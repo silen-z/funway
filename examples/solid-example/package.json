@@ -1,15 +1,13 @@
 {
   "name": "@fiveway/solid-example",
-  "version": "0.0.0",
   "type": "module",
-  "description": "",
+  "private": true,
   "scripts": {
     "start": "vite",
     "dev": "vite",
     "build": "vite build",
     "serve": "vite preview"
   },
-  "license": "MIT",
   "devDependencies": {
     "solid-devtools": "^0.29.2",
     "typescript": "^5.4.3",
