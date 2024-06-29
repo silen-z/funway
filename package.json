@@ -1,0 +1,9 @@
+{
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "example:react": "pnpm --filter \"@fiveway/react-example\" run dev",
+    "example:solid": "pnpm --filter \"@fiveway/solid-example\" run dev",
+    "dev:libs": "pnpm --filter \"@fiveway/core\" --filter \"@fiveway/react\" --filter \"@fiveway/solid\" --parallel  run build --watch"
+  }
+}

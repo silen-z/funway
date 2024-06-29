@@ -1,0 +1,9 @@
+node_modules
+dist
+*.tsbuildinfo
+
+# direnv
+.envrc
+.direnv
+flake.nix
+flake.lock

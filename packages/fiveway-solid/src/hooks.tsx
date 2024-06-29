@@ -1,0 +1,216 @@
+import {
+  type Accessor,
+  type Component,
+  type ParentProps,
+  onCleanup,
+  createMemo,
+  createEffect,
+} from "solid-js";
+import {
+  type NodeId,
+  type FocusOptions,
+  type NavigationHandler,
+  type Provider,
+  createItemNode,
+  createContainerNode,
+  connectNode,
+  selectNode,
+  removeNode,
+  hasFocusWithin,
+  requestFocus,
+  createProvider,
+  updateNode,
+  scopedId,
+} from "@fiveway/core";
+import { useNavigationContext } from "./context.js";
+import { PositionProvider } from "@fiveway/core/dom";
+import { NodeContext } from "./NavigationNode.jsx";
+
+export const ElementProvider = createProvider<HTMLElement>("element");
+
+export type NavigationNodeOptions = {
+  id: NodeId;
+  parent?: NodeId;
+  focusable?: boolean;
+  order?: number;
+  onFocus?: () => void;
+  handler?: NavigationHandler;
+};
+
+export type NavigationItemOptions = NavigationNodeOptions & {
+  elRef?: Accessor<HTMLElement | undefined>;
+  onSelect?: () => void;
+};
+
+type NodeHandle = {
+  id: NodeId;
+  isFocused: (options?: { children?: boolean }) => Accessor<boolean>;
+  focus: (nodeId?: NodeId) => void;
+  provide: <P extends Provider<unknown>>(
+    provider: P,
+    value: P extends Provider<infer V> ? Accessor<V> : never
+  ) => void;
+};
+
+export type ItemHandle = NodeHandle & {
+  select: () => void;
+};
+
+export function createNavigationItem(
+  getOptions: NavigationItemOptions | Accessor<NavigationItemOptions>
+): ItemHandle {
+  const { tree, parentNode } = useNavigationContext();
+
+  const initialOptions = access(getOptions);
+
+  const node = createItemNode(tree, {
+    id: initialOptions.id,
+    parent: initialOptions.parent ?? parentNode,
+    order: initialOptions.order,
+    onSelect: initialOptions.onSelect,
+    focusable: initialOptions.focusable,
+    handler: initialOptions.handler,
+  });
+
+  createEffect(() => {
+    connectNode(tree, node);
+
+    createEffect(() => {
+      const currentOptions = access(getOptions);
+
+      updateNode(node, currentOptions);
+
+      ElementProvider.provide(node, () => {
+        return currentOptions.elRef?.() ?? null;
+      });
+
+      PositionProvider.provide(node, () => {
+        return currentOptions.elRef?.()?.getBoundingClientRect() ?? null;
+      });
+    });
+
+    onCleanup(() => {
+      removeNode(tree, node.id);
+    });
+  });
+
+  return {
+    id: node.id,
+    isFocused: (options = {}) => createFocusSignal(node.id, options),
+    focus: (nodeId?: NodeId, options?: FocusOptions) => {
+      requestFocus(
+        tree,
+        nodeId != null ? scopedId(parentNode, nodeId) : node.id,
+        options
+      );
+    },
+    select: (nodeId?: NodeId) => {
+      selectNode(tree, nodeId != null ? scopedId(parentNode, nodeId) : node.id);
+    },
+    provide: (provider, value) => {
+      createEffect(() => {
+        provider.provide(node, value());
+      });
+    },
+  };
+}
+
+export type NavigationContainerOptions = NavigationNodeOptions & {
+  initial?: NodeId;
+  captureFocus?: boolean;
+};
+
+export type ContainerHandle = NodeHandle & {
+  Context: Component<ParentProps>;
+};
+
+export function createNavigationContainer(
+  getOptions: NavigationContainerOptions | Accessor<NavigationContainerOptions>
+): ContainerHandle {
+  const { tree, parentNode } = useNavigationContext();
+
+  const initialOptions = access(getOptions);
+
+  const node = createContainerNode(tree, {
+    id: initialOptions.id,
+    parent: initialOptions.parent ?? parentNode,
+    initial: initialOptions.initial,
+    order: initialOptions.order,
+    captureFocus: initialOptions.captureFocus,
+    focusable: initialOptions.focusable,
+    handler: initialOptions.handler,
+  });
+
+  createEffect(() => {
+    connectNode(tree, node);
+
+    createEffect(() => {
+      updateNode(node, access(getOptions));
+    });
+
+    onCleanup(() => {
+      removeNode(tree, node.id);
+    });
+  });
+
+  return {
+    id: node.id,
+    isFocused: (options = {}) => createFocusSignal(node.id, options),
+    focus: (nodeId?: NodeId, options?: FocusOptions) => {
+      requestFocus(
+        tree,
+        nodeId != null ? scopedId(parentNode, nodeId) : node.id,
+        options
+      );
+    },
+    provide: (provider, value) => {
+      createEffect(() => {
+        provider.provide(node, value());
+      });
+    },
+    Context: (props: ParentProps) => (
+      <NodeContext node={node.id}>{props.children}</NodeContext>
+    ),
+  };
+}
+
+export function createFocusSignal(
+  nodeId: NodeId | Accessor<NodeId>,
+  options: { children?: boolean } = {}
+): Accessor<boolean> {
+  const { tree, focusedId, parentNode } = useNavigationContext();
+
+  const isFocused = createMemo(() => {
+    const globalId = scopedId(parentNode, access(nodeId));
+
+    const focused = focusedId();
+    if (options.children ?? false) {
+      return hasFocusWithin(tree, globalId);
+    } else {
+      return focused === globalId;
+    }
+  });
+
+  return isFocused;
+}
+
+export function useNavigationActions(scope?: NodeId) {
+  const { tree, parentNode } = useNavigationContext();
+  const parentId = scope ?? parentNode;
+
+  const focus = (nodeId: NodeId, options?: FocusOptions) => {
+    requestFocus(tree, scopedId(parentId, nodeId), options);
+  };
+
+  const select = (nodeId: NodeId, focus?: boolean) => {
+    selectNode(tree, scopedId(parentId, nodeId), focus);
+  };
+
+  return { focus, select };
+}
+
+function access<T extends Accessor<unknown> | unknown>(
+  v: T
+): T extends () => unknown ? ReturnType<T> : T {
+  return typeof v === "function" && !v.length ? v() : v;
+}

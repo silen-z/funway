@@ -1,0 +1,24 @@
+{
+  "name": "@xfiveway/extension",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build"
+  },
+  "types": "./dist/hook.d.ts",
+  "dependencies": {
+    "@fiveway/core": "workspace:^",
+    "solid-js": "^1.7.12"
+  },
+  "devDependencies": {
+    "@types/webextension-polyfill": "^0.10.0",
+    "typescript": "^5.4.3",
+    "vite": "^4.1.4",
+    "vite-plugin-dts": "^3.5.4",
+    "vite-plugin-solid": "^2.7.0",
+    "vite-plugin-web-extension": "^3.0.1",
+    "webextension-polyfill": "^0.10.0"
+  }
+}

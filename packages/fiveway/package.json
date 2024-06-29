@@ -1,0 +1,19 @@
+{
+  "name": "@fiveway/core",
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "build": "tsc --project .",
+    "test": "vitest"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": "./dist/index.js",
+    "./dom": "./dist/dom.js"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.3",
+    "vitest": "^1.6.0"
+  }
+}
