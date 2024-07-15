@@ -6,6 +6,7 @@ import type {
 } from "./node.js";
 import { binarySearch, swapRemove } from "./array.js";
 import { rootHandler } from "./handlers/default.js";
+import { runHandler } from "./handlers.js";
 
 type FocusListener = () => void;
 
@@ -83,13 +84,12 @@ export function connectNode(tree: NavigationTree, node: NavigationNode) {
     focusedNode.type === "container" &&
     isParent(tree, node.id, focusedNode.id)
   ) {
-    const n = focusedNode.handler(
-      focusedNode,
-      { kind: "focus", direction: "initial" },
-      { path: [] }
-    );
-    if (n) {
-      focusNode(tree, n);
+    const nodeToFocus = runHandler(focusedNode, {
+      kind: "focus",
+      direction: "initial",
+    });
+    if (nodeToFocus) {
+      focusNode(tree, nodeToFocus);
     }
   }
 }
@@ -117,12 +117,7 @@ export function removeNode(tree: NavigationTree, nodeId: NodeId) {
     while (nextNode.parent !== null) {
       nextNode = getContainerNode(tree, nextNode.parent);
 
-      targetNode = nextNode.handler(
-        nextNode,
-        { kind: "focus", direction: null },
-        { path: [] }
-      );
-
+      targetNode = runHandler(nextNode, { kind: "focus", direction: null });
       if (targetNode !== null) {
         break;
       }

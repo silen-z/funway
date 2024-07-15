@@ -1,4 +1,4 @@
-import { makeHandler } from "../handlers.js";
+import { makeHandler, runHandler } from "../handlers.js";
 import type { NavigationDirection } from "../navigation.js";
 import type { NodeId } from "../node.js";
 import { createProvider } from "../provider.js";
@@ -50,13 +50,13 @@ const distanceFns: Record<
 
 export const gridMovement = makeHandler((node, action, context, next) => {
   if (action.kind !== "move" || action.direction === "back") {
-    return next?.() ?? null;
+    return next();
   }
 
   const focusedNode = getNode(node.tree, context.path.at(-1)!);
   const focusedPos = GridPositionProvider.extract(focusedNode);
   if (focusedPos == null) {
-    return next?.() ?? null;
+    return next();
   }
 
   const getDistance = distanceFns[action.direction];
@@ -88,7 +88,7 @@ export const gridMovement = makeHandler((node, action, context, next) => {
 
   if (closestId != null) {
     const closestNode = getNode(node.tree, closestId);
-    return closestNode.handler(
+    return runHandler(
       closestNode,
       { kind: "focus", direction: action.direction },
       context

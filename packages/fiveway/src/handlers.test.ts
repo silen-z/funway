@@ -5,6 +5,7 @@ import {
   type NavigationHandler,
   chainHandlers,
   makeHandler,
+  runHandler,
 } from "./handlers.js";
 
 describe("handlers", () => {
@@ -15,7 +16,7 @@ describe("handlers", () => {
       (msg: string): NavigationHandler =>
       (n, a, c, next) => {
         logs.push(msg);
-        return next?.() ?? null;
+        return next();
       };
 
     const testHandler = chainHandlers(
@@ -30,11 +31,7 @@ describe("handlers", () => {
       handler: testHandler,
     });
 
-    const result = testNode.handler(
-      testNode,
-      { kind: "move", direction: "right" },
-      { path: [] }
-    );
+    const result = runHandler(testNode, { kind: "move", direction: "right" });
 
     expect(result).toBeNull();
     expect(logs).toEqual(["handler1", "handler2", "handler3", "handler4"]);
@@ -46,7 +43,7 @@ describe("handlers", () => {
     const logHandler = (msg: string) =>
       makeHandler((n, a, c, next) => {
         logs.push(msg);
-        return next?.() ?? null;
+        return next();
       });
 
     const testHandler = logHandler("handler1")
@@ -59,11 +56,7 @@ describe("handlers", () => {
       handler: testHandler,
     });
 
-    const result = testNode.handler(
-      testNode,
-      { kind: "move", direction: "right" },
-      { path: [] }
-    );
+    const result = runHandler(testNode, { kind: "move", direction: "right" });
 
     expect(result).toBeNull();
     expect(logs).toEqual(["handler1", "handler2", "handler3", "handler4"]);

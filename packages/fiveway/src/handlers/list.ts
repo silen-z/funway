@@ -1,6 +1,6 @@
 import type { NavigationContainer, NodeId } from "../node.js";
 import { getNode } from "../tree.js";
-import { makeHandler } from "../handlers.js";
+import { makeHandler, runHandler } from "../handlers.js";
 import { parentHandler } from "./default.js";
 import { focusHandler } from "./focus.js";
 
@@ -17,11 +17,11 @@ export const verticalMovement = makeHandler((node, action, context, next) => {
         for (;;) {
           const prevChildId = previousChild(node, childId);
           if (prevChildId === null) {
-            return next?.() ?? null;
+            return next();
           }
 
           const childNode = getNode(node.tree, prevChildId);
-          const targetNode = childNode.handler(
+          const targetNode = runHandler(
             childNode,
             { kind: "focus", direction: action.direction },
             context
@@ -41,11 +41,11 @@ export const verticalMovement = makeHandler((node, action, context, next) => {
         for (;;) {
           const nextChildId = nextChild(node, childId);
           if (nextChildId === null) {
-            return next?.() ?? null;
+            return next();
           }
 
           const childNode = getNode(node.tree, nextChildId);
-          const targetNode = childNode.handler(
+          const targetNode = runHandler(
             childNode,
             { kind: "focus", direction: action.direction },
             context
@@ -62,7 +62,7 @@ export const verticalMovement = makeHandler((node, action, context, next) => {
     }
   }
 
-  return next?.() ?? null;
+  return next();
 });
 
 export const verticalList = focusHandler({
@@ -84,11 +84,11 @@ export const horizontalMovement = makeHandler((node, action, context, next) => {
         for (;;) {
           const prevChildId = previousChild(node, childId);
           if (prevChildId === null) {
-            return next?.() ?? null;
+            return next();
           }
 
           const childNode = getNode(node.tree, prevChildId);
-          const targetNode = childNode.handler(
+          const targetNode = runHandler(
             childNode,
             { kind: "focus", direction: action.direction },
             context
@@ -109,11 +109,11 @@ export const horizontalMovement = makeHandler((node, action, context, next) => {
         for (;;) {
           const nextChildId = nextChild(node, childId);
           if (nextChildId === null) {
-            return next?.() ?? null;
+            return next();
           }
 
           const childNode = getNode(node.tree, nextChildId);
-          const targetNode = childNode.handler(
+          const targetNode = runHandler(
             childNode,
             { kind: "focus", direction: action.direction },
             context
@@ -130,7 +130,7 @@ export const horizontalMovement = makeHandler((node, action, context, next) => {
     }
   }
 
-  return next?.() ?? null;
+  return next();
 });
 
 export const horizontalList = focusHandler({
