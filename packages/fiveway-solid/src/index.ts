@@ -1,7 +1,7 @@
 export {
   createNavigationContainer,
   createNavigationItem,
-  createFocusSignal,
+  useIsFocused,
   useNavigationActions,
 } from "./hooks.jsx";
 export { NavigationContext, useNavigationContext } from "./context.js";

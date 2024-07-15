@@ -17,6 +17,24 @@
   border-color: red;
 }
 
+@keyframes rotating {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.spatialSection {
+  position: relative;
+  animation: rotating 10s linear infinite;
+}
+
+.spatialSection .item {
+  animation: rotating 10s linear infinite reverse;
+}
+
 .list[data-type="horizontal"] {
   display: flex;
 }

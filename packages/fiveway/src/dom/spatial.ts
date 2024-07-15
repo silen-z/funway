@@ -1,35 +1,25 @@
 import {
-  type NavigationAction,
-  type NavigationNode,
   type NodeId,
   getItemNode,
   parentHandler,
   traverseNodes,
   createProvider,
 } from "../index.js";
-import { childFocusHandler } from "../navigation.js";
+import { focusHandler } from "../handlers/focus.js";
+import { chainHandlers, makeHandler } from "../handlers.js";
+import type { NavigationDirection } from "../navigation.js";
 
 export const PositionProvider = createProvider<DOMRect>("position");
 
-export function spatial(
-  node: NavigationNode,
-  action: NavigationAction,
-  context: {
-    path: NodeId[];
-  }
-) {
-  if (action.kind === "focus") {
-    return childFocusHandler(node, action, context);
-  }
-
-  if (action.kind === "select") {
-    return parentHandler(node, action, context);
+export const spatialMovement = makeHandler((node, action, context, next) => {
+  if (action.kind !== "move" || action.direction === "back") {
+    return next?.() ?? null;
   }
 
   const focusedNode = getItemNode(node.tree, node.tree.focusedId);
   const focusedPos = PositionProvider.extract(focusedNode);
-  if (focusedPos == null || action.direction === "back") {
-    return parentHandler(node, action, context);
+  if (focusedPos == null) {
+    return next?.() ?? null;
   }
 
   const isCorrectDirection = directionFilters[action.direction];
@@ -58,14 +48,18 @@ export function spatial(
     }
   });
 
-  return closestId ?? parentHandler(node, action, context);
-}
+  return closestId ?? next?.() ?? null;
+});
 
-type NavigationDirection = "up" | "down" | "left" | "right";
-const directionFilters: Record<
-  NavigationDirection,
-  (current: DOMRect, potential: DOMRect) => boolean
-> = {
+export const spatialHandler = chainHandlers(
+  focusHandler(),
+  spatialMovement,
+  parentHandler
+);
+
+type DirectionFilter = (current: DOMRect, potential: DOMRect) => boolean;
+
+const directionFilters: Record<NavigationDirection, DirectionFilter> = {
   up: (current, potential) =>
     Math.floor(potential.bottom) <= Math.ceil(current.top),
   down: (current, potential) =>

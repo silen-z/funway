@@ -1,40 +1,39 @@
 import { type ReactNode } from "react";
 import { type NavigationItem } from "@fiveway/core";
 import {
-  type NavigationContainerHandle,
   type NavigationContainerOptions,
   type NavigationItemOptions,
+  type ContainerHandle,
+  type ItemHandle,
   useNavigationContainer,
   useNavigationItem,
-  useIsFocused,
 } from "./hooks.js";
 
-type NavContainerRenderProps = Omit<NavigationContainerHandle, "NavContext">;
+type ContextlessContainerHandle = Omit<ContainerHandle, "Context">;
 
-export type NavigationContainerProps = NavigationContainerOptions & {
-  children: ReactNode | ((props: NavContainerRenderProps) => ReactNode);
+type NavigationContainerProps = NavigationContainerOptions & {
+  children: ReactNode | ((props: ContextlessContainerHandle) => ReactNode);
 };
 
 export function NavigationContainer({
   children,
   ...props
 }: NavigationContainerProps) {
-  const { NavContext, ...node } = useNavigationContainer(props);
+  const { Context, ...node } = useNavigationContainer(props);
 
   return (
-    <NavContext>
+    <Context>
       {typeof children === "function" ? children(node) : children}
-    </NavContext>
+    </Context>
   );
 }
 
-export type NavigationItemProps = NavigationItemOptions & {
-  children: ReactNode | ((isFocused: boolean) => ReactNode);
+type NavigationItemProps = NavigationItemOptions & {
+  children: ReactNode | ((handle: ItemHandle) => ReactNode);
 };
 
 export function NavigationItem({ children, ...props }: NavigationItemProps) {
   const node = useNavigationItem(props);
-  const isFocused = useIsFocused(node.id);
 
-  return typeof children === "function" ? children(isFocused) : children;
+  return typeof children === "function" ? children(node) : children;
 }

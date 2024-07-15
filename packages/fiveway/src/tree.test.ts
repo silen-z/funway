@@ -1,10 +1,6 @@
 import { expect, test } from "vitest";
-import {
-  connectNode,
-  createNavigationTree,
-  createItemNode,
-  updateNode,
-} from "./tree.js";
+import { connectNode, createNavigationTree } from "./tree.js";
+import { createItemNode, updateNode } from "./node.js";
 
 test("updateNode correctly sorts children", () => {
   const tree = createNavigationTree();
