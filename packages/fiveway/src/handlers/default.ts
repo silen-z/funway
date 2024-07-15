@@ -1,4 +1,4 @@
-import { makeHandler } from "../handlers.js";
+import { makeHandler, runHandler } from "../handlers.js";
 import { getNode, selectNode } from "../tree.js";
 import { focusHandler } from "./focus.js";
 
@@ -7,10 +7,10 @@ export const parentHandler = makeHandler((node, action, context, next) => {
     const parentNode = getNode(node.tree, node.parent);
 
     context.path.push(node.id);
-    return parentNode.handler(parentNode, action, context);
+    return runHandler(parentNode, action, context);
   }
 
-  return next?.() ?? null;
+  return next();
 });
 
 export const selectHandler = makeHandler((node, action, _, next) => {
@@ -19,10 +19,10 @@ export const selectHandler = makeHandler((node, action, _, next) => {
     return null;
   }
 
-  return next?.() ?? null;
+  return next();
 });
 
-export const rootHandler =  focusHandler();
+export const rootHandler = focusHandler();
 
 export const itemHandler = focusHandler()
   .chain(selectHandler)

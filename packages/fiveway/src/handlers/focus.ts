@@ -1,7 +1,7 @@
 import { getNode } from "../tree.js";
 import { childrenIterator } from "../node.js";
 import type { NavigationDirection } from "../navigation.js";
-import { makeHandler } from "../handlers.js";
+import { makeHandler, runHandler } from "../handlers.js";
 
 type FocusDirection = "front" | "back" | undefined;
 
@@ -12,7 +12,7 @@ type FocusHandlerConfig = {
 export const focusHandler = (config: FocusHandlerConfig = {}) =>
   makeHandler((node, action, context, next) => {
     if (action.kind !== "focus") {
-      return next?.() ?? null;
+      return next();
     }
 
     if (node.type === "item") {
@@ -28,7 +28,7 @@ export const focusHandler = (config: FocusHandlerConfig = {}) =>
       }
 
       const initialNode = getNode(node.tree, initialChild.id);
-      return initialNode.handler(initialNode, action, context);
+      return runHandler(initialNode, action, context);
     }
 
     const direction = config.direction?.(action.direction);
@@ -40,7 +40,7 @@ export const focusHandler = (config: FocusHandlerConfig = {}) =>
       }
 
       const childNode = getNode(node.tree, child.id);
-      const focusableNode = childNode.handler(childNode, action, context);
+      const focusableNode = runHandler(childNode, action, context);
 
       if (focusableNode !== null) {
         return focusableNode;

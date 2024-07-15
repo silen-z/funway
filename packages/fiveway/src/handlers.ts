@@ -9,7 +9,7 @@ export type NavigationHandler = (
   node: NavigationNode,
   action: NavigationAction,
   context: NavigationHandlerContext,
-  next?: () => NodeId | null
+  next: () => NodeId | null
 ) => NodeId | null;
 
 export type ChainableHandler = NavigationHandler & {
@@ -39,6 +39,16 @@ export function makeHandler(
   cloned.chain = (another) => chain2Handlers(handler, another);
 
   return cloned;
+}
+
+const finalHandler = () => null;
+
+export function runHandler(
+  node: NavigationNode,
+  action: NavigationAction,
+  context: NavigationHandlerContext = { path: [] }
+): NodeId | null {
+  return node.handler(node, action, context, finalHandler);
 }
 
 export function chainHandlers(

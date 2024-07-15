@@ -1,3 +1,4 @@
+import { runHandler } from "./handlers.js";
 import { type NavigationTree, focusNode, getNode } from "./tree.js";
 
 export type NavigationDirection = "up" | "down" | "left" | "right";
@@ -8,7 +9,7 @@ export type NavigationAction =
 
 export function handleAction(tree: NavigationTree, action: NavigationAction) {
   const node = getNode(tree, tree.focusedId);
-  const targetId = node.handler(node, action, { path: [] });
+  const targetId = runHandler(node, action);
   if (targetId === null) {
     return;
   }

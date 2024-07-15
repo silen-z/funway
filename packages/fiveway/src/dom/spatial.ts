@@ -13,13 +13,13 @@ export const PositionProvider = createProvider<DOMRect>("position");
 
 export const spatialMovement = makeHandler((node, action, context, next) => {
   if (action.kind !== "move" || action.direction === "back") {
-    return next?.() ?? null;
+    return next();
   }
 
   const focusedNode = getItemNode(node.tree, node.tree.focusedId);
   const focusedPos = PositionProvider.extract(focusedNode);
   if (focusedPos == null) {
-    return next?.() ?? null;
+    return next();
   }
 
   const isCorrectDirection = directionFilters[action.direction];
@@ -49,7 +49,7 @@ export const spatialMovement = makeHandler((node, action, context, next) => {
     }
   });
 
-  return closestId ?? next?.() ?? null;
+  return closestId ?? next();
 });
 
 export const spatialHandler = chainHandlers(
