@@ -65,6 +65,7 @@ export const gridMovement = makeHandler((node, action, context, next) => {
   let shortestDistance: number | null = null;
 
   traverseNodes(node.tree, node.id, (potentialNode) => {
+    // TODO use focus handler?
     if (!potentialNode.focusable) {
       return;
     }
