@@ -6,6 +6,10 @@ import { Showcase } from "./Showcase.tsx";
 
 const navigationTree = createNavigationTree();
 
+Object.defineProperties(window, {
+  NAVTREE: { value: navigationTree },
+});
+
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <NavigationProvider tree={navigationTree}>

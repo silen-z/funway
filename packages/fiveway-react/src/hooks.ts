@@ -6,6 +6,7 @@ import {
   useEffect,
   useSyncExternalStore,
   useRef,
+  useState,
 } from "react";
 import {
   type NodeId,
@@ -20,11 +21,12 @@ import {
   createContainerNode,
   connectNode,
   removeNode,
-  hasFocusWithin,
-  requestFocus,
+  isFocused,
   createProvider,
   updateNode,
   registerFocusListener,
+  type NavigationTree,
+  focusNode,
 } from "@fiveway/core";
 import { PositionProvider } from "@fiveway/core/dom";
 import { useNavigationContext, NavigationContext } from "./context.js";
@@ -45,17 +47,21 @@ export type NavigationItemOptions = NavigationNodeOptions & {
   onSelect?: () => void;
 };
 
-export type NavigationItemHandle = {
-  nodeId: NodeId;
-  provide: <T>(
-    provider: Provider<T>,
-    value: Parameters<Provider<T>["provide"]>[1]
+type NodeHandle = {
+  id: NodeId;
+  isFocused: () => boolean;
+  focus: (nodeId?: NodeId) => void;
+  provide: <P extends Provider<unknown>>(
+    provider: P,
+    value: P extends Provider<infer V> ? V : never
   ) => void;
 };
 
-export function useNavigationItem(
-  options: NavigationItemOptions
-): NavigationItem {
+export type ItemHandle = NodeHandle & {
+  select: () => void;
+};
+
+export function useNavigationItem(options: NavigationItemOptions): ItemHandle {
   const { tree, parentNode } = useNavigationContext();
 
   const parentId = options.parent ?? parentNode;
@@ -91,7 +97,16 @@ export function useNavigationItem(
     };
   }, [tree, nodeId]);
 
-  return nodeRef.current;
+  const isFocused = useLazyIsFocused(tree, nodeId);
+  const { focus, select } = useNavigationActions();
+
+  return {
+    id: nodeId,
+    isFocused,
+    focus: () => focus(nodeId),
+    select: () => select(nodeId),
+    provide: (provider, value) => provider.provide(nodeRef.current!, value),
+  };
 }
 
 export type NavigationContainerOptions = NavigationNodeOptions & {
@@ -99,14 +114,13 @@ export type NavigationContainerOptions = NavigationNodeOptions & {
   captureFocus?: boolean;
 };
 
-export type NavigationContainerHandle = {
-  node: NavigationContainer;
-  NavContext: React.FunctionComponent<{ children: ReactNode }>;
+export type ContainerHandle = NodeHandle & {
+  Context: React.FunctionComponent<{ children: ReactNode }>;
 };
 
 export function useNavigationContainer(
   options: NavigationContainerOptions
-): NavigationContainerHandle {
+): ContainerHandle {
   const { tree, parentNode } = useNavigationContext();
 
   const parent = options.parent ?? parentNode;
@@ -137,7 +151,7 @@ export function useNavigationContainer(
     };
   }, [tree, nodeId]);
 
-  const NavContext = useCallback(
+  const Context = useCallback(
     (props: { children: ReactNode }) => {
       const context = {
         tree: tree,
@@ -153,7 +167,16 @@ export function useNavigationContainer(
     [tree, nodeId]
   );
 
-  return { node: nodeRef.current, NavContext };
+  const isFocused = useLazyIsFocused(tree, nodeId);
+  const { focus } = useNavigationActions();
+
+  return {
+    id: nodeId,
+    isFocused,
+    focus: () => focus(nodeId),
+    provide: (provider, value) => provider.provide(nodeRef.current!, value),
+    Context,
+  };
 }
 
 function scopedId(scope: NodeId, nodeId: NodeId) {
@@ -173,38 +196,48 @@ export function useIsFocused(nodeId: NodeId) {
     [tree]
   );
 
-  return useSyncExternalStore(subscribe, () => tree.focusedId === globalId);
+  return useSyncExternalStore(subscribe, () => isFocused(tree, globalId));
 }
 
-export function useHasFocusWithin(nodeId: NodeId) {
+export function useNavigationActions() {
   const { tree, parentNode } = useNavigationContext();
-  const globalId = scopedId(parentNode, nodeId);
+
+  const focus = useCallback(
+    (nodeId: NodeId, options?: FocusOptions) => {
+      return focusNode(tree, scopedId(parentNode, nodeId), options);
+    },
+    [tree, parentNode]
+  );
+
+  const select = useCallback(
+    (nodeId: NodeId, focus?: boolean) => {
+      selectNode(tree, scopedId(parentNode, nodeId), focus);
+    },
+    [tree, parentNode]
+  );
+
+  return { focus, select };
+}
+
+const noopSubscribe = () => () => {};
+function useLazyIsFocused<V>(tree: NavigationTree, nodeId: NodeId) {
+  const [subscribed, setSubscribed] = useState(false);
 
   const subscribe = useCallback(
     (callback: () => void) => registerFocusListener(tree, callback),
     [tree]
   );
 
-  return useSyncExternalStore(subscribe, () => hasFocusWithin(tree, globalId));
-}
-
-export function useNavigationActions(scope?: NodeId) {
-  const { tree, parentNode } = useNavigationContext();
-  const parentId = scope ?? parentNode;
-
-  const focus = useCallback(
-    (nodeId: NodeId, options?: FocusOptions) => {
-      requestFocus(tree, scopedId(parentId, nodeId), options);
-    },
-    [tree, parentId]
+  const subscribedValue = useSyncExternalStore(
+    subscribed ? subscribe : noopSubscribe,
+    () => isFocused(tree, nodeId)
   );
 
-  const select = useCallback(
-    (nodeId: NodeId, focus?: boolean) => {
-      selectNode(tree, scopedId(parentId, nodeId), focus);
-    },
-    [tree, parentId]
-  );
+  return () => {
+    if (!subscribed) {
+      setSubscribed(true);
+    }
 
-  return { focus, select };
+    return subscribedValue;
+  };
 }

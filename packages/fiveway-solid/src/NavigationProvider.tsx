@@ -2,7 +2,7 @@ import { type JSX, createSignal, onCleanup, createEffect } from "solid-js";
 import {
   type NavigationAction,
   type NavigationTree,
-  handleNavigation,
+  handleAction,
   registerFocusListener,
   getNode,
 } from "@fiveway/core";
@@ -35,7 +35,7 @@ export function NavigationProvider(props: NavigationProviderProps) {
       return;
     }
 
-    handleNavigation(tree, action);
+    handleAction(tree, action);
   };
   window.addEventListener("keydown", handler);
 

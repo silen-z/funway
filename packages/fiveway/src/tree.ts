@@ -1,16 +1,11 @@
-import {
-  type NavigationHandler,
-  itemHandler,
-  parentHandler,
-} from "./navigation.js";
-import {
-  type NodeId,
-  type NavigationNode,
-  type NavigationContainer,
-  type NavigationItem,
-  createRoot,
+import type {
+  NodeId,
+  NavigationNode,
+  NavigationContainer,
+  NavigationItem,
 } from "./node.js";
-import { binarySearch, swapRemove } from "./array.js";
+import { swapRemove } from "./array.js";
+import { rootHandler } from "./handlers/default.js";
 
 type FocusListener = () => void;
 
@@ -33,69 +28,23 @@ export function createNavigationTree(): NavigationTree {
     focusListeners: [],
   };
 
-  tree.root = createRoot(tree, rootId);
+  tree.root = {
+    type: "container",
+    tree,
+    id: rootId,
+    parent: null,
+    initial: null,
+    order: 0,
+    depth: 0,
+    focusable: true,
+    handler: rootHandler,
+    providers: new Map(),
+    children: [],
+    captureFocus: true,
+  };
   tree.nodes.set(rootId, tree.root);
 
   return tree;
-}
-
-export type NodeConfig = {
-  id: string;
-  parent: NodeId;
-  focusable?: boolean;
-  order?: number;
-  handler?: NavigationHandler;
-};
-
-export type ItemNodeConfig = NodeConfig & {
-  onSelect?: () => void;
-};
-
-export function createItemNode(
-  tree: NavigationTree,
-  options: ItemNodeConfig
-): NavigationItem {
-  const globalId = createGlobalId(options.parent, options.id);
-
-  return {
-    type: "item",
-    tree,
-    id: globalId,
-    parent: options.parent,
-    order: options.order ?? 0,
-    depth: 0,
-    focusable: options.focusable ?? true,
-    handler: options.handler ?? itemHandler,
-    providers: new Map(),
-    onSelect: options.onSelect ?? null,
-  };
-}
-
-export type ContainerNodeConfig = NodeConfig & {
-  initial?: NodeId;
-  captureFocus?: boolean;
-};
-
-export function createContainerNode(
-  tree: NavigationTree,
-  options: ContainerNodeConfig
-): NavigationContainer {
-  const globalId = createGlobalId(options.parent, options.id);
-
-  return {
-    type: "container",
-    tree,
-    id: globalId,
-    parent: options.parent,
-    initial: options.initial ? scopedId(globalId, options.initial) : null,
-    order: options.order ?? 0,
-    depth: 0,
-    focusable: options.focusable ?? true,
-    handler: options.handler ?? parentHandler,
-    providers: new Map(),
-    children: [],
-    captureFocus: options.captureFocus ?? false,
-  };
 }
 
 export function connectNode(tree: NavigationTree, node: NavigationNode) {
@@ -131,92 +80,14 @@ export function connectNode(tree: NavigationTree, node: NavigationNode) {
     focusedNode.type === "container" &&
     isParent(tree, node.id, focusedNode.id)
   ) {
-    focusedNode;
-
-    const nodeToFocus = findInitialFocus(tree, focusedNode.id);
-    if (nodeToFocus != null) {
-      focusNode(tree, nodeToFocus);
-    }
-  }
-}
-
-function findInitialFocus(tree: NavigationTree, nodeId: NodeId): NodeId | null {
-  const node = getNode(tree, nodeId);
-
-  if (node.type === "item") {
-    return node.id;
-  }
-
-  const child = node.children.find(
-    (c) => c.active && (node.initial === null || c.id === node.initial)
-  );
-
-  if (child != null) {
-    return findInitialFocus(tree, child.id);
-  }
-
-  return null;
-}
-
-export function updateNode(
-  node: NavigationItem,
-  config: Omit<ItemNodeConfig, "id" | "parent">
-): void;
-export function updateNode(
-  node: NavigationContainer,
-  config: Omit<ContainerNodeConfig, "id" | "parent">
-): void;
-export function updateNode<N extends NavigationNode>(
-  node: N,
-  options: Omit<ItemNodeConfig & ContainerNodeConfig, "id" | "parent">
-) {
-  if (options.handler != null) {
-    node.handler = options.handler;
-  }
-
-  if (options.focusable != null) {
-    node.focusable = options.focusable;
-  }
-
-  if (options.order != null) {
-    updateNodeOrder(node.tree, node.id, options.order);
-  }
-
-  if (node.type === "item" && options.onSelect != null) {
-    node.onSelect = options.onSelect;
-  }
-
-  if (node.type === "container" && options.captureFocus != null) {
-    node.captureFocus = options.captureFocus;
-  }
-}
-
-export function updateNodeOrder(
-  tree: NavigationTree,
-  globalId: NodeId,
-  newOrder: number
-) {
-  const node = getNode(tree, globalId);
-
-  if (node.order !== newOrder && node.parent !== null) {
-    node.order = newOrder;
-
-    // update children inside parent
-    const parentNode = getContainerNode(tree, node.parent);
-
-    const childIndex = parentNode.children.findIndex((i) => i.id === node.id);
-    const newIndex = binarySearch(
-      parentNode.children,
-      (child) => newOrder < child.order
+    const n = focusedNode.handler(
+      focusedNode,
+      { kind: "focus", direction: "initial" },
+      { path: [] }
     );
-
-    if (newIndex === -1 || newIndex === childIndex) {
-      return;
+    if (n) {
+      focusNode(tree, n);
     }
-
-    parentNode.children[childIndex!]!.order = newOrder;
-    const removed = parentNode.children.splice(childIndex, 1);
-    parentNode.children.splice(newIndex, 0, ...removed);
   }
 }
 
@@ -233,20 +104,23 @@ export function removeNode(tree: NavigationTree, nodeId: NodeId) {
     return;
   }
 
-  const updateFocus = tree.focusedId === nodeId || hasFocusWithin(tree, nodeId);
+  const updateFocus =
+    tree.focusedId === node.id ||
+    (node.type === "container" && isFocused(tree, node.id));
 
-  disconnectNode(tree, nodeId);
-  tree.disconnectedNodes.delete(nodeId);
+  disconnectNode(tree, node.id);
+  tree.disconnectedNodes.delete(node.id);
 
   if (updateFocus) {
     let targetNode = null;
+
     let nextNode = node;
     while (nextNode.parent !== null) {
       nextNode = getContainerNode(tree, nextNode.parent);
 
       targetNode = nextNode.handler(
         nextNode,
-        { kind: "focus", from: null },
+        { kind: "focus", direction: null },
         { path: [] }
       );
 
@@ -255,12 +129,10 @@ export function removeNode(tree: NavigationTree, nodeId: NodeId) {
       }
     }
 
-    if (targetNode != null) {
-      focusNode(tree, targetNode, { respectCapture: false });
-    } else {
-      tree.focusedId = tree.root.id;
-      notifyFocusListeners(tree);
-    }
+    focusNode(tree, targetNode ?? tree.root.id, {
+      respectCapture: false,
+      allowRoot: true,
+    });
   }
 }
 
@@ -293,6 +165,7 @@ function disconnectNode(tree: NavigationTree, nodeId: NodeId) {
 
 export type FocusOptions = {
   respectCapture?: boolean;
+  allowRoot?: boolean;
 };
 
 export function focusNode(
@@ -300,46 +173,41 @@ export function focusNode(
   nodeId: NodeId,
   options: FocusOptions = {}
 ) {
-  const node = getNode(tree, nodeId);
-
-  const nodeToFocus = node.handler(
-    node,
-    { kind: "focus", from: null },
-    { path: [] }
-  );
-
-  if (nodeToFocus == null) {
-    throw new Error(`cannot focus node '${nodeId}'`);
+  if (!tree.nodes.has(nodeId)) {
+    return false;
   }
 
-  if (tree.focusedId === nodeToFocus) {
-    return;
+  if (tree.focusedId === nodeId) {
+    return true;
   }
 
   const currentNode = tree.nodes.get(tree.focusedId);
   if (
+    nodeId != null &&
     currentNode != null &&
     (options.respectCapture ?? true) &&
-    tree.focusedId !== "#"
+    tree.focusedId !== tree.root.id
   ) {
     const lowestCommonAncestor = getLowestCommonAncestor(
       tree,
-      nodeToFocus,
+      nodeId,
       tree.focusedId
     );
 
     let current = currentNode;
     while (current.id !== lowestCommonAncestor.id) {
       if (current.type === "container" && current.captureFocus) {
-        return;
+        return false;
       }
 
       current = getContainerNode(tree, current.parent!);
     }
   }
 
-  tree.focusedId = nodeToFocus;
+  tree.focusedId = nodeId ?? tree.root.id;
   notifyFocusListeners(tree);
+
+  return true;
 }
 
 export function registerFocusListener(
@@ -431,7 +299,7 @@ export function getLeaf(
   return null;
 }
 
-export function hasFocusWithin(tree: NavigationTree, nodeId: NodeId): boolean {
+export function isFocused(tree: NavigationTree, nodeId: NodeId): boolean {
   if (tree.focusedId === nodeId) {
     return true;
   }
@@ -507,7 +375,11 @@ function insertChildInOrder(
 // }
 
 // TODO just compare strings here?
-function isParent(tree: NavigationTree, childId: NodeId, parentId: NodeId) {
+export function isParent(
+  tree: NavigationTree,
+  childId: NodeId,
+  parentId: NodeId
+) {
   let current: NavigationNode | null = getNode(tree, childId);
   while (current !== null) {
     if (current.id === parentId) {

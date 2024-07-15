@@ -5,6 +5,7 @@ import {
   onCleanup,
   createMemo,
   createEffect,
+  on,
 } from "solid-js";
 import {
   type NodeId,
@@ -16,15 +17,16 @@ import {
   connectNode,
   selectNode,
   removeNode,
-  hasFocusWithin,
-  requestFocus,
   createProvider,
   updateNode,
   scopedId,
+  focusNode,
+  isFocused,
 } from "@fiveway/core";
 import { useNavigationContext } from "./context.js";
 import { PositionProvider } from "@fiveway/core/dom";
 import { NodeContext } from "./NavigationNode.jsx";
+import { createLazyMemo } from "@solid-primitives/memo";
 
 export const ElementProvider = createProvider<HTMLElement>("element");
 
@@ -44,7 +46,7 @@ export type NavigationItemOptions = NavigationNodeOptions & {
 
 type NodeHandle = {
   id: NodeId;
-  isFocused: (options?: { children?: boolean }) => Accessor<boolean>;
+  isFocused: Accessor<boolean>;
   focus: (nodeId?: NodeId) => void;
   provide: <P extends Provider<unknown>>(
     provider: P,
@@ -59,7 +61,7 @@ export type ItemHandle = NodeHandle & {
 export function createNavigationItem(
   getOptions: NavigationItemOptions | Accessor<NavigationItemOptions>
 ): ItemHandle {
-  const { tree, parentNode } = useNavigationContext();
+  const { tree, parentNode, focusedId } = useNavigationContext();
 
   const initialOptions = access(getOptions);
 
@@ -96,9 +98,9 @@ export function createNavigationItem(
 
   return {
     id: node.id,
-    isFocused: (options = {}) => createFocusSignal(node.id, options),
+    isFocused: createLazyMemo(on(focusedId, () => isFocused(tree, node.id))),
     focus: (nodeId?: NodeId, options?: FocusOptions) => {
-      requestFocus(
+      return focusNode(
         tree,
         nodeId != null ? scopedId(parentNode, nodeId) : node.id,
         options
@@ -127,7 +129,7 @@ export type ContainerHandle = NodeHandle & {
 export function createNavigationContainer(
   getOptions: NavigationContainerOptions | Accessor<NavigationContainerOptions>
 ): ContainerHandle {
-  const { tree, parentNode } = useNavigationContext();
+  const { tree, parentNode, focusedId } = useNavigationContext();
 
   const initialOptions = access(getOptions);
 
@@ -155,9 +157,9 @@ export function createNavigationContainer(
 
   return {
     id: node.id,
-    isFocused: (options = {}) => createFocusSignal(node.id, options),
+    isFocused: createLazyMemo(on(focusedId, () => isFocused(tree, node.id))),
     focus: (nodeId?: NodeId, options?: FocusOptions) => {
-      requestFocus(
+      return focusNode(
         tree,
         nodeId != null ? scopedId(parentNode, nodeId) : node.id,
         options
@@ -174,36 +176,28 @@ export function createNavigationContainer(
   };
 }
 
-export function createFocusSignal(
-  nodeId: NodeId | Accessor<NodeId>,
-  options: { children?: boolean } = {}
-): Accessor<boolean> {
+export function useIsFocused(nodeId: NodeId): Accessor<boolean> {
   const { tree, focusedId, parentNode } = useNavigationContext();
 
-  const isFocused = createMemo(() => {
-    const globalId = scopedId(parentNode, access(nodeId));
+  const getIsFocused = createMemo(
+    on(focusedId, () => {
+      const globalId = scopedId(parentNode, nodeId);
+      return isFocused(tree, globalId);
+    })
+  );
 
-    const focused = focusedId();
-    if (options.children ?? false) {
-      return hasFocusWithin(tree, globalId);
-    } else {
-      return focused === globalId;
-    }
-  });
-
-  return isFocused;
+  return getIsFocused;
 }
 
-export function useNavigationActions(scope?: NodeId) {
+export function useNavigationActions() {
   const { tree, parentNode } = useNavigationContext();
-  const parentId = scope ?? parentNode;
 
   const focus = (nodeId: NodeId, options?: FocusOptions) => {
-    requestFocus(tree, scopedId(parentId, nodeId), options);
+    return focusNode(tree, scopedId(parentNode, nodeId), options);
   };
 
   const select = (nodeId: NodeId, focus?: boolean) => {
-    selectNode(tree, scopedId(parentId, nodeId), focus);
+    selectNode(tree, scopedId(parentNode, nodeId), focus);
   };
 
   return { focus, select };

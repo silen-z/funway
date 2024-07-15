@@ -1,6 +1,5 @@
 export {
   type NavigationTree,
-  type NodeConfig as NodeOptions,
   type FocusOptions,
   getNode,
   getItemNode,
@@ -8,33 +7,49 @@ export {
   selectNode,
   removeNode,
   createNavigationTree,
-  createItemNode,
-  createContainerNode,
   connectNode,
+  focusNode,
   createGlobalId,
   scopedId,
-  hasFocusWithin,
-  updateNode,
+  isFocused,
   traverseNodes,
   registerFocusListener,
 } from "./tree.js";
+export { type NavigationAction, handleAction } from "./navigation.js";
 export {
-  type NavigationAction,
   type NavigationHandler,
-  handleAction as handleNavigation,
-  requestFocus,
+  type NavigationHandlerContext,
+  makeHandler,
+  chainHandlers,
+} from "./handlers.js";
+export {
   itemHandler,
+  containerHandler,
   parentHandler,
+  selectHandler,
+} from "./handlers/default.js";
+export { focusHandler } from "./handlers/focus.js";
+export {
   horizontalList,
+  horizontalMovement,
   verticalList,
-  grid,
+  verticalMovement,
+} from "./handlers/list.js";
+export {
+  gridHandler,
+  gridMovement,
   GridPositionProvider,
-} from "./navigation.js";
+} from "./handlers/grid.js";
 export {
   type NodeId,
   type NavigationNode,
   type NavigationContainer,
   type NavigationItem,
-  type Provider,
-  createProvider,
+  type NodeConfig,
+  type ItemNodeConfig,
+  type ContainerNodeConfig,
+  createItemNode,
+  createContainerNode,
+  updateNode,
 } from "./node.js";
+export { type Provider, createProvider } from "./provider.js";

@@ -2,7 +2,7 @@ import { type PropsWithChildren, useEffect, useRef } from "react";
 import {
   type NavigationAction,
   type NavigationTree,
-  handleNavigation,
+  handleAction,
   registerFocusListener,
   getNode,
 } from "@fiveway/core";
@@ -26,7 +26,7 @@ export function NavigationProvider({
       return;
     }
 
-    handleNavigation(tree, action);
+    handleAction(tree, action);
   });
 
   useEffect(() => {
