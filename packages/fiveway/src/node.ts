@@ -14,15 +14,16 @@ export type NodeId = string;
 type NavigationNodeBase = {
   tree: NavigationTree;
   id: NodeId;
+  connected: boolean;
   parent: NodeId | null;
   depth: number;
-  order: number;
+  order: number | null;
   focusable: boolean;
   handler: NavigationHandler;
   providers: Map<symbol, unknown | (() => unknown)>;
 };
 
-export type NodeChild = { id: NodeId; order: number; active: boolean };
+export type NodeChild = { id: NodeId; order: number | null; active: boolean };
 
 export type NavigationContainer = NavigationNodeBase & {
   type: "container";
@@ -60,8 +61,9 @@ export function createItemNode(
     type: "item",
     tree,
     id: globalId,
+    connected: false,
     parent: options.parent,
-    order: options.order ?? 0,
+    order: options.order ?? null,
     depth: 0,
     focusable: options.focusable ?? true,
     handler: options.handler ?? itemHandler,
@@ -85,9 +87,10 @@ export function createContainerNode(
     type: "container",
     tree,
     id: globalId,
+    connected: false,
     parent: options.parent,
     initial: options.initial ? scopedId(globalId, options.initial) : null,
-    order: options.order ?? 0,
+    order: options.order ?? null,
     depth: 0,
     focusable: options.focusable ?? true,
     handler: options.handler ?? containerHandler,
@@ -140,7 +143,8 @@ function updateNodeOrder(node: NavigationNode, order: number) {
     const childIndex = parentNode.children.findIndex((i) => i.id === node.id);
     const newIndex = binarySearch(
       parentNode.children,
-      (child) => order < child.order
+      // TODO handle null in order better?
+      (child) => order < (child.order ?? 0)
     );
 
     if (newIndex === -1 || newIndex === childIndex) {

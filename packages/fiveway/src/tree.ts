@@ -4,7 +4,7 @@ import type {
   NavigationContainer,
   NavigationItem,
 } from "./node.js";
-import { swapRemove } from "./array.js";
+import { binarySearch, swapRemove } from "./array.js";
 import { rootHandler } from "./handlers/default.js";
 
 type FocusListener = () => void;
@@ -12,7 +12,6 @@ type FocusListener = () => void;
 export type NavigationTree = {
   root: NavigationContainer;
   nodes: Map<NodeId, NavigationNode>;
-  disconnectedNodes: Map<NodeId, NavigationNode>;
   focusedId: NodeId;
   focusListeners: FocusListener[];
 };
@@ -24,7 +23,6 @@ export function createNavigationTree(): NavigationTree {
     root: {} as NavigationContainer,
     focusedId: rootId,
     nodes: new Map(),
-    disconnectedNodes: new Map(),
     focusListeners: [],
   };
 
@@ -32,6 +30,7 @@ export function createNavigationTree(): NavigationTree {
     type: "container",
     tree,
     id: rootId,
+    connected: true,
     parent: null,
     initial: null,
     order: 0,
@@ -48,27 +47,31 @@ export function createNavigationTree(): NavigationTree {
 }
 
 export function connectNode(tree: NavigationTree, node: NavigationNode) {
-  if (!tree.nodes.has(node.parent!)) {
-    tree.disconnectedNodes.set(node.id, node);
+  if (node.parent === null) {
+    throw new Error("trying to connect root (or node without parent)");
+  }
+
+  if (!tree.nodes.has(node.parent)) {
+    tree.nodes.set(node.id, node);
     return;
   }
 
   const existingNode = tree.nodes.get(node.id);
-  if (existingNode != null) {
+  if (existingNode != null && existingNode.connected) {
     console.warn(`trying to connect existing node: ${node.id}`);
   }
 
-  const parentNode = getContainerNode(tree, node.parent!);
-
-  tree.disconnectedNodes.delete(node.id);
   tree.nodes.set(node.id, node);
-  // TODO this functionality probably depends on disconnectedNodes Map being ordered
-  // it would be better to handle that explicitly
+  node.connected = true;
+
+  // TODO preserving order probably depends on nodes Map being ordered
+  // it would be better to handle that explicitly via sentinel nodes (children)
+  const parentNode = getContainerNode(tree, node.parent);
   insertChildInOrder(parentNode, node);
   node.depth = parentNode.depth + 1;
 
   if (node.type === "container") {
-    for (const n of tree.disconnectedNodes.values()) {
+    for (const n of tree.nodes.values()) {
       if (n.parent === node.id) {
         connectNode(tree, n);
       }
@@ -97,21 +100,17 @@ export function removeNode(tree: NavigationTree, nodeId: NodeId) {
   }
 
   const node = tree.nodes.get(nodeId);
-
-  // node is probably already disconnected
   if (node == null) {
-    tree.disconnectedNodes.delete(nodeId);
     return;
   }
 
-  const updateFocus =
-    tree.focusedId === node.id ||
-    (node.type === "container" && isFocused(tree, node.id));
+  if (node.connected) {
+    disconnectNode(tree, node.id);
+  }
 
-  disconnectNode(tree, node.id);
-  tree.disconnectedNodes.delete(node.id);
+  tree.nodes.delete(node.id);
 
-  if (updateFocus) {
+  if (isFocused(tree, node.id)) {
     let targetNode = null;
 
     let nextNode = node;
@@ -159,8 +158,7 @@ function disconnectNode(tree: NavigationTree, nodeId: NodeId) {
     }
   }
 
-  tree.nodes.delete(nodeId);
-  tree.disconnectedNodes.set(nodeId, node);
+  node.connected = false;
 }
 
 export type FocusOptions = {
@@ -173,7 +171,8 @@ export function focusNode(
   nodeId: NodeId,
   options: FocusOptions = {}
 ) {
-  if (!tree.nodes.has(nodeId)) {
+  const node = tree.nodes.get(nodeId);
+  if (node == null || !node.connected) {
     return false;
   }
 
@@ -246,6 +245,10 @@ export function getNode(tree: NavigationTree, nodeId: NodeId): NavigationNode {
   const node = tree.nodes.get(nodeId);
   if (node == null) {
     throw new Error(`node '${nodeId}' does not exist`);
+  }
+
+  if (!node.connected) {
+    throw new Error(`node '${nodeId}' not connected`);
   }
 
   return node;
@@ -347,32 +350,18 @@ function insertChildInOrder(
     return;
   }
 
-  let index = parentNode.children.length - 1;
-  while (index >= 0) {
-    if (parentNode.children[index]!.order <= node.order) {
-      break;
-    }
-    index -= 1;
-  }
+  const newIndex = binarySearch(
+    parentNode.children,
+    // TODO handle null in order better?
+    (child) => (node.order ?? 0) < (child.order ?? 0)
+  );
 
-  parentNode.children.splice(index + 1, 0, {
+  parentNode.children.splice(newIndex, 0, {
     active: true,
     id: node.id,
     order: node.order,
   });
 }
-
-// function getDepth(tree: NavigationTree, nodeId: NodeId) {
-//   let depth = 0;
-//   let node = getNode(tree, nodeId);
-
-//   while (node.parent !== null) {
-//     depth += 1;
-//     node = getNode(tree, node.parent);
-//   }
-
-//   return depth;
-// }
 
 // TODO just compare strings here?
 export function isParent(
