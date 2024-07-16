@@ -39,12 +39,18 @@ export function NavigationProvider({
   }, []);
 
   useEffect(() => {
-    return registerFocusListener(tree, () => {
+    const handler = () => {
       const node = getNode(tree, tree.focusedId);
       const el = ElementProvider.extract(node);
       if (el != null) {
         el.focus();
       }
+    };
+
+    return registerFocusListener(tree, {
+      type: "focuschange",
+      node: "#",
+      fn: handler,
     });
   }, [tree]);
 

@@ -23,8 +23,12 @@ export function NavigationProvider(props: NavigationProviderProps) {
 
   const [focusedId, setFocusedId] = createSignal(tree.focusedId);
 
-  const cleanupFocusListener = registerFocusListener(tree, () => {
-    setFocusedId(tree.focusedId);
+  const cleanupFocusListener = registerFocusListener(tree, {
+    type: "focuschange",
+    node: "#",
+    fn: () => {
+      setFocusedId(tree.focusedId);
+    },
   });
 
   const handler = (e: KeyboardEvent) => {

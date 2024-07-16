@@ -4,17 +4,22 @@ import type {
   NavigationContainer,
   NavigationItem,
 } from "./node.js";
-import { binarySearch, swapRemove } from "./array.js";
+import { binarySearch } from "./array.js";
 import { rootHandler } from "./handlers/default.js";
 import { runHandler } from "./handlers.js";
+import { splitRemainders } from "./string.js";
 
-type FocusListener = () => void;
+type Listener = {
+  node: NodeId;
+  type: "focuschange";
+  fn: () => void;
+};
 
 export type NavigationTree = {
   root: NavigationContainer;
   nodes: Map<NodeId, NavigationNode>;
   focusedId: NodeId;
-  focusListeners: FocusListener[];
+  listeners: Map<NodeId, Set<Listener>>;
 };
 
 export function createNavigationTree(): NavigationTree {
@@ -24,7 +29,7 @@ export function createNavigationTree(): NavigationTree {
     root: {} as NavigationContainer,
     focusedId: rootId,
     nodes: new Map(),
-    focusListeners: [],
+    listeners: new Map(),
   };
 
   tree.root = {
@@ -198,27 +203,64 @@ export function focusNode(
     }
   }
 
+  const lastFocused = tree.focusedId;
   tree.focusedId = nodeId ?? tree.root.id;
-  notifyFocusListeners(tree);
+
+  convergingPaths(lastFocused, tree.focusedId, (id) => {
+    callListeners(tree, id, "focuschange");
+  });
 
   return true;
 }
 
 export function registerFocusListener(
   tree: NavigationTree,
-  listener: FocusListener
+  listener: Listener
 ) {
-  tree.focusListeners.push(listener);
+  if (!tree.listeners.has(listener.node)) {
+    tree.listeners.set(listener.node, new Set());
+  }
+
+  const nodeListeners = tree.listeners.get(listener.node)!;
+
+  nodeListeners.add(listener);
 
   return () => {
-    const index = tree.focusListeners.findIndex((l) => l === listener);
-    swapRemove(tree.focusListeners, index);
+    nodeListeners.delete(listener);
+    if (nodeListeners.size === 0) {
+      tree.listeners.delete(listener.node);
+    }
   };
 }
 
-function notifyFocusListeners(tree: NavigationTree) {
-  for (const listener of tree.focusListeners) {
-    listener();
+function convergingPaths(
+  node1: NodeId,
+  node2: NodeId,
+  cb: (id: NodeId) => void
+) {
+  if (node1 !== node2) {
+    splitRemainders(node2, "/", (id) => {
+      if (node1.startsWith(id)) {
+        return false;
+      }
+
+      cb(id);
+    });
+  }
+
+  splitRemainders(node1, "/", cb);
+}
+
+function callListeners(tree: NavigationTree, nodeId: NodeId, event: string) {
+  const listenerNode = tree.listeners.get(nodeId);
+  if (listenerNode == null) {
+    return;
+  }
+
+  for (const listener of listenerNode) {
+    if (listener.type === event) {
+      listener.fn();
+    }
   }
 }
 

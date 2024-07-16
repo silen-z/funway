@@ -192,8 +192,13 @@ export function useIsFocused(nodeId: NodeId) {
   const globalId = scopedId(parentNode, nodeId);
 
   const subscribe = useCallback(
-    (callback: () => void) => registerFocusListener(tree, callback),
-    [tree]
+    (callback: () => void) =>
+      registerFocusListener(tree, {
+        type: "focuschange" as const,
+        node: nodeId,
+        fn: callback,
+      }),
+    [tree, nodeId]
   );
 
   return useSyncExternalStore(subscribe, () => isFocused(tree, globalId));
@@ -224,8 +229,13 @@ function useLazyIsFocused<V>(tree: NavigationTree, nodeId: NodeId) {
   const [subscribed, setSubscribed] = useState(false);
 
   const subscribe = useCallback(
-    (callback: () => void) => registerFocusListener(tree, callback),
-    [tree]
+    (callback: () => void) =>
+      registerFocusListener(tree, {
+        type: "focuschange" as const,
+        node: nodeId,
+        fn: callback,
+      }),
+    [tree, nodeId]
   );
 
   const subscribedValue = useSyncExternalStore(
