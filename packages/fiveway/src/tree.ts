@@ -85,10 +85,7 @@ export function connectNode(tree: NavigationTree, node: NavigationNode) {
   }
 
   const focusedNode = getNode(tree, tree.focusedId);
-  if (
-    focusedNode.type === "container" &&
-    isParent(tree, node.id, focusedNode.id)
-  ) {
+  if (focusedNode.type === "container" && isParent(focusedNode.id, node.id)) {
     const nodeToFocus = runHandler(focusedNode, {
       kind: "focus",
       direction: "initial",
@@ -118,15 +115,15 @@ export function removeNode(tree: NavigationTree, nodeId: NodeId) {
   if (isFocused(tree, node.id)) {
     let targetNode = null;
 
-    let nextNode = node;
-    while (nextNode.parent !== null) {
-      nextNode = getContainerNode(tree, nextNode.parent);
-
-      targetNode = runHandler(nextNode, { kind: "focus", direction: null });
+    splitRemainders(node.parent!, "/", (id) => {
+      targetNode = runHandler(tree.nodes.get(id)!, {
+        kind: "focus",
+        direction: null,
+      });
       if (targetNode !== null) {
-        break;
+        return false;
       }
-    }
+    });
 
     focusNode(tree, targetNode ?? tree.root.id, {
       respectCapture: false,
@@ -168,43 +165,44 @@ export type FocusOptions = {
 
 export function focusNode(
   tree: NavigationTree,
-  nodeId: NodeId,
+  targetId: NodeId,
   options: FocusOptions = {}
 ) {
-  const node = tree.nodes.get(nodeId);
+  const node = tree.nodes.get(targetId);
   if (node == null || !node.connected) {
     return false;
   }
 
-  if (tree.focusedId === nodeId) {
+  if (tree.focusedId === targetId) {
     return true;
   }
 
-  const currentNode = tree.nodes.get(tree.focusedId);
-  if (
-    nodeId != null &&
-    currentNode != null &&
-    (options.respectCapture ?? true) &&
-    tree.focusedId !== tree.root.id
-  ) {
-    const lowestCommonAncestor = getLowestCommonAncestor(
-      tree,
-      nodeId,
-      tree.focusedId
-    );
+  if (options.respectCapture ?? true) {
+    let allowFocus = true;
 
-    let current = currentNode;
-    while (current.id !== lowestCommonAncestor.id) {
-      if (current.type === "container" && current.captureFocus) {
+    splitRemainders(tree.focusedId, "/", (id) => {
+      if (targetId.startsWith(id)) {
         return false;
       }
 
-      current = getContainerNode(tree, current.parent!);
+      const parentNode = tree.nodes.get(id);
+      if (
+        parentNode != null &&
+        parentNode.type === "container" &&
+        parentNode.captureFocus
+      ) {
+        allowFocus = false;
+        return false;
+      }
+    });
+
+    if (!allowFocus) {
+      return false;
     }
   }
 
   const lastFocused = tree.focusedId;
-  tree.focusedId = nodeId ?? tree.root.id;
+  tree.focusedId = targetId;
 
   convergingPaths(lastFocused, tree.focusedId, (id) => {
     callListeners(tree, id, "focuschange");
@@ -344,7 +342,7 @@ export function isFocused(tree: NavigationTree, nodeId: NodeId): boolean {
     return true;
   }
 
-  return isParent(tree, tree.focusedId, nodeId);
+  return isParent(nodeId, tree.focusedId);
 }
 
 export function createGlobalId(...tail: NodeId[]) {
@@ -400,43 +398,6 @@ function insertChildInOrder(
   });
 }
 
-// TODO just compare strings here?
-export function isParent(
-  tree: NavigationTree,
-  childId: NodeId,
-  parentId: NodeId
-) {
-  let current: NavigationNode | null = getNode(tree, childId);
-  while (current !== null) {
-    if (current.id === parentId) {
-      return true;
-    }
-    current = current.parent !== null ? getNode(tree, current.parent) : null;
-  }
-
-  return false;
-}
-
-function getLowestCommonAncestor(
-  tree: NavigationTree,
-  idA: NodeId,
-  idB: NodeId
-) {
-  let nodeA = getNode(tree, idA);
-  let nodeB = getNode(tree, idB);
-
-  while (nodeA.depth !== nodeB.depth) {
-    if (nodeA.depth > nodeB.depth) {
-      nodeA = getNode(tree, nodeA.parent!);
-    } else {
-      nodeB = getNode(tree, nodeB.parent!);
-    }
-  }
-
-  while (nodeA.id !== nodeB.id) {
-    nodeA = getNode(tree, nodeA.parent!);
-    nodeB = getNode(tree, nodeB.parent!);
-  }
-
-  return nodeA as NavigationContainer;
+export function isParent(parentId: NodeId, childId: NodeId) {
+  return childId.startsWith(parentId + "/");
 }
