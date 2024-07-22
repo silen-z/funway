@@ -27,8 +27,8 @@ import {
   registerFocusListener,
   type NavigationTree,
   focusNode,
+  PositionProvider,
 } from "@fiveway/core";
-import { PositionProvider } from "@fiveway/core/dom";
 import { useNavigationContext, NavigationContext } from "./context.js";
 
 export const ElementProvider = createProvider<HTMLElement>("element");
@@ -38,7 +38,6 @@ export type NavigationNodeOptions = {
   parent?: NodeId;
   focusable?: boolean;
   order?: number;
-  onFocus?: () => void;
   handler?: NavigationHandler;
 };
 

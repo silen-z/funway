@@ -1,6 +1,7 @@
 import { describe, expect, test } from "vitest";
 import { connectNode, createNavigationTree } from "./tree.js";
-import { childrenIterator, createItemNode } from "./node.js";
+import { createItemNode } from "./node.js";
+import { childrenIterator } from "./children.js";
 
 describe("node", () => {
   const tree = createNavigationTree();
@@ -26,7 +27,7 @@ describe("node", () => {
   tree.root.initial = node2.id;
 
   test("childrenIterator: default", () => {
-    const iterated = [];
+    const iterated: string[] = [];
     for (const child of childrenIterator(tree.root)) {
       iterated.push(child.id);
     }
@@ -35,7 +36,7 @@ describe("node", () => {
   });
 
   test("childrenIterator: front", () => {
-    const iterated = [];
+    const iterated: string[] = [];
     for (const child of childrenIterator(tree.root, "front")) {
       iterated.push(child.id);
     }
@@ -44,7 +45,7 @@ describe("node", () => {
   });
 
   test("childrenIterator: back", () => {
-    const iterated = [];
+    const iterated: string[] = [];
     for (const child of childrenIterator(tree.root, "back")) {
       iterated.push(child.id);
     }

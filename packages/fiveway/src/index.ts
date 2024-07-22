@@ -1,6 +1,7 @@
 export {
   type NavigationTree,
   type FocusOptions,
+  type Listener,
   getNode,
   getItemNode,
   getContainerNode,
@@ -15,20 +16,28 @@ export {
   traverseNodes,
   registerFocusListener,
 } from "./tree.js";
-export { type NavigationAction, handleAction } from "./navigation.js";
+export {
+  type NavigationAction,
+  type NavigationDirection,
+  handleAction,
+} from "./navigation.js";
 export {
   type NavigationHandler,
+  type ChainableHandler,
   type NavigationHandlerContext,
-  makeHandler,
-  chainHandlers,
-} from "./handlers.js";
+} from "./handlers/types.js";
+export { makeHandler, chainHandlers } from "./handlers/factory.js";
 export {
   itemHandler,
   containerHandler,
   parentHandler,
   selectHandler,
 } from "./handlers/default.js";
-export { focusHandler } from "./handlers/focus.js";
+export {
+  focusHandler,
+  type FocusHandlerConfig,
+  type FocusDirection,
+} from "./handlers/focus.js";
 export {
   horizontalList,
   horizontalMovement,
@@ -36,15 +45,22 @@ export {
   verticalMovement,
 } from "./handlers/list.js";
 export {
+  type GridPosition,
   gridHandler,
   gridMovement,
   GridPositionProvider,
 } from "./handlers/grid.js";
 export {
+  spatialHandler,
+  spatialMovement,
+  PositionProvider,
+} from "./handlers/spatial.js";
+export {
   type NodeId,
   type NavigationNode,
   type NavigationContainer,
   type NavigationItem,
+  type NodeChild,
   type NodeConfig,
   type ItemNodeConfig,
   type ContainerNodeConfig,

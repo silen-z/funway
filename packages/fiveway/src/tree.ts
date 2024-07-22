@@ -6,10 +6,10 @@ import type {
 } from "./node.js";
 import { binarySearch } from "./array.js";
 import { rootHandler } from "./handlers/default.js";
-import { runHandler } from "./handlers.js";
+import { runHandler } from "./handlers/runner.js";
 import { splitRemainders } from "./string.js";
 
-type Listener = {
+export type Listener = {
   node: NodeId;
   type: "focuschange";
   fn: () => void;

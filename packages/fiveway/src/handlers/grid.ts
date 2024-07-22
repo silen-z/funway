@@ -1,17 +1,19 @@
-import { makeHandler, runHandler } from "../handlers.js";
 import type { NavigationDirection } from "../navigation.js";
 import type { NodeId } from "../node.js";
-import { createProvider } from "../provider.js";
+import { createProvider, type Provider } from "../provider.js";
 import { getNode, traverseNodes } from "../tree.js";
 import { parentHandler } from "./default.js";
+import { makeHandler } from "./factory.js";
 import { focusHandler } from "./focus.js";
+import { runHandler } from "./runner.js";
+import type { ChainableHandler } from "./types.js";
 
-type GridPosition = {
+export type GridPosition = {
   row: number;
   col: number;
 };
-export const GridPositionProvider =
-  createProvider<GridPosition>("GridPosition");
+export const GridPositionProvider: Provider<GridPosition> =
+  createProvider("GridPosition");
 
 const distanceFns: Record<
   NavigationDirection,
@@ -48,55 +50,57 @@ const distanceFns: Record<
   },
 };
 
-export const gridMovement = makeHandler((node, action, context, next) => {
-  if (action.kind !== "move" || action.direction === "back") {
-    return next();
+export const gridMovement: ChainableHandler = makeHandler(
+  (node, action, context, next) => {
+    if (action.kind !== "move" || action.direction === "back") {
+      return next();
+    }
+
+    const focusedNode = getNode(node.tree, context.path.at(-1)!);
+    const focusedPos = GridPositionProvider.extract(focusedNode);
+    if (focusedPos == null) {
+      return next();
+    }
+
+    const getDistance = distanceFns[action.direction];
+
+    let closestId: NodeId | null = null;
+    let shortestDistance: number | null = null;
+
+    traverseNodes(node.tree, node.id, (potentialNode) => {
+      // TODO use focus handler?
+      if (!potentialNode.focusable) {
+        return;
+      }
+
+      const potentialPos = GridPositionProvider.extract(potentialNode);
+      if (potentialPos == null) {
+        return;
+      }
+
+      const distance = getDistance(focusedPos, potentialPos);
+      if (distance === null) {
+        return;
+      }
+
+      if (shortestDistance === null || distance < shortestDistance) {
+        closestId = potentialNode.id;
+        shortestDistance = distance;
+      }
+    });
+
+    if (closestId != null) {
+      const closestNode = getNode(node.tree, closestId);
+      return runHandler(
+        closestNode,
+        { kind: "focus", direction: action.direction },
+        context
+      );
+    }
+
+    return null;
   }
-
-  const focusedNode = getNode(node.tree, context.path.at(-1)!);
-  const focusedPos = GridPositionProvider.extract(focusedNode);
-  if (focusedPos == null) {
-    return next();
-  }
-
-  const getDistance = distanceFns[action.direction];
-
-  let closestId: NodeId | null = null;
-  let shortestDistance: number | null = null;
-
-  traverseNodes(node.tree, node.id, (potentialNode) => {
-    // TODO use focus handler?
-    if (!potentialNode.focusable) {
-      return;
-    }
-
-    const potentialPos = GridPositionProvider.extract(potentialNode);
-    if (potentialPos == null) {
-      return;
-    }
-
-    const distance = getDistance(focusedPos, potentialPos);
-    if (distance === null) {
-      return;
-    }
-
-    if (shortestDistance === null || distance < shortestDistance) {
-      closestId = potentialNode.id;
-      shortestDistance = distance;
-    }
-  });
-
-  if (closestId != null) {
-    const closestNode = getNode(node.tree, closestId);
-    return runHandler(
-      closestNode,
-      { kind: "focus", direction: action.direction },
-      context
-    );
-  }
-
-  return null;
-});
+);
 
 export const gridHandler = focusHandler()
   .chain(gridMovement)

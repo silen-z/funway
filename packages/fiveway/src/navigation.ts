@@ -1,4 +1,4 @@
-import { runHandler } from "./handlers.js";
+import { runHandler } from "./handlers/runner.js";
 import { type NavigationTree, focusNode, getNode } from "./tree.js";
 
 export type NavigationDirection = "up" | "down" | "left" | "right";

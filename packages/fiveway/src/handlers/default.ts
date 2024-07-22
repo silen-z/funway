@@ -1,10 +1,13 @@
-import { makeHandler, runHandler } from "../handlers.js";
-import { getNode, selectNode } from "../tree.js";
+import { selectNode } from "../tree.js";
+import { makeHandler } from "./factory.js";
 import { focusHandler } from "./focus.js";
+import { runHandler } from "./runner.js";
 
-export const parentHandler = makeHandler((node, action, context, next) => {
+import type { ChainableHandler } from "./types.js";
+
+export const parentHandler: ChainableHandler = makeHandler((node, action, context, next) => {
   if (node.parent !== null) {
-    const parentNode = getNode(node.tree, node.parent);
+    const parentNode = node.tree.nodes.get(node.parent)!;
 
     context.path.push(node.id);
     return runHandler(parentNode, action, context);

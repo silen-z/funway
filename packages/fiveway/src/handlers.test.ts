@@ -1,12 +1,9 @@
 import { describe, expect, test } from "vitest";
 import { createNavigationTree } from "./tree.js";
 import { createItemNode } from "./node.js";
-import {
-  type NavigationHandler,
-  chainHandlers,
-  makeHandler,
-  runHandler,
-} from "./handlers.js";
+import { runHandler } from "./handlers/runner.js";
+import { chainHandlers, makeHandler } from "./handlers/factory.js";
+import { NavigationHandler } from "./handlers/types.js";
 
 describe("handlers", () => {
   test("chainHandlers", () => {

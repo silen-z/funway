@@ -1,15 +1,18 @@
-import { getNode } from "../tree.js";
-import { childrenIterator } from "../node.js";
+import { childrenIterator } from "../children.js";
 import type { NavigationDirection } from "../navigation.js";
-import { makeHandler, runHandler } from "../handlers.js";
+import { makeHandler } from "./factory.js";
+import { runHandler } from "./runner.js";
+import type { ChainableHandler } from "./types.js";
 
-type FocusDirection = "front" | "back" | undefined;
+export type FocusDirection = "front" | "back" | undefined;
 
-type FocusHandlerConfig = {
+export type FocusHandlerConfig = {
   direction?: (d: NavigationDirection | "initial" | null) => FocusDirection;
 };
 
-export const focusHandler = (config: FocusHandlerConfig = {}) =>
+export const focusHandler = (
+  config: FocusHandlerConfig = {}
+): ChainableHandler =>
   makeHandler((node, action, context, next) => {
     if (action.kind !== "focus") {
       return next();
@@ -31,7 +34,7 @@ export const focusHandler = (config: FocusHandlerConfig = {}) =>
         return null;
       }
 
-      const initialNode = getNode(node.tree, initialChild.id);
+      const initialNode = node.tree.nodes.get(initialChild.id)!;
       return runHandler(initialNode, action, context);
     }
 
@@ -43,7 +46,7 @@ export const focusHandler = (config: FocusHandlerConfig = {}) =>
         continue;
       }
 
-      const childNode = getNode(node.tree, child.id);
+      const childNode = node.tree.nodes.get(child.id)!;
       const focusableNode = runHandler(childNode, action, context);
 
       if (focusableNode !== null) {

@@ -10,7 +10,7 @@ import { defaultEventMapping } from "@fiveway/core/dom";
 import { NavigationContext } from "./context.js";
 import { ElementProvider } from "./hooks.js";
 
-type NaviationProviderProps = PropsWithChildren<{
+export type NavigationProviderProps = PropsWithChildren<{
   tree: NavigationTree;
   fromEvent?: (e: KeyboardEvent) => NavigationAction | null;
 }>;
@@ -19,7 +19,7 @@ export function NavigationProvider({
   tree,
   children,
   fromEvent = defaultEventMapping,
-}: NaviationProviderProps) {
+}: NavigationProviderProps) {
   const handlerRef = useRef((e: KeyboardEvent) => {
     const action = fromEvent(e);
     if (action === null) {

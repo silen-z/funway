@@ -22,9 +22,9 @@ import {
   scopedId,
   focusNode,
   isFocused,
+  PositionProvider
 } from "@fiveway/core";
 import { useNavigationContext } from "./context.js";
-import { PositionProvider } from "@fiveway/core/dom";
 import { NodeContext } from "./NavigationNode.jsx";
 import { createLazyMemo } from "@solid-primitives/memo";
 
