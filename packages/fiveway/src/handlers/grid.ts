@@ -3,10 +3,8 @@ import type { NodeId } from "../node.js";
 import { createProvider, type Provider } from "../provider.js";
 import { getNode, traverseNodes } from "../tree.js";
 import { parentHandler } from "./default.js";
-import { makeHandler } from "./factory.js";
+import { type ChainableHandler, makeHandler } from "../handler.js";
 import { focusHandler } from "./focus.js";
-import { runHandler } from "./runner.js";
-import type { ChainableHandler } from "./types.js";
 
 export type GridPosition = {
   row: number;
@@ -51,7 +49,7 @@ const distanceFns: Record<
 };
 
 export const gridMovement: ChainableHandler = makeHandler(
-  (node, action, context, next) => {
+  (node, action, next, context) => {
     if (action.kind !== "move" || action.direction === "back") {
       return next();
     }
@@ -90,18 +88,13 @@ export const gridMovement: ChainableHandler = makeHandler(
     });
 
     if (closestId != null) {
-      const closestNode = getNode(node.tree, closestId);
-      return runHandler(
-        closestNode,
-        { kind: "focus", direction: action.direction },
-        context
-      );
+      return next(closestId, { kind: "focus", direction: action.direction });
     }
 
-    return null;
+    return next();
   }
 );
 
 export const gridHandler = focusHandler()
-  .chain(gridMovement)
-  .chain(parentHandler);
+  .append(gridMovement)
+  .append(parentHandler);

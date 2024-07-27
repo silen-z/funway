@@ -5,6 +5,7 @@ export {
   useNavigationItem,
   useNavigationActions,
   useIsFocused,
+  useFocusedId,
 } from "./hooks.js";
 export { NavigationContext, useNavigationContext } from "./context.js";
 export { type NavigationProviderProps, NavigationProvider } from "./NavigationProvider.js";

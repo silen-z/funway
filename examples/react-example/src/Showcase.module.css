@@ -4,13 +4,12 @@
 
 .layout {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 20px;
 }
 
 .section {
   border: 1px dashed #ccc;
-  aspect-ratio: 1/1;
 }
 
 .section[data-is-focused="true"] {
@@ -29,6 +28,8 @@
 .spatialSection {
   position: relative;
   animation: rotating 10s linear infinite;
+  border-radius: 99999px;
+  aspect-ratio: 1/1;
 }
 
 .spatialSection .item {
@@ -41,4 +42,9 @@
 
 .item[data-is-focused="true"] {
   background: red;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(var(--cols), 1fr);
 }

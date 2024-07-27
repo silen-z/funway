@@ -6,7 +6,11 @@ settings:
 
 importers:
 
-  .: {}
+  .:
+    devDependencies:
+      vitest:
+        specifier: ^1.6.0
+        version: 1.6.0
 
   examples/react-example:
     dependencies:

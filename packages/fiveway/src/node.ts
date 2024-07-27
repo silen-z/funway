@@ -4,14 +4,14 @@ import {
   getContainerNode,
   scopedId,
 } from "./tree.js";
-import type { NavigationHandler } from "./handlers/types.js";
+import type { NavigationHandler } from "./handler.js";
 import { containerHandler, itemHandler } from "./handlers/default.js";
 
 import { binarySearch } from "./array.js";
 
 export type NodeId = string;
 
-type NavigationNodeBase = {
+type Node = {
   tree: NavigationTree;
   id: NodeId;
   connected: boolean;
@@ -25,19 +25,20 @@ type NavigationNodeBase = {
 
 export type NodeChild = { id: NodeId; order: number | null; active: boolean };
 
-export type NavigationContainer = NavigationNodeBase & {
+export type ContainerNode = Node & {
   type: "container";
   initial: NodeId | null;
   children: NodeChild[];
   captureFocus: boolean;
+  rememberChildren: boolean;
 };
 
-export type NavigationItem = NavigationNodeBase & {
+export type ItemNode = Node & {
   type: "item";
   onSelect: (() => void) | null;
 };
 
-export type NavigationNode = NavigationContainer | NavigationItem;
+export type NavigationNode = ContainerNode | ItemNode;
 
 export type NodeConfig = {
   id: string;
@@ -54,7 +55,7 @@ export type ItemNodeConfig = NodeConfig & {
 export function createItemNode(
   tree: NavigationTree,
   options: ItemNodeConfig
-): NavigationItem {
+): ItemNode {
   const globalId = createGlobalId(options.parent, options.id);
 
   return {
@@ -75,12 +76,13 @@ export function createItemNode(
 export type ContainerNodeConfig = NodeConfig & {
   initial?: NodeId;
   captureFocus?: boolean;
+  rememberChildren?: boolean;
 };
 
 export function createContainerNode(
   tree: NavigationTree,
   options: ContainerNodeConfig
-): NavigationContainer {
+): ContainerNode {
   const globalId = createGlobalId(options.parent, options.id);
 
   return {
@@ -97,15 +99,16 @@ export function createContainerNode(
     providers: new Map(),
     children: [],
     captureFocus: options.captureFocus ?? false,
+    rememberChildren: options.rememberChildren ?? true,
   };
 }
 
 export function updateNode(
-  node: NavigationItem,
+  node: ItemNode,
   config: Omit<ItemNodeConfig, "id" | "parent">
 ): void;
 export function updateNode(
-  node: NavigationContainer,
+  node: ContainerNode,
   config: Omit<ContainerNodeConfig, "id" | "parent">
 ): void;
 export function updateNode<N extends NavigationNode>(
@@ -138,6 +141,7 @@ function updateNodeOrder(node: NavigationNode, order: number) {
     node.order = order;
 
     // update children inside parent
+    // TODO handle parent not being connected
     const parentNode = getContainerNode(node.tree, node.parent);
 
     const childIndex = parentNode.children.findIndex((i) => i.id === node.id);

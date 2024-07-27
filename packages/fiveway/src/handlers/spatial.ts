@@ -1,7 +1,10 @@
 import { focusHandler } from "./focus.js";
 import type { NavigationDirection } from "../navigation.js";
-import { makeHandler, chainHandlers } from "./factory.js";
-import type { ChainableHandler } from "./types.js";
+import {
+  type ChainableHandler,
+  makeHandler,
+  chainHandlers,
+} from "../handler.js";
 import type { NodeId } from "../node.js";
 import { createProvider, type Provider } from "../provider.js";
 import { getItemNode, traverseNodes } from "../tree.js";
@@ -10,7 +13,7 @@ import { parentHandler } from "./default.js";
 export const PositionProvider: Provider<DOMRect> = createProvider("position");
 
 export const spatialMovement: ChainableHandler = makeHandler(
-  (node, action, context, next) => {
+  (node, action, next) => {
     if (action.kind !== "move" || action.direction === "back") {
       return next();
     }

@@ -1,5 +1,4 @@
 import {
-  type MutableRefObject,
   type ReactNode,
   createElement,
   useCallback,
@@ -10,8 +9,8 @@ import {
 } from "react";
 import {
   type NodeId,
-  type NavigationItem,
-  type NavigationContainer,
+  type ItemNode,
+  type ContainerNode,
   type FocusOptions,
   type NavigationHandler,
   type Provider,
@@ -28,6 +27,8 @@ import {
   type NavigationTree,
   focusNode,
   PositionProvider,
+  type NavigationNode,
+  scopedId,
 } from "@fiveway/core";
 import { useNavigationContext, NavigationContext } from "./context.js";
 
@@ -42,7 +43,6 @@ export type NavigationNodeOptions = {
 };
 
 export type NavigationItemOptions = NavigationNodeOptions & {
-  elRef?: MutableRefObject<HTMLElement | null>;
   onSelect?: () => void;
 };
 
@@ -54,6 +54,7 @@ type NodeHandle = {
     provider: P,
     value: P extends Provider<infer V> ? V : never
   ) => void;
+  registerElement: (element: HTMLElement | null) => void;
 };
 
 export type ItemHandle = NodeHandle & {
@@ -62,12 +63,9 @@ export type ItemHandle = NodeHandle & {
 
 export function useNavigationItem(options: NavigationItemOptions): ItemHandle {
   const { tree, parentNode } = useNavigationContext();
-
   const parentId = options.parent ?? parentNode;
-  const nodeId = createGlobalId(parentId, options.id);
 
-  const nodeRef = useRef<NavigationItem | null>(null);
-
+  const nodeRef = useRef<ItemNode>(null as unknown as ItemNode);
   if (nodeRef.current === null) {
     nodeRef.current = createItemNode(tree, {
       id: options.id,
@@ -75,26 +73,22 @@ export function useNavigationItem(options: NavigationItemOptions): ItemHandle {
       handler: options.handler,
       focusable: options.focusable,
       onSelect: options.onSelect,
-    }) as NavigationItem;
+      order: options.order,
+    });
   } else {
     updateNode(nodeRef.current, options);
   }
-
-  ElementProvider.provide(nodeRef.current, () => {
-    return options.elRef?.current ?? null;
-  });
-
-  PositionProvider.provide(nodeRef.current, () => {
-    return options.elRef?.current?.getBoundingClientRect() ?? null;
-  });
+  const nodeId = nodeRef.current.id;
 
   useEffect(() => {
-    connectNode(tree, nodeRef.current!);
+    connectNode(tree, nodeRef.current);
 
     return () => {
       removeNode(tree, nodeId);
     };
   }, [tree, nodeId]);
+
+  const registerElement = useRegisterElement(nodeRef.current);
 
   const isFocused = useLazyIsFocused(tree, nodeId);
   const { focus, select } = useNavigationActions();
@@ -104,7 +98,8 @@ export function useNavigationItem(options: NavigationItemOptions): ItemHandle {
     isFocused,
     focus: () => focus(nodeId),
     select: () => select(nodeId),
-    provide: (provider, value) => provider.provide(nodeRef.current!, value),
+    provide: (provider, value) => provider.provide(nodeRef.current, value),
+    registerElement,
   };
 }
 
@@ -121,11 +116,9 @@ export function useNavigationContainer(
   options: NavigationContainerOptions
 ): ContainerHandle {
   const { tree, parentNode } = useNavigationContext();
-
   const parent = options.parent ?? parentNode;
 
-  const nodeRef = useRef<NavigationContainer | null>(null);
-
+  const nodeRef = useRef<ContainerNode>(null as unknown as ContainerNode);
   if (nodeRef.current === null) {
     nodeRef.current = createContainerNode(tree, {
       id: options.id,
@@ -135,20 +128,21 @@ export function useNavigationContainer(
       focusable: options.focusable,
       captureFocus: options.captureFocus,
       order: options.order,
-    }) as NavigationContainer;
+    });
   } else {
     updateNode(nodeRef.current, options);
   }
-
   const nodeId = nodeRef.current.id;
 
   useEffect(() => {
-    connectNode(tree, nodeRef.current!);
+    connectNode(tree, nodeRef.current);
 
     return () => {
       removeNode(tree, nodeId);
     };
   }, [tree, nodeId]);
+
+  const registerElement = useRegisterElement(nodeRef.current);
 
   const Context = useCallback(
     (props: { children: ReactNode }) => {
@@ -173,17 +167,10 @@ export function useNavigationContainer(
     id: nodeId,
     isFocused,
     focus: () => focus(nodeId),
-    provide: (provider, value) => provider.provide(nodeRef.current!, value),
+    provide: (provider, value) => provider.provide(nodeRef.current, value),
     Context,
+    registerElement,
   };
-}
-
-function scopedId(scope: NodeId, nodeId: NodeId) {
-  if (nodeId.startsWith("#")) {
-    return nodeId;
-  }
-
-  return createGlobalId(scope, nodeId);
 }
 
 export function useIsFocused(nodeId: NodeId) {
@@ -194,13 +181,55 @@ export function useIsFocused(nodeId: NodeId) {
     (callback: () => void) =>
       registerFocusListener(tree, {
         type: "focuschange" as const,
-        node: nodeId,
+        node: globalId,
         fn: callback,
       }),
-    [tree, nodeId]
+    [tree, globalId]
   );
 
   return useSyncExternalStore(subscribe, () => isFocused(tree, globalId));
+}
+
+export function useOnFocus(
+  nodeId: NodeId,
+  handler: (id: NodeId | null) => void
+) {
+  const { tree, parentNode } = useNavigationContext();
+  const globalId = scopedId(parentNode, nodeId);
+
+  const handlerRef = useRef(handler);
+  handlerRef.current = handler;
+
+  useEffect(() => {
+    return registerFocusListener(tree, {
+      type: "focuschange" as const,
+      node: globalId,
+      fn: () => {
+        return handlerRef.current(
+          isFocused(tree, globalId) ? tree.focusedId : null
+        );
+      },
+    });
+  }, [globalId]);
+}
+
+export function useFocusedId(scope: NodeId) {
+  const { tree, parentNode } = useNavigationContext();
+  const globalId = scopedId(parentNode, scope);
+
+  const subscribe = useCallback(
+    (callback: () => void) =>
+      registerFocusListener(tree, {
+        type: "focuschange" as const,
+        node: globalId,
+        fn: callback,
+      }),
+    [tree, globalId]
+  );
+
+  return useSyncExternalStore(subscribe, () =>
+    isFocused(tree, globalId) ? tree.focusedId : null
+  );
 }
 
 export function useNavigationActions() {
@@ -224,7 +253,7 @@ export function useNavigationActions() {
 }
 
 const noopSubscribe = () => () => {};
-function useLazyIsFocused<V>(tree: NavigationTree, nodeId: NodeId) {
+function useLazyIsFocused(tree: NavigationTree, nodeId: NodeId) {
   const [subscribed, setSubscribed] = useState(false);
 
   const subscribe = useCallback(
@@ -249,4 +278,14 @@ function useLazyIsFocused<V>(tree: NavigationTree, nodeId: NodeId) {
 
     return subscribedValue;
   };
+}
+
+function useRegisterElement(node: NavigationNode) {
+  return useCallback((element: HTMLElement | null) => {
+    ElementProvider.provide(node, element ?? null);
+
+    PositionProvider.provide(node, () => {
+      return element?.getBoundingClientRect() ?? null;
+    });
+  }, []);
 }

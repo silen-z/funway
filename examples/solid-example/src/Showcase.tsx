@@ -1,11 +1,11 @@
-import { type JSX } from "solid-js";
+import type { JSX } from "solid-js";
 import {
   GridPositionProvider,
   gridHandler,
-  horizontalList,
-  verticalList,
+  horizontalHandler,
+  verticalHandler,
+  spatialHandler,
 } from "@fiveway/core";
-import { PositionProvider, spatialHandler } from "@fiveway/core/dom";
 import {
   NavigationContainer,
   NavigationItem,
@@ -15,7 +15,7 @@ import {
 import css from "./Showcase.module.css";
 
 export function Showcase() {
-  const ShowcaseNav = createNavigationContainer({
+  const nav = createNavigationContainer({
     id: "showcase",
     handler: gridHandler,
   });
@@ -25,7 +25,7 @@ export function Showcase() {
       <h1>fiveway: Solid example</h1>
 
       <div class={css.layout}>
-        <ShowcaseNav.Context>
+        <nav.Context>
           <NavigationContainer id="verticalList">
             {(node) => {
               node.provide(GridPositionProvider, () => ({ row: 1, col: 1 }));
@@ -46,22 +46,22 @@ export function Showcase() {
               return <SpatialShowcase />;
             }}
           </NavigationContainer>
-        </ShowcaseNav.Context>
+        </nav.Context>
       </div>
     </div>
   );
 }
 
 function ListShowcase(props: { type: "vertical" | "horizontal" }) {
-  const ListNav = createNavigationContainer({
+  const nav = createNavigationContainer({
     id: "list",
-    handler: props.type === "vertical" ? verticalList : horizontalList,
+    handler: props.type === "vertical" ? verticalHandler : horizontalHandler,
   });
 
   return (
-    <div class={css.section} data-is-focused={ListNav.isFocused()}>
+    <div class={css.section} data-is-focused={nav.isFocused()}>
       <ul class={css.list} data-type={props.type}>
-        <ListNav.Context>
+        <nav.Context>
           <NavigationItem id="item1">
             {(node) => (
               <li class={css.item} data-is-focused={node.isFocused()}>
@@ -83,14 +83,14 @@ function ListShowcase(props: { type: "vertical" | "horizontal" }) {
               </li>
             )}
           </NavigationItem>
-        </ListNav.Context>
+        </nav.Context>
       </ul>
     </div>
   );
 }
 
 function SpatialShowcase() {
-  const SpatialNav = createNavigationContainer({
+  const nav = createNavigationContainer({
     id: "spatial",
     handler: spatialHandler,
   });
@@ -98,10 +98,10 @@ function SpatialShowcase() {
   return (
     <div
       class={css.section}
-      data-is-focused={SpatialNav.isFocused()}
+      data-is-focused={nav.isFocused()}
       style={{ position: "relative", "min-height": "250px" }}
     >
-      <SpatialNav.Context>
+      <nav.Context>
         <SpatialItem
           navId="item1"
           style={{ position: "absolute", left: "50px", top: "150px" }}
@@ -114,23 +114,19 @@ function SpatialShowcase() {
           navId="item3"
           style={{ position: "absolute", left: "250px", top: "200px" }}
         />
-      </SpatialNav.Context>
+      </nav.Context>
     </div>
   );
 }
 
 function SpatialItem(props: { navId: string; style: JSX.CSSProperties }) {
-  const ItemNav = createNavigationItem({ id: props.navId });
-
-  const provideElPosition = (el: HTMLDivElement) => {
-    ItemNav.provide(PositionProvider, () => el.getBoundingClientRect());
-  };
+  const nav = createNavigationItem({ id: props.navId });
 
   return (
     <div
       class={css.item}
-      ref={provideElPosition}
-      data-is-focused={ItemNav.isFocused()}
+      ref={nav.registerElement}
+      data-is-focused={nav.isFocused()}
       style={props.style}
     >
       {props.navId}

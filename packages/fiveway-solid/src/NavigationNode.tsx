@@ -1,9 +1,5 @@
 import { type JSX, splitProps, children } from "solid-js";
-import {
-  type NavigationContainer,
-  type NavigationItem,
-  type NodeId,
-} from "@fiveway/core";
+import type { NodeId } from "@fiveway/core";
 import {
   type NavigationContainerOptions,
   type NavigationItemOptions,

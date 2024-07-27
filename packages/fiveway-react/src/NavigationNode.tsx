@@ -1,5 +1,4 @@
-import { type ReactNode } from "react";
-import { type NavigationItem } from "@fiveway/core";
+import type { ReactNode } from "react";
 import {
   type NavigationContainerOptions,
   type NavigationItemOptions,

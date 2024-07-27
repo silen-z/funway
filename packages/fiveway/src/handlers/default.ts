@@ -1,22 +1,19 @@
 import { selectNode } from "../tree.js";
-import { makeHandler } from "./factory.js";
+import { type ChainableHandler, makeHandler } from "../handler.js";
 import { focusHandler } from "./focus.js";
-import { runHandler } from "./runner.js";
 
-import type { ChainableHandler } from "./types.js";
+export const parentHandler: ChainableHandler = makeHandler(
+  (node, action, next, context) => {
+    if (node.parent !== null) {
+      context.path.push(node.id);
+      return next(node.parent, action);
+    }
 
-export const parentHandler: ChainableHandler = makeHandler((node, action, context, next) => {
-  if (node.parent !== null) {
-    const parentNode = node.tree.nodes.get(node.parent)!;
-
-    context.path.push(node.id);
-    return runHandler(parentNode, action, context);
+    return next();
   }
+);
 
-  return next();
-});
-
-export const selectHandler = makeHandler((node, action, _, next) => {
+export const selectHandler = makeHandler((node, action, next) => {
   if (action.kind === "select") {
     selectNode(node.tree, node.id, true);
     return null;
@@ -28,7 +25,7 @@ export const selectHandler = makeHandler((node, action, _, next) => {
 export const rootHandler = focusHandler();
 
 export const itemHandler = focusHandler()
-  .chain(selectHandler)
-  .chain(parentHandler);
+  .append(selectHandler)
+  .append(parentHandler);
 
-export const containerHandler = focusHandler().chain(parentHandler);
+export const containerHandler = focusHandler().append(parentHandler);

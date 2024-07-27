@@ -22,7 +22,7 @@ import {
   scopedId,
   focusNode,
   isFocused,
-  PositionProvider
+  PositionProvider,
 } from "@fiveway/core";
 import { useNavigationContext } from "./context.js";
 import { NodeContext } from "./NavigationNode.jsx";
@@ -40,7 +40,6 @@ export type NavigationNodeOptions = {
 };
 
 export type NavigationItemOptions = NavigationNodeOptions & {
-  elRef?: Accessor<HTMLElement | undefined>;
   onSelect?: () => void;
 };
 
@@ -52,6 +51,7 @@ type NodeHandle = {
     provider: P,
     value: P extends Provider<infer V> ? Accessor<V> : never
   ) => void;
+  registerElement: (el: HTMLElement | Accessor<HTMLElement>) => void;
 };
 
 export type ItemHandle = NodeHandle & {
@@ -81,20 +81,22 @@ export function createNavigationItem(
       const currentOptions = access(getOptions);
 
       updateNode(node, currentOptions);
-
-      ElementProvider.provide(node, () => {
-        return currentOptions.elRef?.() ?? null;
-      });
-
-      PositionProvider.provide(node, () => {
-        return currentOptions.elRef?.()?.getBoundingClientRect() ?? null;
-      });
     });
 
     onCleanup(() => {
       removeNode(tree, node.id);
     });
   });
+
+  const registerElement = (el: HTMLElement | Accessor<HTMLElement>) => {
+    ElementProvider.provide(node, () => {
+      return access(el) ?? null;
+    });
+
+    PositionProvider.provide(node, () => {
+      return access(el).getBoundingClientRect() ?? null;
+    });
+  };
 
   return {
     id: node.id,
@@ -109,10 +111,9 @@ export function createNavigationItem(
     select: (nodeId?: NodeId) => {
       selectNode(tree, nodeId != null ? scopedId(parentNode, nodeId) : node.id);
     },
+    registerElement,
     provide: (provider, value) => {
-      createEffect(() => {
-        provider.provide(node, value());
-      });
+      provider.provide(node, value);
     },
   };
 }
@@ -155,6 +156,16 @@ export function createNavigationContainer(
     });
   });
 
+  const registerElement = (el: HTMLElement | Accessor<HTMLElement>) => {
+    ElementProvider.provide(node, () => {
+      return access(el) ?? null;
+    });
+
+    PositionProvider.provide(node, () => {
+      return access(el).getBoundingClientRect() ?? null;
+    });
+  };
+
   return {
     id: node.id,
     isFocused: createLazyMemo(on(focusedId, () => isFocused(tree, node.id))),
@@ -170,6 +181,7 @@ export function createNavigationContainer(
         provider.provide(node, value());
       });
     },
+    registerElement,
     Context: (props: ParentProps) => (
       <NodeContext node={node.id}>{props.children}</NodeContext>
     ),

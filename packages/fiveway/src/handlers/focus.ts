@@ -1,8 +1,6 @@
 import { childrenIterator } from "../children.js";
 import type { NavigationDirection } from "../navigation.js";
-import { makeHandler } from "./factory.js";
-import { runHandler } from "./runner.js";
-import type { ChainableHandler } from "./types.js";
+import { type ChainableHandler, makeHandler } from "../handler.js";
 
 export type FocusDirection = "front" | "back" | undefined;
 
@@ -13,7 +11,7 @@ export type FocusHandlerConfig = {
 export const focusHandler = (
   config: FocusHandlerConfig = {}
 ): ChainableHandler =>
-  makeHandler((node, action, context, next) => {
+  makeHandler((node, action, next) => {
     if (action.kind !== "focus") {
       return next();
     }
@@ -34,8 +32,7 @@ export const focusHandler = (
         return null;
       }
 
-      const initialNode = node.tree.nodes.get(initialChild.id)!;
-      return runHandler(initialNode, action, context);
+      return next(initialChild.id, action);
     }
 
     const direction = config.direction?.(action.direction);
@@ -46,8 +43,7 @@ export const focusHandler = (
         continue;
       }
 
-      const childNode = node.tree.nodes.get(child.id)!;
-      const focusableNode = runHandler(childNode, action, context);
+      const focusableNode = next(child.id, action);
 
       if (focusableNode !== null) {
         return focusableNode;

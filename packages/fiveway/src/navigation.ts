@@ -1,5 +1,5 @@
-import { runHandler } from "./handlers/runner.js";
-import { type NavigationTree, focusNode, getNode } from "./tree.js";
+import { type NavigationTree, focusNode } from "./tree.js";
+import { runHandler } from "./handler.js";
 
 export type NavigationDirection = "up" | "down" | "left" | "right";
 export type NavigationAction =
@@ -8,12 +8,8 @@ export type NavigationAction =
   | { kind: "focus"; direction: NavigationDirection | "initial" | null };
 
 export function handleAction(tree: NavigationTree, action: NavigationAction) {
-  const node = getNode(tree, tree.focusedId);
-  const targetId = runHandler(node, action);
-  if (targetId === null) {
-    return;
+  const targetId = runHandler(tree, tree.focusedId, action);
+  if (targetId !== null) {
+    focusNode(tree, targetId);
   }
-
-  // TODO maybe not call focusNode right here and return result instead
-  focusNode(tree, targetId);
 }

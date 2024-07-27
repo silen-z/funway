@@ -1,12 +1,12 @@
 import type {
   NodeId,
   NavigationNode,
-  NavigationContainer,
-  NavigationItem,
+  ContainerNode,
+  ItemNode,
 } from "./node.js";
-import { binarySearch } from "./array.js";
+import { binarySearch, swapRemove } from "./array.js";
+import { runHandler } from "./handler.js";
 import { rootHandler } from "./handlers/default.js";
-import { runHandler } from "./handlers/runner.js";
 import { splitRemainders } from "./string.js";
 
 export type Listener = {
@@ -16,7 +16,7 @@ export type Listener = {
 };
 
 export type NavigationTree = {
-  root: NavigationContainer;
+  root: ContainerNode;
   nodes: Map<NodeId, NavigationNode>;
   focusedId: NodeId;
   listeners: Map<NodeId, Set<Listener>>;
@@ -26,7 +26,7 @@ export function createNavigationTree(): NavigationTree {
   const rootId = "#";
 
   const tree = {
-    root: {} as NavigationContainer,
+    root: {} as ContainerNode,
     focusedId: rootId,
     nodes: new Map(),
     listeners: new Map(),
@@ -46,6 +46,7 @@ export function createNavigationTree(): NavigationTree {
     providers: new Map(),
     children: [],
     captureFocus: true,
+    rememberChildren: true,
   };
   tree.nodes.set(rootId, tree.root);
 
@@ -84,9 +85,8 @@ export function connectNode(tree: NavigationTree, node: NavigationNode) {
     }
   }
 
-  const focusedNode = getNode(tree, tree.focusedId);
-  if (focusedNode.type === "container" && isParent(focusedNode.id, node.id)) {
-    const nodeToFocus = runHandler(focusedNode, {
+  if (isParent(tree.focusedId, node.id)) {
+    const nodeToFocus = runHandler(tree, tree.focusedId, {
       kind: "focus",
       direction: "initial",
     });
@@ -116,9 +116,9 @@ export function removeNode(tree: NavigationTree, nodeId: NodeId) {
     let targetNode = null;
 
     splitRemainders(node.parent!, "/", (id) => {
-      targetNode = runHandler(tree.nodes.get(id)!, {
+      targetNode = runHandler(tree, id, {
         kind: "focus",
-        direction: null,
+        direction: "initial",
       });
       if (targetNode !== null) {
         return false;
@@ -127,7 +127,7 @@ export function removeNode(tree: NavigationTree, nodeId: NodeId) {
 
     focusNode(tree, targetNode ?? tree.root.id, {
       respectCapture: false,
-      allowRoot: true,
+      runHandler: false,
     });
   }
 }
@@ -140,14 +140,25 @@ function disconnectNode(tree: NavigationTree, nodeId: NodeId) {
 
   const parentNode = getContainerNode(tree, node.parent!);
 
-  // tombstone id of removed node in parent
-  const parentChildRecord = parentNode.children.find(
-    (child) => child.id === nodeId
-  );
-  if (parentChildRecord == null) {
-    throw new Error("broken tree");
+  if (parentNode.rememberChildren) {
+    // tombstone id of removed node in parent
+    const parentChildRecord = parentNode.children.find(
+      (child) => child.id === nodeId
+    );
+    if (parentChildRecord == null) {
+      throw new Error("broken tree");
+    }
+    parentChildRecord.active = false;
+  } else {
+    const parentChildIndex = parentNode.children.findIndex(
+      (child) => child.id === nodeId
+    );
+
+    if (parentChildIndex === -1) {
+      throw new Error("broken tree");
+    }
+    swapRemove(parentNode.children, parentChildIndex);
   }
-  parentChildRecord.active = false;
 
   if (node.type === "container") {
     for (const child of node.children) {
@@ -160,7 +171,7 @@ function disconnectNode(tree: NavigationTree, nodeId: NodeId) {
 
 export type FocusOptions = {
   respectCapture?: boolean;
-  allowRoot?: boolean;
+  runHandler?: boolean;
 };
 
 export function focusNode(
@@ -175,6 +186,19 @@ export function focusNode(
 
   if (tree.focusedId === targetId) {
     return true;
+  }
+
+  if (options.runHandler ?? true) {
+    const resolvedId = runHandler(tree, targetId, {
+      kind: "focus",
+      direction: null,
+    });
+
+    if (resolvedId === null) {
+      return false;
+    }
+
+    targetId = resolvedId;
   }
 
   if (options.respectCapture ?? true) {
@@ -292,7 +316,7 @@ export function getNode(tree: NavigationTree, nodeId: NodeId): NavigationNode {
 export function getContainerNode(
   tree: NavigationTree,
   nodeId: NodeId
-): NavigationContainer {
+): ContainerNode {
   const node = getNode(tree, nodeId);
   if (node.type !== "container") {
     throw new Error(`node '${nodeId}' is expected to be a container`);
@@ -301,10 +325,7 @@ export function getContainerNode(
   return node;
 }
 
-export function getItemNode(
-  tree: NavigationTree,
-  nodeId: NodeId
-): NavigationItem {
+export function getItemNode(tree: NavigationTree, nodeId: NodeId): ItemNode {
   const node = getNode(tree, nodeId);
   if (node.type !== "item") {
     throw new Error(`node '${nodeId}' is expected to be an item`);
@@ -357,27 +378,30 @@ export function scopedId(scope: NodeId, nodeId: NodeId) {
   return createGlobalId(scope, nodeId);
 }
 
+// TODO better implementation for depth
 export function traverseNodes(
   tree: NavigationTree,
   nodeId: NodeId,
-  fn: (node: NavigationNode) => void
+  fn: (node: NavigationNode) => void,
+  depth = 1
 ) {
   const node = getNode(tree, nodeId);
   fn(node);
 
+  if (depth === 0) {
+    return;
+  }
+
   if (node.type === "container") {
     for (const child of node.children) {
       if (child.active) {
-        traverseNodes(tree, child.id, fn);
+        traverseNodes(tree, child.id, fn, depth - 1);
       }
     }
   }
 }
 
-function insertChildInOrder(
-  parentNode: NavigationContainer,
-  node: NavigationNode
-) {
+function insertChildInOrder(parentNode: ContainerNode, node: NavigationNode) {
   const tombstone = parentNode.children.find((child) => child.id === node.id);
   if (tombstone != null) {
     // TODO: handle if node has explicit order

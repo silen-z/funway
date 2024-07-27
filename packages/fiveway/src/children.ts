@@ -1,10 +1,11 @@
-import type { NavigationContainer, NodeChild } from "./node.js";
+import type { ContainerNode, NodeChild } from "./node.js";
 
+// TODO convert to functions with callback
 class DefaultChildrenIterator implements Iterator<NodeChild> {
     initialIndex: number | null;
     current = 0;
   
-    constructor(public node: NavigationContainer) {
+    constructor(public node: ContainerNode) {
       this.initialIndex = node.initial !== null ? null : -1;
     }
   
@@ -33,7 +34,7 @@ class DefaultChildrenIterator implements Iterator<NodeChild> {
   class BackwardsChildrenIterator implements Iterator<NodeChild> {
     current: number;
   
-    constructor(public node: NavigationContainer) {
+    constructor(public node: ContainerNode) {
       this.current = node.children.length - 1;
     }
   
@@ -47,7 +48,7 @@ class DefaultChildrenIterator implements Iterator<NodeChild> {
   }
   
   export function childrenIterator(
-    node: NavigationContainer,
+    node: ContainerNode,
     direction?: "front" | "back"
   ): Iterable<NodeChild> {
     if (direction === "front") {

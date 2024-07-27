@@ -1,9 +1,12 @@
 import { describe, expect, test } from "vitest";
-import { createNavigationTree } from "./tree.js";
+import { connectNode, createNavigationTree } from "./tree.js";
 import { createItemNode } from "./node.js";
-import { runHandler } from "./handlers/runner.js";
-import { chainHandlers, makeHandler } from "./handlers/factory.js";
-import { NavigationHandler } from "./handlers/types.js";
+import {
+  NavigationHandler,
+  makeHandler,
+  chainHandlers,
+  runHandler,
+} from "./handler.js";
 
 describe("handlers", () => {
   test("chainHandlers", () => {
@@ -11,8 +14,10 @@ describe("handlers", () => {
 
     const logHandler =
       (msg: string): NavigationHandler =>
-      (n, a, c, next) => {
-        logs.push(msg);
+      (n, a, next) => {
+        if (a.kind === "select") {
+          logs.push(msg);
+        }
         return next();
       };
 
@@ -22,13 +27,17 @@ describe("handlers", () => {
       chainHandlers(logHandler("handler3"), logHandler("handler4"))
     );
 
-    const testNode = createItemNode(createNavigationTree(), {
+    const testTree = createNavigationTree();
+    const testNode = createItemNode(testTree, {
       id: "node1",
       parent: "#",
       handler: testHandler,
     });
+    connectNode(testTree, testNode);
 
-    const result = runHandler(testNode, { kind: "move", direction: "right" });
+    const result = runHandler(testTree, testNode.id, {
+      kind: "select",
+    });
 
     expect(result).toBeNull();
     expect(logs).toEqual(["handler1", "handler2", "handler3", "handler4"]);
@@ -38,22 +47,28 @@ describe("handlers", () => {
     const logs: string[] = [];
 
     const logHandler = (msg: string) =>
-      makeHandler((n, a, c, next) => {
-        logs.push(msg);
+      makeHandler((n, a, next) => {
+        if (a.kind === "select") {
+          logs.push(msg);
+        }
         return next();
       });
 
     const testHandler = logHandler("handler1")
-      .chain(logHandler("handler2"))
-      .chain(logHandler("handler3").chain(logHandler("handler4")));
+      .append(logHandler("handler2"))
+      .append(logHandler("handler3").append(logHandler("handler4")));
 
-    const testNode = createItemNode(createNavigationTree(), {
+    const testTree = createNavigationTree();
+    const testNode = createItemNode(testTree, {
       id: "node1",
       parent: "#",
       handler: testHandler,
     });
+    connectNode(testTree, testNode);
 
-    const result = runHandler(testNode, { kind: "move", direction: "right" });
+    const result = runHandler(testTree, testNode.id, {
+      kind: "select",
+    });
 
     expect(result).toBeNull();
     expect(logs).toEqual(["handler1", "handler2", "handler3", "handler4"]);

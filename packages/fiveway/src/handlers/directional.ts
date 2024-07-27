@@ -1,13 +1,10 @@
-import type { NavigationContainer, NodeId } from "../node.js";
-import { getNode } from "../tree.js";
+import type { ContainerNode, NodeId } from "../node.js";
 import { parentHandler } from "./default.js";
-import { makeHandler } from "./factory.js";
+import { type ChainableHandler, makeHandler } from "../handler.js";
 import { focusHandler } from "./focus.js";
-import { runHandler } from "./runner.js";
-import type { ChainableHandler } from "./types.js";
 
 export const verticalMovement: ChainableHandler = makeHandler(
-  (node, action, context, next) => {
+  (node, action, next, context) => {
     if (node.type !== "container") {
       throw Error("verticalList handler can only be used on containers");
     }
@@ -23,12 +20,10 @@ export const verticalMovement: ChainableHandler = makeHandler(
               return next();
             }
 
-            const childNode = getNode(node.tree, prevChildId);
-            const targetNode = runHandler(
-              childNode,
-              { kind: "focus", direction: action.direction },
-              context
-            );
+            const targetNode = next(prevChildId, {
+              kind: "focus",
+              direction: action.direction,
+            });
 
             if (targetNode === null) {
               childId = prevChildId;
@@ -47,12 +42,10 @@ export const verticalMovement: ChainableHandler = makeHandler(
               return next();
             }
 
-            const childNode = getNode(node.tree, nextChildId);
-            const targetNode = runHandler(
-              childNode,
-              { kind: "focus", direction: action.direction },
-              context
-            );
+            const targetNode = next(nextChildId, {
+              kind: "focus",
+              direction: action.direction,
+            });
 
             if (targetNode === null) {
               childId = nextChildId;
@@ -69,13 +62,13 @@ export const verticalMovement: ChainableHandler = makeHandler(
   }
 );
 
-export const verticalList = focusHandler({
+export const verticalHandler = focusHandler({
   direction: (dir) => (dir === "up" ? "back" : undefined),
 })
-  .chain(verticalMovement)
-  .chain(parentHandler);
+  .append(verticalMovement)
+  .append(parentHandler);
 
-export const horizontalMovement = makeHandler((node, action, context, next) => {
+export const horizontalMovement = makeHandler((node, action, next, context) => {
   if (node.type !== "container") {
     throw Error("horizontalList handler can only be used on containers");
   }
@@ -91,12 +84,10 @@ export const horizontalMovement = makeHandler((node, action, context, next) => {
             return next();
           }
 
-          const childNode = getNode(node.tree, prevChildId);
-          const targetNode = runHandler(
-            childNode,
-            { kind: "focus", direction: action.direction },
-            context
-          );
+          const targetNode = next(prevChildId, {
+            kind: "focus",
+            direction: action.direction,
+          });
 
           if (targetNode === null) {
             childId = prevChildId;
@@ -116,12 +107,10 @@ export const horizontalMovement = makeHandler((node, action, context, next) => {
             return next();
           }
 
-          const childNode = getNode(node.tree, nextChildId);
-          const targetNode = runHandler(
-            childNode,
-            { kind: "focus", direction: action.direction },
-            context
-          );
+          const targetNode = next(nextChildId, {
+            kind: "focus",
+            direction: action.direction,
+          });
 
           if (targetNode === null) {
             childId = nextChildId;
@@ -137,16 +126,13 @@ export const horizontalMovement = makeHandler((node, action, context, next) => {
   return next();
 });
 
-export const horizontalList = focusHandler({
+export const horizontalHandler = focusHandler({
   direction: (dir) => (dir === "left" ? "back" : undefined),
 })
-  .chain(horizontalMovement)
-  .chain(parentHandler);
+  .append(horizontalMovement)
+  .append(parentHandler);
 
-function previousChild(
-  node: NavigationContainer,
-  nodeId: NodeId
-): NodeId | null {
+function previousChild(node: ContainerNode, nodeId: NodeId): NodeId | null {
   const currentIndex = node.children.findIndex((child) => child.id === nodeId);
 
   if (currentIndex === -1) {
@@ -164,7 +150,7 @@ function previousChild(
   return null;
 }
 
-function nextChild(node: NavigationContainer, nodeId: NodeId): NodeId | null {
+function nextChild(node: ContainerNode, nodeId: NodeId): NodeId | null {
   const currentIndex = node.children.findIndex((child) => child.id === nodeId);
 
   if (currentIndex === -1) {

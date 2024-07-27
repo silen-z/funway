@@ -25,8 +25,10 @@ export {
   type NavigationHandler,
   type ChainableHandler,
   type NavigationHandlerContext,
-} from "./handlers/types.js";
-export { makeHandler, chainHandlers } from "./handlers/factory.js";
+  makeHandler,
+  chainHandlers,
+  runHandler,
+} from "./handler.js";
 export {
   itemHandler,
   containerHandler,
@@ -39,11 +41,11 @@ export {
   type FocusDirection,
 } from "./handlers/focus.js";
 export {
-  horizontalList,
+  horizontalHandler,
   horizontalMovement,
-  verticalList,
+  verticalHandler,
   verticalMovement,
-} from "./handlers/list.js";
+} from "./handlers/directional.js";
 export {
   type GridPosition,
   gridHandler,
@@ -58,8 +60,8 @@ export {
 export {
   type NodeId,
   type NavigationNode,
-  type NavigationContainer,
-  type NavigationItem,
+  type ContainerNode,
+  type ItemNode,
   type NodeChild,
   type NodeConfig,
   type ItemNodeConfig,
