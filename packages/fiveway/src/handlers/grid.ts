@@ -1,5 +1,5 @@
+import { directChildId, type NodeId } from "../id.js";
 import type { NavigationDirection } from "../navigation.js";
-import type { NodeId } from "../node.js";
 import { createProvider, type Provider } from "../provider.js";
 import { getNode, traverseNodes } from "../tree.js";
 import { parentHandler } from "./default.js";
@@ -52,13 +52,19 @@ const distanceFns: Record<
  * @category Handler
  */
 export const gridMovement: ChainableHandler = makeHandler(
-  (node, action, next, context) => {
+  (node, action, next) => {
     if (action.kind !== "move" || action.direction === "back") {
       return next();
     }
 
-    const focusedNode = getNode(node.tree, context.path.at(-1)!);
-    const focusedPos = GridPositionProvider.extract(focusedNode);
+    const focusedId = directChildId(node.id, node.tree.focusedId);
+    if (focusedId === null) {
+      return next();
+    }
+
+    const focusedPos = GridPositionProvider.extract(
+      getNode(node.tree, focusedId)
+    );
     if (focusedPos == null) {
       return next();
     }

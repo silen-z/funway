@@ -5,7 +5,7 @@ import {
   makeHandler,
   chainHandlers,
 } from "../handler.js";
-import type { NodeId } from "../node.js";
+import type { NodeId } from "../id.js";
 import { createProvider, type Provider } from "../provider.js";
 import { getItemNode, traverseNodes } from "../tree.js";
 import { parentHandler } from "./default.js";

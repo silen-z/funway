@@ -6,9 +6,8 @@ import { focusHandler } from "./focus.js";
  * @category Handler
  */
 export const parentHandler: ChainableHandler = makeHandler(
-  (node, action, next, context) => {
+  (node, action, next) => {
     if (node.parent !== null) {
-      context.path.push(node.id);
       return next(node.parent, action);
     }
 

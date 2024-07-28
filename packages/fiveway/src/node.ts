@@ -1,15 +1,8 @@
-import {
-  type NavigationTree,
-  createGlobalId,
-  getContainerNode,
-  scopedId,
-} from "./tree.js";
+import { createGlobalId, scopedId, type NodeId } from "./id.js";
+import { type NavigationTree, getContainerNode } from "./tree.js";
 import type { NavigationHandler } from "./handler.js";
 import { containerHandler, itemHandler } from "./handlers/default.js";
-
 import { binarySearch } from "./array.js";
-
-export type NodeId = string;
 
 type Node = {
   tree: NavigationTree;

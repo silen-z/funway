@@ -1,15 +1,11 @@
+import type { NodeId } from "./id.js";
 import type { NavigationAction } from "./navigation.js";
-import type { NodeId, NavigationNode } from "./node.js";
+import type { NavigationNode } from "./node.js";
 import { getNode, type NavigationTree } from "./tree.js";
 
 type HandlerNext = {
   (): NodeId | null;
   (id: NodeId, action?: NavigationAction): NodeId | null;
-}
-
-// TODO consider getting rid of context and read focusedNode directly from tree
-type HandlerContext = {
-  path: NodeId[];
 };
 
 /**
@@ -18,8 +14,7 @@ type HandlerContext = {
 export type NavigationHandler = (
   node: NavigationNode,
   action: NavigationAction,
-  next: HandlerNext,
-  context: HandlerContext
+  next: HandlerNext
 ) => NodeId | null;
 
 export type ChainableHandler = NavigationHandler & {
@@ -39,40 +34,51 @@ export function makeHandler(handler: NavigationHandler): ChainableHandler {
 export function runHandler(
   tree: NavigationTree,
   id: NodeId,
-  action: NavigationAction,
-  context: HandlerContext = { path: [] }
+  action: NavigationAction
 ): NodeId | null {
   const next = (id?: NodeId, anotherAction?: NavigationAction) => {
     if (id != null) {
-      return runHandler(tree, id, anotherAction ?? action, context);
+      return runHandler(tree, id, anotherAction ?? action);
     }
 
     return null;
   };
 
   const node = getNode(tree, id);
-  return node.handler(node, action, next, context);
+  return node.handler(node, action, next);
 }
 
 /**
  * Take handlers and combines them into one so the next handler function
  * automatically passes action to the next handler
 
- * @param handler handler that will be called first
  * @param handlers handlers that will be called in order first to last 
- * @returns single handler that will pipe navigation action through all given handlers
+ * @returns handler that will pipe navigation actions through via the next function
  */
 export function chainHandlers(
-  handler: NavigationHandler,
   ...handlers: NavigationHandler[]
 ): ChainableHandler {
-  let chainedHandler = wrapHandler(handler);
+  return wrapHandler(
+    handlers.reduce((chained, another) => chain2Handlers(chained, another))
+  );
+}
 
-  for (const handler of handlers) {
-    chainedHandler = chainedHandler.append(wrapHandler(handler));
-  }
+// TODO check if this technique can be used: https://deno.land/x/oak@v16.1.0/middleware.ts?source=#L60
+function chain2Handlers(
+  handler1: NavigationHandler,
+  handler2: NavigationHandler
+): ChainableHandler {
+  return makeHandler((node, action, next) => {
+    const chainedNext = (id?: NodeId, newAction?: NavigationAction) => {
+      if (id != null) {
+        return runHandler(node.tree, id, newAction ?? action);
+      }
 
-  return chainedHandler;
+      return handler2(node, action, next);
+    };
+
+    return handler1(node, action, chainedNext);
+  });
 }
 
 function wrapHandler(
@@ -83,22 +89,4 @@ function wrapHandler(
   }
 
   return makeHandler(handler);
-}
-
-// TODO check if this technique can be used: https://deno.land/x/oak@v16.1.0/middleware.ts?source=#L60
-function chain2Handlers(
-  handler1: NavigationHandler,
-  handler2: NavigationHandler
-): ChainableHandler {
-  return makeHandler((node, action, next, context) => {
-    const chainedNext = (id?: NodeId, anotherAction?: NavigationAction) => {
-      if (id != null) {
-        return runHandler(node.tree, id, anotherAction ?? action, context);
-      }
-
-      return handler2(node, action, next, context);
-    };
-
-    return handler1(node, action, chainedNext, context);
-  });
 }

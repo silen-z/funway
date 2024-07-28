@@ -1,13 +1,14 @@
-import type { ContainerNode, NodeId } from "../node.js";
-import { parentHandler } from "./default.js";
+import type { NodeId } from "../id.js";
+import type { ContainerNode } from "../node.js";
 import { type ChainableHandler, makeHandler } from "../handler.js";
+import { parentHandler } from "./default.js";
 import { focusHandler } from "./focus.js";
 
 /**
  * @category Handler
  */
 export const verticalMovement: ChainableHandler = makeHandler(
-  (node, action, next, context) => {
+  (node, action, next) => {
     if (node.type !== "container") {
       throw Error("verticalList handler can only be used on containers");
     }
@@ -15,7 +16,7 @@ export const verticalMovement: ChainableHandler = makeHandler(
     if (action.kind === "move") {
       switch (action.direction) {
         case "up": {
-          let childId = context.path.at(-1) ?? node.tree.focusedId;
+          let childId = node.tree.focusedId;
 
           for (;;) {
             const prevChildId = previousChild(node, childId);
@@ -37,7 +38,7 @@ export const verticalMovement: ChainableHandler = makeHandler(
           }
         }
         case "down": {
-          let childId = context.path.at(-1) ?? node.tree.focusedId;
+          let childId = node.tree.focusedId;
 
           for (;;) {
             const nextChildId = nextChild(node, childId);
@@ -77,7 +78,7 @@ export const verticalHandler = focusHandler({
 /**
  * @category Handler
  */
-export const horizontalMovement = makeHandler((node, action, next, context) => {
+export const horizontalMovement = makeHandler((node, action, next) => {
   if (node.type !== "container") {
     throw Error("horizontalList handler can only be used on containers");
   }
@@ -85,7 +86,7 @@ export const horizontalMovement = makeHandler((node, action, next, context) => {
   if (action.kind === "move") {
     switch (action.direction) {
       case "left": {
-        let childId = context.path.at(-1) ?? node.tree.focusedId;
+        let childId = node.tree.focusedId;
 
         for (;;) {
           const prevChildId = previousChild(node, childId);
@@ -108,7 +109,7 @@ export const horizontalMovement = makeHandler((node, action, next, context) => {
       }
 
       case "right": {
-        let childId = context.path.at(-1) ?? node.tree.focusedId;
+        let childId = node.tree.focusedId;
 
         for (;;) {
           const nextChildId = nextChild(node, childId);

@@ -1,10 +1,10 @@
 import { expect, test } from "vitest";
-import { splitRemainders } from "./string.js";
+import { idsToRoot } from "./id.js";
 
 test("splitLast", () => {
   const result: string[] = [];
 
-  splitRemainders("#/something/a/test", "/", (id) => {
+  idsToRoot("#/something/a/test", (id) => {
     result.push(id);
   });
 

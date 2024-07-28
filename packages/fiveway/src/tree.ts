@@ -1,13 +1,8 @@
-import type {
-  NodeId,
-  NavigationNode,
-  ContainerNode,
-  ItemNode,
-} from "./node.js";
+import { type NodeId, convergingPaths, idsToRoot, isParent } from "./id.js";
+import type { NavigationNode, ContainerNode, ItemNode } from "./node.js";
 import { binarySearch, swapRemove } from "./array.js";
 import { runHandler } from "./handler.js";
 import { rootHandler } from "./handlers/default.js";
-import { splitRemainders } from "./string.js";
 
 export type Listener = {
   node: NodeId;
@@ -115,7 +110,7 @@ export function removeNode(tree: NavigationTree, nodeId: NodeId) {
   if (isFocused(tree, node.id)) {
     let targetNode = null;
 
-    splitRemainders(node.parent!, "/", (id) => {
+    idsToRoot(node.parent!, (id) => {
       targetNode = runHandler(tree, id, {
         kind: "focus",
         direction: "initial",
@@ -204,7 +199,7 @@ export function focusNode(
   if (options.respectCapture ?? true) {
     let allowFocus = true;
 
-    splitRemainders(tree.focusedId, "/", (id) => {
+    idsToRoot(tree.focusedId, (id) => {
       if (targetId.startsWith(id)) {
         return false;
       }
@@ -253,37 +248,6 @@ export function registerFocusListener(
       tree.listeners.delete(listener.node);
     }
   };
-}
-
-function convergingPaths(
-  node1: NodeId,
-  node2: NodeId,
-  cb: (id: NodeId) => void
-) {
-  if (node1 !== node2) {
-    splitRemainders(node2, "/", (id) => {
-      if (node1.startsWith(id)) {
-        return false;
-      }
-
-      cb(id);
-    });
-  }
-
-  splitRemainders(node1, "/", cb);
-}
-
-function callListeners(tree: NavigationTree, nodeId: NodeId, event: string) {
-  const listenerNode = tree.listeners.get(nodeId);
-  if (listenerNode == null) {
-    return;
-  }
-
-  for (const listener of listenerNode) {
-    if (listener.type === event) {
-      listener.fn();
-    }
-  }
 }
 
 export function selectNode(
@@ -366,18 +330,6 @@ export function isFocused(tree: NavigationTree, nodeId: NodeId): boolean {
   return isParent(nodeId, tree.focusedId);
 }
 
-export function createGlobalId(...tail: NodeId[]) {
-  return tail.join("/");
-}
-
-export function scopedId(scope: NodeId, nodeId: NodeId) {
-  if (nodeId.startsWith("#")) {
-    return nodeId;
-  }
-
-  return createGlobalId(scope, nodeId);
-}
-
 // TODO better implementation for depth
 export function traverseNodes(
   tree: NavigationTree,
@@ -401,6 +353,19 @@ export function traverseNodes(
   }
 }
 
+function callListeners(tree: NavigationTree, nodeId: NodeId, event: string) {
+  const listenerNode = tree.listeners.get(nodeId);
+  if (listenerNode == null) {
+    return;
+  }
+
+  for (const listener of listenerNode) {
+    if (listener.type === event) {
+      listener.fn();
+    }
+  }
+}
+
 function insertChildInOrder(parentNode: ContainerNode, node: NavigationNode) {
   const tombstone = parentNode.children.find((child) => child.id === node.id);
   if (tombstone != null) {
@@ -420,8 +385,4 @@ function insertChildInOrder(parentNode: ContainerNode, node: NavigationNode) {
     id: node.id,
     order: node.order,
   });
-}
-
-export function isParent(parentId: NodeId, childId: NodeId) {
-  return childId.startsWith(parentId + "/");
 }

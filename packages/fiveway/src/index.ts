@@ -1,3 +1,16 @@
+export { type NodeId, createGlobalId, scopedId, directChildId } from "./id.js";
+export {
+  type NavigationNode,
+  type ContainerNode,
+  type ItemNode,
+  type NodeChild,
+  type NodeConfig,
+  type ItemNodeConfig,
+  type ContainerNodeConfig,
+  createItemNode,
+  createContainerNode,
+  updateNode,
+} from "./node.js";
 export {
   type NavigationTree,
   type FocusOptions,
@@ -10,17 +23,10 @@ export {
   createNavigationTree,
   connectNode,
   focusNode,
-  createGlobalId,
-  scopedId,
   isFocused,
   traverseNodes,
   registerFocusListener,
 } from "./tree.js";
-export {
-  type NavigationAction,
-  type NavigationDirection,
-  handleAction,
-} from "./navigation.js";
 export {
   type NavigationHandler,
   type ChainableHandler,
@@ -57,16 +63,8 @@ export {
   PositionProvider,
 } from "./handlers/spatial.js";
 export {
-  type NodeId,
-  type NavigationNode,
-  type ContainerNode,
-  type ItemNode,
-  type NodeChild,
-  type NodeConfig,
-  type ItemNodeConfig,
-  type ContainerNodeConfig,
-  createItemNode,
-  createContainerNode,
-  updateNode,
-} from "./node.js";
+  type NavigationAction,
+  type NavigationDirection,
+  handleAction,
+} from "./navigation.js";
 export { type Provider, createProvider } from "./provider.js";
