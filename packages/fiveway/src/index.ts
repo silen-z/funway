@@ -29,8 +29,7 @@ export {
 } from "./tree.js";
 export {
   type NavigationHandler,
-  type ChainableHandler,
-  makeHandler,
+  type HandlerChain as ChainableHandler,
   chainHandlers,
   runHandler,
 } from "./handler.js";

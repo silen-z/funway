@@ -1,67 +1,65 @@
-import { focusHandler } from "./focus.js";
+import type { NodeId } from "../id.js";
+import { getItemNode, traverseNodes } from "../tree.js";
 import type { NavigationDirection } from "../navigation.js";
 import {
-  type ChainableHandler,
-  makeHandler,
+  type NavigationHandler,
+  type HandlerChain,
   chainHandlers,
 } from "../handler.js";
-import type { NodeId } from "../id.js";
-import { createProvider, type Provider } from "../provider.js";
-import { getItemNode, traverseNodes } from "../tree.js";
 import { parentHandler } from "./default.js";
+import { focusHandler } from "./focus.js";
+import { createProvider, type Provider } from "../provider.js";
 
 export const PositionProvider: Provider<DOMRect> = createProvider("position");
 
 /**
  * @category Handler
  */
-export const spatialMovement: ChainableHandler = makeHandler(
-  (node, action, next) => {
-    if (action.kind !== "move" || action.direction === "back") {
-      return next();
-    }
-
-    const focusedNode = getItemNode(node.tree, node.tree.focusedId);
-    const focusedPos = PositionProvider.extract(focusedNode);
-    if (focusedPos == null) {
-      return next();
-    }
-
-    const isCorrectDirection = directionFilters[action.direction];
-
-    let closestId: NodeId | null = null;
-    let shortestDistance: number | null = null;
-
-    traverseNodes(node.tree, node.id, (potentialNode) => {
-      // TODO use focus handler?
-      if (!potentialNode.focusable) {
-        return;
-      }
-
-      const potentialPos = PositionProvider.extract(potentialNode);
-      if (potentialPos == null) {
-        return;
-      }
-
-      if (!isCorrectDirection(focusedPos, potentialPos)) {
-        return;
-      }
-
-      const distance = distanceSquared(focusedPos, potentialPos);
-      if (shortestDistance === null || distance < shortestDistance) {
-        closestId = potentialNode.id;
-        shortestDistance = distance;
-      }
-    });
-
-    return closestId ?? next();
+export const spatialMovement: NavigationHandler = (node, action, next) => {
+  if (action.kind !== "move" || action.direction === "back") {
+    return next();
   }
-);
+
+  const focusedNode = getItemNode(node.tree, node.tree.focusedId);
+  const focusedPos = PositionProvider.extract(focusedNode);
+  if (focusedPos == null) {
+    return next();
+  }
+
+  const isCorrectDirection = directionFilters[action.direction];
+
+  let closestId: NodeId | null = null;
+  let shortestDistance: number | null = null;
+
+  traverseNodes(node.tree, node.id, (potentialNode) => {
+    // TODO use focus handler?
+    if (!potentialNode.focusable) {
+      return;
+    }
+
+    const potentialPos = PositionProvider.extract(potentialNode);
+    if (potentialPos == null) {
+      return;
+    }
+
+    if (!isCorrectDirection(focusedPos, potentialPos)) {
+      return;
+    }
+
+    const distance = distanceSquared(focusedPos, potentialPos);
+    if (shortestDistance === null || distance < shortestDistance) {
+      closestId = potentialNode.id;
+      shortestDistance = distance;
+    }
+  });
+
+  return closestId ?? next();
+};
 
 /**
  * @category Handler
  */
-export const spatialHandler = chainHandlers(
+export const spatialHandler: HandlerChain = chainHandlers(
   focusHandler(),
   spatialMovement,
   parentHandler

@@ -17,19 +17,10 @@ export type NavigationHandler = (
   next: HandlerNext
 ) => NodeId | null;
 
-export type ChainableHandler = NavigationHandler & {
-  prepend(another: NavigationHandler): ChainableHandler;
-  append(another: NavigationHandler): ChainableHandler;
+export type HandlerChain = NavigationHandler & {
+  prepend(another: NavigationHandler): HandlerChain;
+  append(another: NavigationHandler): HandlerChain;
 };
-
-export function makeHandler(handler: NavigationHandler): ChainableHandler {
-  const chainable = handler.bind({}) as ChainableHandler;
-
-  chainable.prepend = (another) => chain2Handlers(another, handler);
-  chainable.append = (another) => chain2Handlers(handler, another);
-
-  return chainable;
-}
 
 export function runHandler(
   tree: NavigationTree,
@@ -51,42 +42,51 @@ export function runHandler(
 /**
  * Take handlers and combines them into one so the next handler function
  * automatically passes action to the next handler
-
- * @param handlers handlers that will be called in order first to last 
+ *
+ * implementation inspired by:  https://deno.land/x/oak@v16.1.0/middleware.ts?source=#L60
+ *
+ * @param handlers handlers that will be called in order first to last
  * @returns handler that will pipe navigation actions through via the next function
  */
 export function chainHandlers(
   ...handlers: NavigationHandler[]
-): ChainableHandler {
-  return wrapHandler(
-    handlers.reduce((chained, another) => chain2Handlers(chained, another))
-  );
-}
+): HandlerChain {
+  const stack = handlers.slice();
 
-// TODO check if this technique can be used: https://deno.land/x/oak@v16.1.0/middleware.ts?source=#L60
-function chain2Handlers(
-  handler1: NavigationHandler,
-  handler2: NavigationHandler
-): ChainableHandler {
-  return makeHandler((node, action, next) => {
-    const chainedNext = (id?: NodeId, newAction?: NavigationAction) => {
-      if (id != null) {
-        return runHandler(node.tree, id, newAction ?? action);
+  const composedHandler = (
+    node: NavigationNode,
+    action: NavigationAction,
+    next: HandlerNext
+  ): NodeId | null => {
+    let index = -1;
+    function dispatch(i: number): NodeId | null {
+      if (i <= index) {
+        throw new Error("next() called multiple times.");
+      }
+      index = i;
+
+      const fn = stack[i];
+      if (fn == null) {
+        return next();
       }
 
-      return handler2(node, action, next);
-    };
+      return fn(node, action, (id?: NodeId, newAction?: NavigationAction) => {
+        if (id != null) {
+          return next(id, newAction ?? action);
+        }
 
-    return handler1(node, action, chainedNext);
-  });
-}
+        return dispatch(i + 1);
+      });
+    }
 
-function wrapHandler(
-  handler: NavigationHandler | ChainableHandler
-): ChainableHandler {
-  if ("append" in handler) {
-    return handler;
-  }
+    return dispatch(0);
+  };
 
-  return makeHandler(handler);
+  composedHandler.append = (handler: NavigationHandler) =>
+    chainHandlers(...stack, handler);
+
+  composedHandler.prepend = (handler: NavigationHandler) =>
+    chainHandlers(handler, ...stack);
+
+  return composedHandler;
 }

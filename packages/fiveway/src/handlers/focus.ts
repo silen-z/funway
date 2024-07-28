@@ -1,6 +1,6 @@
 import { childrenIterator } from "../children.js";
 import type { NavigationDirection } from "../navigation.js";
-import { type ChainableHandler, makeHandler } from "../handler.js";
+import { type NavigationHandler } from "../handler.js";
 
 export type FocusDirection = "front" | "back" | undefined;
 
@@ -10,13 +10,12 @@ export type FocusHandlerConfig = {
 
 /**
  * @category Handler
- * @param config 
- * @returns 
+ * @param config
+ * @returns
  */
-export const focusHandler = (
-  config: FocusHandlerConfig = {}
-): ChainableHandler =>
-  makeHandler((node, action, next) => {
+export const focusHandler =
+  (config: FocusHandlerConfig = {}): NavigationHandler =>
+  (node, action, next) => {
     if (action.kind !== "focus") {
       return next();
     }
@@ -56,4 +55,4 @@ export const focusHandler = (
     }
 
     return null;
-  });
+  };
