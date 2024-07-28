@@ -3,6 +3,9 @@ import { parentHandler } from "./default.js";
 import { type ChainableHandler, makeHandler } from "../handler.js";
 import { focusHandler } from "./focus.js";
 
+/**
+ * @category Handler
+ */
 export const verticalMovement: ChainableHandler = makeHandler(
   (node, action, next, context) => {
     if (node.type !== "container") {
@@ -62,12 +65,18 @@ export const verticalMovement: ChainableHandler = makeHandler(
   }
 );
 
+/**
+ * @category Handler
+ */
 export const verticalHandler = focusHandler({
   direction: (dir) => (dir === "up" ? "back" : undefined),
 })
   .append(verticalMovement)
   .append(parentHandler);
 
+/**
+ * @category Handler
+ */
 export const horizontalMovement = makeHandler((node, action, next, context) => {
   if (node.type !== "container") {
     throw Error("horizontalList handler can only be used on containers");
@@ -126,6 +135,9 @@ export const horizontalMovement = makeHandler((node, action, next, context) => {
   return next();
 });
 
+/**
+ * @category Handler
+ */
 export const horizontalHandler = focusHandler({
   direction: (dir) => (dir === "left" ? "back" : undefined),
 })

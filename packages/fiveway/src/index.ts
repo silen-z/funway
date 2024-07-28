@@ -24,7 +24,6 @@ export {
 export {
   type NavigationHandler,
   type ChainableHandler,
-  type NavigationHandlerContext,
   makeHandler,
   chainHandlers,
   runHandler,

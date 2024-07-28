@@ -1,10 +1,10 @@
 import type { NavigationNode } from "./node.js";
 
-export interface Provider<T> {
+export type Provider<T> = {
   provide(node: NavigationNode, value: T | null): void;
   provide(node: NavigationNode, fn: () => T | null): void;
   extract: (node: NavigationNode) => T | null;
-}
+};
 
 export function createProvider<T>(name?: string): Provider<T> {
   const key = Symbol(name);

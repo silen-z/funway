@@ -8,6 +8,11 @@ export type FocusHandlerConfig = {
   direction?: (d: NavigationDirection | "initial" | null) => FocusDirection;
 };
 
+/**
+ * @category Handler
+ * @param config 
+ * @returns 
+ */
 export const focusHandler = (
   config: FocusHandlerConfig = {}
 ): ChainableHandler =>

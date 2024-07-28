@@ -12,6 +12,9 @@ import { parentHandler } from "./default.js";
 
 export const PositionProvider: Provider<DOMRect> = createProvider("position");
 
+/**
+ * @category Handler
+ */
 export const spatialMovement: ChainableHandler = makeHandler(
   (node, action, next) => {
     if (action.kind !== "move" || action.direction === "back") {
@@ -55,6 +58,9 @@ export const spatialMovement: ChainableHandler = makeHandler(
   }
 );
 
+/**
+ * @category Handler
+ */
 export const spatialHandler = chainHandlers(
   focusHandler(),
   spatialMovement,

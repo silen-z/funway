@@ -48,6 +48,9 @@ const distanceFns: Record<
   },
 };
 
+/**
+ * @category Handler
+ */
 export const gridMovement: ChainableHandler = makeHandler(
   (node, action, next, context) => {
     if (action.kind !== "move" || action.direction === "back") {
@@ -95,6 +98,9 @@ export const gridMovement: ChainableHandler = makeHandler(
   }
 );
 
+/**
+ * @category Handler
+ */
 export const gridHandler = focusHandler()
   .append(gridMovement)
   .append(parentHandler);

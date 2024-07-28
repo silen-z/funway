@@ -1,0 +1,14 @@
+{
+  "entryPointStrategy": "packages",
+  "entryPoints": [
+    "packages/fiveway",
+    "packages/fiveway-react",
+    "packages/fiveway-solid"
+  ],
+
+  "navigation": {
+    "includeCategories": true
+  },
+
+  "out": "docs"
+}

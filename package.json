@@ -8,6 +8,7 @@
     "build": "pnpm --filter \"@fiveway/core\" --filter \"@fiveway/react\" --filter \"@fiveway/solid\" run build"
   },
   "devDependencies": {
+    "typedoc": "^0.26.5",
     "vitest": "^1.6.0"
   }
 }
