@@ -1,4 +1,4 @@
-import type { NodeId } from "../id.js";
+import { type NodeId, directChildId } from "../id.js";
 import type { ContainerNode } from "../node.js";
 import {
   type NavigationHandler,
@@ -6,7 +6,8 @@ import {
   chainHandlers,
 } from "../handler.js";
 import { parentHandler } from "./default.js";
-import { focusHandler } from "./focus.js";
+import { type FocusDirection, focusHandler } from "./focus.js";
+import type { NavigationDirection } from "../navigation.js";
 
 /**
  * @category Handler
@@ -19,7 +20,10 @@ export const verticalMovement: NavigationHandler = (node, action, next) => {
   if (action.kind === "move") {
     switch (action.direction) {
       case "up": {
-        let childId = node.tree.focusedId;
+        let childId = directChildId(node.id, node.tree.focusedId);
+        if (childId === null) {
+          return next();
+        }
 
         for (;;) {
           const prevChildId = previousChild(node, childId);
@@ -41,7 +45,10 @@ export const verticalMovement: NavigationHandler = (node, action, next) => {
         }
       }
       case "down": {
-        let childId = node.tree.focusedId;
+        let childId = directChildId(node.id, node.tree.focusedId);
+        if (childId === null) {
+          return next();
+        }
 
         for (;;) {
           const nextChildId = nextChild(node, childId);
@@ -68,13 +75,23 @@ export const verticalMovement: NavigationHandler = (node, action, next) => {
   return next();
 };
 
+function verticalFocusDirection(
+  dir: NavigationDirection | "initial" | null
+): FocusDirection {
+  if (dir === "up") {
+    return "back";
+  }
+
+  if (dir === "down") {
+    return "front";
+  }
+}
+
 /**
  * @category Handler
  */
 export const verticalHandler: HandlerChain = chainHandlers(
-  focusHandler({
-    direction: (dir) => (dir === "up" ? "back" : undefined),
-  }),
+  focusHandler({ direction: verticalFocusDirection }),
   verticalMovement,
   parentHandler
 );
@@ -90,7 +107,10 @@ export const horizontalMovement: NavigationHandler = (node, action, next) => {
   if (action.kind === "move") {
     switch (action.direction) {
       case "left": {
-        let childId = node.tree.focusedId;
+        let childId = directChildId(node.id, node.tree.focusedId);
+        if (childId === null) {
+          return next();
+        }
 
         for (;;) {
           const prevChildId = previousChild(node, childId);
@@ -113,8 +133,10 @@ export const horizontalMovement: NavigationHandler = (node, action, next) => {
       }
 
       case "right": {
-        let childId = node.tree.focusedId;
-
+        let childId = directChildId(node.id, node.tree.focusedId);
+        if (childId === null) {
+          return next();
+        }
         for (;;) {
           const nextChildId = nextChild(node, childId);
           if (nextChildId === null) {
@@ -140,13 +162,23 @@ export const horizontalMovement: NavigationHandler = (node, action, next) => {
   return next();
 };
 
+function horizontalFocusDirection(
+  dir: NavigationDirection | "initial" | null
+): FocusDirection {
+  if (dir === "left") {
+    return "back";
+  }
+
+  if (dir === "right") {
+    return "front";
+  }
+}
+
 /**
  * @category Handler
  */
 export const horizontalHandler: HandlerChain = chainHandlers(
-  focusHandler({
-    direction: (dir) => (dir === "left" ? "back" : undefined),
-  }),
+  focusHandler({ direction: horizontalFocusDirection }),
   horizontalMovement,
   parentHandler
 );

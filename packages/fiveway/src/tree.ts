@@ -86,7 +86,7 @@ export function connectNode(tree: NavigationTree, node: NavigationNode) {
       direction: "initial",
     });
     if (nodeToFocus) {
-      focusNode(tree, nodeToFocus);
+      focusNode(tree, nodeToFocus, { runHandler: false });
     }
   }
 }
@@ -111,6 +111,10 @@ export function removeNode(tree: NavigationTree, nodeId: NodeId) {
     let targetNode = null;
 
     idsToRoot(node.parent!, (id) => {
+      if (id === node.id) {
+        return true;
+      }
+
       targetNode = runHandler(tree, id, {
         kind: "focus",
         direction: "initial",
@@ -296,30 +300,6 @@ export function getItemNode(tree: NavigationTree, nodeId: NodeId): ItemNode {
   }
 
   return node;
-}
-
-export function getLeaf(
-  tree: NavigationTree,
-  nodeId: NodeId
-): NavigationNode | null {
-  const node = getNode(tree, nodeId);
-  if (node.type === "item") {
-    return node;
-  }
-
-  for (const child of node.children) {
-    if (!child.active) {
-      continue;
-    }
-
-    const leaf = getLeaf(tree, child?.id);
-
-    if (leaf !== null) {
-      return leaf;
-    }
-  }
-
-  return null;
 }
 
 export function isFocused(tree: NavigationTree, nodeId: NodeId): boolean {

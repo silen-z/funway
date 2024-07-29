@@ -41,13 +41,13 @@ export type NodeConfig = {
   handler?: NavigationHandler;
 };
 
-export type ItemNodeConfig = NodeConfig & {
+export type ItemConfig = NodeConfig & {
   onSelect?: () => void;
 };
 
 export function createItemNode(
   tree: NavigationTree,
-  options: ItemNodeConfig
+  options: ItemConfig
 ): ItemNode {
   const globalId = createGlobalId(options.parent, options.id);
 
@@ -66,7 +66,7 @@ export function createItemNode(
   };
 }
 
-export type ContainerNodeConfig = NodeConfig & {
+export type ContainerConfig = NodeConfig & {
   initial?: NodeId;
   captureFocus?: boolean;
   rememberChildren?: boolean;
@@ -74,7 +74,7 @@ export type ContainerNodeConfig = NodeConfig & {
 
 export function createContainerNode(
   tree: NavigationTree,
-  options: ContainerNodeConfig
+  options: ContainerConfig
 ): ContainerNode {
   const globalId = createGlobalId(options.parent, options.id);
 
@@ -98,15 +98,15 @@ export function createContainerNode(
 
 export function updateNode(
   node: ItemNode,
-  config: Omit<ItemNodeConfig, "id" | "parent">
+  config: Omit<ItemConfig, "id" | "parent">
 ): void;
 export function updateNode(
   node: ContainerNode,
-  config: Omit<ContainerNodeConfig, "id" | "parent">
+  config: Omit<ContainerConfig, "id" | "parent">
 ): void;
 export function updateNode<N extends NavigationNode>(
   node: N,
-  options: Omit<ItemNodeConfig & ContainerNodeConfig, "id" | "parent">
+  options: Omit<ItemConfig & ContainerConfig, "id" | "parent">
 ) {
   if (options.handler != null) {
     node.handler = options.handler;

@@ -1,5 +1,7 @@
+import { useState } from "react";
 import {
   GridPositionProvider,
+  containerHandler,
   gridHandler,
   horizontalHandler,
   verticalHandler,
@@ -60,6 +62,13 @@ export function Showcase() {
               return <SpatialShowcase />;
             }}
           </NavigationContainer>
+
+          <NavigationContainer id="conditional">
+            {(node) => {
+              node.provide(GridPositionProvider, { row: 2, col: 2 });
+              return <ConditionalShowcase />;
+            }}
+          </NavigationContainer>
         </nav.Context>
       </div>
     </div>
@@ -70,6 +79,7 @@ function ListShowcase(props: { type: "vertical" | "horizontal" }) {
   const nav = useNavigationContainer({
     id: "list",
     handler: props.type === "vertical" ? verticalHandler : horizontalHandler,
+    initial: "item2",
   });
 
   return (
@@ -99,6 +109,67 @@ function ListShowcase(props: { type: "vertical" | "horizontal" }) {
           </NavigationItem>
         </nav.Context>
       </ul>
+    </div>
+  );
+}
+
+function ConditionalShowcase() {
+  const nav = useNavigationContainer({
+    id: "section",
+    handler: horizontalHandler,
+  });
+
+  const [isOn, set] = useState(false);
+
+  return (
+    <div className={css.section} data-is-focused={nav.isFocused()}>
+      <div style={{ display: "flex" }}>
+        <nav.Context>
+          <NavigationItem
+            id="toggle"
+            onSelect={() => {
+              set((on) => !on);
+              if (!isOn) {
+                nav.focus("content", { runHandler: false });
+              }
+            }}
+          >
+            {(node) => (
+              <button className={css.item} data-is-focused={node.isFocused()}>
+                {isOn ? "hide" : "show"}
+              </button>
+            )}
+          </NavigationItem>
+
+          <NavigationContainer
+            id="content"
+            handler={containerHandler.prepend((node, action, next) => {
+              if (action.kind === "focus" && isOn) {
+                return next() ?? node.id;
+              }
+              return next();
+            })}
+          >
+            {isOn && (
+              <NavigationItem
+                id="parking"
+                onSelect={() => {
+                  set(false);
+                }}
+              >
+                {(node) => (
+                  <button
+                    className={css.item}
+                    data-is-focused={node.isFocused()}
+                  >
+                    remove
+                  </button>
+                )}
+              </NavigationItem>
+            )}
+          </NavigationContainer>
+        </nav.Context>
+      </div>
     </div>
   );
 }

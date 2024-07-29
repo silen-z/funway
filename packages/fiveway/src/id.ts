@@ -35,7 +35,10 @@ export function convergingPaths(
 }
 
 export function idsToRoot(nodeId: NodeId, cb: (id: NodeId) => boolean | void) {
-  cb(nodeId);
+  const cont = cb(nodeId);
+  if (cont === false) {
+    return;
+  }
 
   for (;;) {
     const idx = nodeId.lastIndexOf("/");

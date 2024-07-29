@@ -13,9 +13,10 @@ export type FocusHandlerConfig = {
  * @param config
  * @returns
  */
-export const focusHandler =
-  (config: FocusHandlerConfig = {}): NavigationHandler =>
-  (node, action, next) => {
+export function focusHandler(
+  config: FocusHandlerConfig = {}
+): NavigationHandler {
+  return (node, action, next) => {
     if (action.kind !== "focus") {
       return next();
     }
@@ -56,3 +57,4 @@ export const focusHandler =
 
     return null;
   };
+}
