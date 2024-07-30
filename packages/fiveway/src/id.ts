@@ -23,7 +23,7 @@ export function convergingPaths(
 ) {
   if (node1 !== node2) {
     idsToRoot(node2, (id) => {
-      if (node1.startsWith(id)) {
+      if (isParent(id, node1)) {
         return false;
       }
 
@@ -54,13 +54,14 @@ export function idsToRoot(nodeId: NodeId, cb: (id: NodeId) => boolean | void) {
 }
 
 export function directChildId(parentId: NodeId, descendantId: NodeId) {
-  if (!descendantId.startsWith(parentId + "/")) {
+  if (!isParent(parentId, descendantId)) {
     return null;
   }
 
-  const firstSlash = descendantId.indexOf("/", parentId.length + 1);
+  const slash = descendantId.indexOf("/", parentId.length + 1);
+  if (slash === -1) {
+    return descendantId;
+  }
 
-  return firstSlash !== -1
-    ? descendantId.substring(0, firstSlash)
-    : descendantId;
+  return descendantId.substring(0, slash);
 }

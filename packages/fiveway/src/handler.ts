@@ -3,7 +3,7 @@ import type { NavigationAction } from "./navigation.js";
 import type { NavigationNode } from "./node.js";
 import { getNode, type NavigationTree } from "./tree.js";
 
-type HandlerNext = {
+export type HandlerNext = {
   (): NodeId | null;
   (id: NodeId, action?: NavigationAction): NodeId | null;
 };

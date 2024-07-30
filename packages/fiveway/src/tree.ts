@@ -204,7 +204,7 @@ export function focusNode(
     let allowFocus = true;
 
     idsToRoot(tree.focusedId, (id) => {
-      if (targetId.startsWith(id)) {
+      if (isParent(id, targetId)) {
         return false;
       }
 

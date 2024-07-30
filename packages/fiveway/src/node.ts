@@ -4,7 +4,7 @@ import type { NavigationHandler } from "./handler.js";
 import { containerHandler, itemHandler } from "./handlers/default.js";
 import { binarySearch } from "./array.js";
 
-type Node = {
+export type NodeBase = {
   tree: NavigationTree;
   id: NodeId;
   connected: boolean;
@@ -18,7 +18,7 @@ type Node = {
 
 export type NodeChild = { id: NodeId; order: number | null; active: boolean };
 
-export type ContainerNode = Node & {
+export type ContainerNode = NodeBase & {
   type: "container";
   initial: NodeId | null;
   children: NodeChild[];
@@ -26,7 +26,7 @@ export type ContainerNode = Node & {
   rememberChildren: boolean;
 };
 
-export type ItemNode = Node & {
+export type ItemNode = NodeBase & {
   type: "item";
   onSelect: (() => void) | null;
 };
