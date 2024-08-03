@@ -14,7 +14,7 @@ export type NavigationTree = {
   root: ContainerNode;
   nodes: Map<NodeId, NavigationNode>;
   focusedId: NodeId;
-  listeners: Map<NodeId, Set<Listener>>;
+  listeners: Map<NodeId, Listener[]>;
 };
 
 export function createNavigationTree(): NavigationTree {
@@ -239,17 +239,22 @@ export function registerFocusListener(
   listener: Listener
 ) {
   if (!tree.listeners.has(listener.node)) {
-    tree.listeners.set(listener.node, new Set());
+    tree.listeners.set(listener.node, []);
   }
 
   const nodeListeners = tree.listeners.get(listener.node)!;
-
-  nodeListeners.add(listener);
+  nodeListeners.push(listener);
 
   return () => {
-    nodeListeners.delete(listener);
-    if (nodeListeners.size === 0) {
+    const index = nodeListeners.findIndex((l) => l === listener);
+    if (index === -1) {
+      return;
+    }
+
+    if (nodeListeners.length === 1) {
       tree.listeners.delete(listener.node);
+    } else {
+      swapRemove(nodeListeners, index);
     }
   };
 }
