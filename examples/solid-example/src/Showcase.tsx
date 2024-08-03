@@ -1,4 +1,4 @@
-import type { JSX } from "solid-js";
+import { createSignal, type JSX } from "solid-js";
 import {
   GridPositionProvider,
   gridHandler,
@@ -90,6 +90,7 @@ function ListShowcase(props: { type: "vertical" | "horizontal" }) {
 }
 
 function SpatialShowcase() {
+  const [isFocusable, setFocusable] = createSignal(true);
   const nav = createNavigationContainer({
     id: "spatial",
     handler: spatialHandler,
@@ -102,25 +103,63 @@ function SpatialShowcase() {
       style={{ position: "relative", "min-height": "250px" }}
     >
       <nav.Context>
+        <NavigationItem id="toggle" onSelect={() => setFocusable((on) => !on)}>
+          {(node) => (
+            <li
+              class={css.item}
+              ref={node.registerElement}
+              data-is-focused={node.isFocused()}
+            >
+              toggle spatial
+            </li>
+          )}
+        </NavigationItem>
         <SpatialItem
           navId="item1"
-          style={{ position: "absolute", left: "50px", top: "150px" }}
+          focusable={isFocusable()}
+          style={{
+            position: "absolute",
+            left: "50px",
+            top: "150px",
+            color: isFocusable() ? "#000" : "#ccc",
+          }}
         />
         <SpatialItem
           navId="item2"
-          style={{ position: "absolute", left: "150px", top: "50px" }}
+          focusable={isFocusable()}
+          style={{
+            position: "absolute",
+            left: "150px",
+            top: "50px",
+            color: isFocusable() ? "#000" : "#ccc",
+          }}
         />
         <SpatialItem
           navId="item3"
-          style={{ position: "absolute", left: "250px", top: "200px" }}
+          focusable={isFocusable()}
+          style={{
+            position: "absolute",
+            left: "250px",
+            top: "200px",
+            color: isFocusable() ? "#000" : "#ccc",
+          }}
         />
       </nav.Context>
     </div>
   );
 }
 
-function SpatialItem(props: { navId: string; style: JSX.CSSProperties }) {
-  const nav = createNavigationItem({ id: props.navId });
+function SpatialItem(props: {
+  navId: string;
+  focusable: boolean;
+  style: JSX.CSSProperties;
+}) {
+  const nav = createNavigationItem({
+    id: props.navId,
+    get focusable() {
+      return props.focusable;
+    },
+  });
 
   return (
     <div

@@ -83,16 +83,13 @@ export function useNavigationContainer(
   };
 }
 
-type ContextlessContainerHandle = Omit<ContainerHandle, "Context">;
-
-type NavigationContainerProps = ContainerOptions & {
-  children: ReactNode | ((props: ContextlessContainerHandle) => ReactNode);
+type ContainerProps = ContainerOptions & {
+  children?:
+    | ReactNode
+    | ((props: Omit<ContainerHandle, "Context">) => ReactNode);
 };
 
-export function NavigationContainer({
-  children,
-  ...props
-}: NavigationContainerProps) {
+export function NavigationContainer({ children, ...props }: ContainerProps) {
   const { Context, ...node } = useNavigationContainer(props);
 
   return (

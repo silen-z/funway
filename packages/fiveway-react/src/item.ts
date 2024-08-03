@@ -20,11 +20,11 @@ export type ItemHandle = NodeHandle & {
   select: (nodeId?: NodeId, focus?: boolean) => void;
 };
 
-export type NavigationItemOptions = NodeOptions & {
+export type ItemOptions = NodeOptions & {
   onSelect?: () => void;
 };
 
-export function useNavigationItem(options: NavigationItemOptions): ItemHandle {
+export function useNavigationItem(options: ItemOptions): ItemHandle {
   const { tree, parentNode } = useNavigationContext();
   const parentId = options.parent ?? parentNode;
 
@@ -67,11 +67,11 @@ export function useNavigationItem(options: NavigationItemOptions): ItemHandle {
   };
 }
 
-type NavigationItemProps = NavigationItemOptions & {
+type ItemProps = ItemOptions & {
   children: ReactNode | ((handle: ItemHandle) => ReactNode);
 };
 
-export function NavigationItem({ children, ...props }: NavigationItemProps) {
+export function NavigationItem({ children, ...props }: ItemProps) {
   const node = useNavigationItem(props);
 
   return typeof children === "function" ? children(node) : children;
