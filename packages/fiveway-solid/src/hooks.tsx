@@ -7,7 +7,7 @@ import {
   scopedId,
   focusNode,
   isFocused,
-  registerFocusListener,
+  registerListener,
 } from "@fiveway/core";
 import { useNavigationContext } from "./context.js";
 
@@ -20,7 +20,7 @@ export function useIsFocused(nodeId: NodeId): Accessor<boolean> {
   const [isNodeFocused, setFocused] = createSignal(isFocused(tree, globalId));
 
   createEffect(() => {
-    const cleanup = registerFocusListener(tree, {
+    const cleanup = registerListener(tree, {
       type: "focuschange",
       node: globalId,
       fn: () => setFocused(isFocused(tree, globalId)),
@@ -42,7 +42,7 @@ export function useOnFocus(
   const globalId = scopedId(parentNode, nodeId);
 
   createEffect(() => {
-    const cleanup = registerFocusListener(tree, {
+    const cleanup = registerListener(tree, {
       type: "focuschange",
       node: globalId,
       fn: () => {
@@ -65,7 +65,7 @@ export function useFocusedId(scope: NodeId) {
   );
 
   createEffect(() => {
-    const cleanup = registerFocusListener(tree, {
+    const cleanup = registerListener(tree, {
       type: "focuschange",
       node: globalId,
       fn: () => {

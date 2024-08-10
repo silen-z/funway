@@ -3,7 +3,7 @@ import {
   type NavigationAction,
   type NavigationTree,
   handleAction,
-  registerFocusListener,
+  registerListener,
   getNode,
 } from "@fiveway/core";
 import { defaultEventMapping } from "@fiveway/core/dom";
@@ -47,7 +47,7 @@ export function NavigationProvider({
       }
     };
 
-    return registerFocusListener(tree, {
+    return registerListener(tree, {
       type: "focuschange",
       node: "#",
       fn: handler,
@@ -55,7 +55,7 @@ export function NavigationProvider({
   }, [tree]);
 
   return (
-    <NavigationContext.Provider value={{ tree, parentNode: tree.root.id }}>
+    <NavigationContext.Provider value={{ tree, parentNode: "#" }}>
       {children}
     </NavigationContext.Provider>
   );

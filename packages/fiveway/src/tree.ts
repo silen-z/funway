@@ -1,36 +1,27 @@
-import { type NodeId, convergingPaths, idsToRoot, isParent } from "./id.js";
+import { type NodeId, convergingPaths, idsToRoot, isParent, ROOT } from "./id.js";
 import type { NavigationNode, ContainerNode, ItemNode } from "./node.js";
-import { binarySearch, swapRemove } from "./array.js";
+import { type ListenerTree, callListeners } from "./events.js";
 import { runHandler } from "./handler.js";
 import { rootHandler } from "./handlers/default.js";
-
-export type Listener = {
-  node: NodeId;
-  type: "focuschange";
-  fn: () => void;
-};
+import { binarySearch, swapRemove } from "./array.js";
 
 export type NavigationTree = {
-  root: ContainerNode;
   nodes: Map<NodeId, NavigationNode>;
   focusedId: NodeId;
-  listeners: Map<NodeId, Listener[]>;
+  listeners: ListenerTree;
 };
 
 export function createNavigationTree(): NavigationTree {
-  const rootId = "#";
-
-  const tree = {
-    root: {} as ContainerNode,
-    focusedId: rootId,
+  let tree = {
+    focusedId: ROOT,
     nodes: new Map(),
     listeners: new Map(),
   };
 
-  tree.root = {
+  tree.nodes.set(ROOT, {
     type: "container",
     tree,
-    id: rootId,
+    id: ROOT,
     connected: true,
     parent: null,
     initial: null,
@@ -42,8 +33,7 @@ export function createNavigationTree(): NavigationTree {
     children: [],
     captureFocus: true,
     rememberChildren: true,
-  };
-  tree.nodes.set(rootId, tree.root);
+  });
 
   return tree;
 }
@@ -92,7 +82,7 @@ export function connectNode(tree: NavigationTree, node: NavigationNode) {
 }
 
 export function removeNode(tree: NavigationTree, nodeId: NodeId) {
-  if (nodeId === tree.root.id) {
+  if (nodeId === ROOT) {
     throw new Error("cannot remove root node");
   }
 
@@ -124,7 +114,7 @@ export function removeNode(tree: NavigationTree, nodeId: NodeId) {
       }
     });
 
-    focusNode(tree, targetNode ?? tree.root.id, {
+    focusNode(tree, targetNode ?? ROOT, {
       respectCapture: false,
       runHandler: false,
     });
@@ -234,31 +224,6 @@ export function focusNode(
   return true;
 }
 
-export function registerFocusListener(
-  tree: NavigationTree,
-  listener: Listener
-) {
-  if (!tree.listeners.has(listener.node)) {
-    tree.listeners.set(listener.node, []);
-  }
-
-  const nodeListeners = tree.listeners.get(listener.node)!;
-  nodeListeners.push(listener);
-
-  return () => {
-    const index = nodeListeners.findIndex((l) => l === listener);
-    if (index === -1) {
-      return;
-    }
-
-    if (nodeListeners.length === 1) {
-      tree.listeners.delete(listener.node);
-    } else {
-      swapRemove(nodeListeners, index);
-    }
-  };
-}
-
 export function selectNode(
   tree: NavigationTree,
   nodeId: NodeId,
@@ -334,19 +299,6 @@ export function traverseNodes(
       if (child.active) {
         traverseNodes(tree, child.id, fn, depth - 1);
       }
-    }
-  }
-}
-
-function callListeners(tree: NavigationTree, nodeId: NodeId, event: string) {
-  const listenerNode = tree.listeners.get(nodeId);
-  if (listenerNode == null) {
-    return;
-  }
-
-  for (const listener of listenerNode) {
-    if (listener.type === event) {
-      listener.fn();
     }
   }
 }

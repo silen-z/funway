@@ -1,5 +1,7 @@
 export type NodeId = string;
 
+export const ROOT = "#";
+
 export function createGlobalId(head: NodeId, ...tail: NodeId[]) {
   return [head, ...tail].join("/");
 }

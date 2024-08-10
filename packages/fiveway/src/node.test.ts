@@ -1,34 +1,39 @@
 import { describe, expect, test } from "vitest";
 import { connectNode, createNavigationTree } from "./tree.js";
-import { createItemNode } from "./node.js";
+import { createContainerNode, createItemNode } from "./node.js";
 import { childrenIterator } from "./children.js";
 
 describe("node", () => {
   const tree = createNavigationTree();
 
+  const container = createContainerNode(tree, {
+    id: "container",
+    parent: "#",
+    initial: "node2",
+  });
+  connectNode(tree, container);
+
   const node1 = createItemNode(tree, {
     id: "node1",
-    parent: tree.root.id,
+    parent: container.id,
   });
   connectNode(tree, node1);
 
   const node2 = createItemNode(tree, {
     id: "node2",
-    parent: tree.root.id,
+    parent: container.id,
   });
   connectNode(tree, node2);
 
   const node3 = createItemNode(tree, {
     id: "node3",
-    parent: tree.root.id,
+    parent: container.id,
   });
   connectNode(tree, node3);
 
-  tree.root.initial = node2.id;
-
   test("childrenIterator: default", () => {
     const iterated: string[] = [];
-    for (const child of childrenIterator(tree.root)) {
+    for (const child of childrenIterator(container)) {
       iterated.push(child.id);
     }
 
@@ -37,7 +42,7 @@ describe("node", () => {
 
   test("childrenIterator: front", () => {
     const iterated: string[] = [];
-    for (const child of childrenIterator(tree.root, "front")) {
+    for (const child of childrenIterator(container, "front")) {
       iterated.push(child.id);
     }
 
@@ -46,7 +51,7 @@ describe("node", () => {
 
   test("childrenIterator: back", () => {
     const iterated: string[] = [];
-    for (const child of childrenIterator(tree.root, "back")) {
+    for (const child of childrenIterator(container, "back")) {
       iterated.push(child.id);
     }
 

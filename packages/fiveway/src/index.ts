@@ -1,6 +1,7 @@
 export * from "./id.js";
 export * from "./node.js";
 export * from "./tree.js";
+export * from "./events.js";
 
 export * from "./handler.js";
 export * from "./handlers/default.js";

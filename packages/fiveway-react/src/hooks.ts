@@ -10,7 +10,7 @@ import {
   type FocusOptions,
   selectNode,
   isFocused,
-  registerFocusListener,
+  registerListener,
   focusNode,
   scopedId,
   createProvider,
@@ -26,7 +26,7 @@ export function useIsFocused(nodeId: NodeId) {
 
   const subscribe = useCallback(
     (callback: () => void) =>
-      registerFocusListener(tree, {
+      registerListener(tree, {
         type: "focuschange",
         node: globalId,
         fn: callback,
@@ -48,7 +48,7 @@ export function useOnFocus(
   handlerRef.current = handler;
 
   useEffect(() => {
-    return registerFocusListener(tree, {
+    return registerListener(tree, {
       type: "focuschange",
       node: globalId,
       fn: () => {
@@ -65,7 +65,7 @@ export function useFocusedId(scope: NodeId) {
 
   const subscribe = useCallback(
     (callback: () => void) =>
-      registerFocusListener(tree, {
+      registerListener(tree, {
         type: "focuschange",
         node: globalId,
         fn: callback,
@@ -129,7 +129,7 @@ export function useLazyIsFocused(tree: NavigationTree, nodeId: NodeId) {
 
   const subscribe = useCallback(
     (callback: () => void) =>
-      registerFocusListener(tree, {
+      registerListener(tree, {
         type: "focuschange",
         node: nodeId,
         fn: callback,

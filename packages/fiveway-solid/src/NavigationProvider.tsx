@@ -3,7 +3,7 @@ import {
   type NavigationAction,
   type NavigationTree,
   handleAction,
-  registerFocusListener,
+  registerListener,
   getNode,
 } from "@fiveway/core";
 import { defaultEventMapping } from "@fiveway/core/dom";
@@ -23,7 +23,7 @@ export function NavigationProvider(props: NavigationProviderProps) {
 
   const [focusedId, setFocusedId] = createSignal(tree.focusedId);
 
-  const cleanupFocusListener = registerFocusListener(tree, {
+  const cleanupFocusListener = registerListener(tree, {
     type: "focuschange",
     node: "#",
     fn: () => {
@@ -59,9 +59,7 @@ export function NavigationProvider(props: NavigationProviderProps) {
   });
 
   return (
-    <NavigationContext.Provider
-      value={{ tree, parentNode: tree.root.id, focusedId }}
-    >
+    <NavigationContext.Provider value={{ tree, parentNode: "#", focusedId }}>
       {props.children}
     </NavigationContext.Provider>
   );
