@@ -40,7 +40,6 @@ export function createNavigationItem(options: ItemOptions): ItemHandle {
     parent: options.parent ?? parentNode,
     order: options.order,
     onSelect: options.onSelect,
-    focusable: options.focusable,
     handler: options.handler,
   });
 

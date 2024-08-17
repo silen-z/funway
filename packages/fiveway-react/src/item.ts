@@ -34,7 +34,6 @@ export function useNavigationItem(options: ItemOptions): ItemHandle {
       id: options.id,
       parent: parentId,
       handler: options.handler,
-      focusable: options.focusable,
       onSelect: options.onSelect,
       order: options.order,
     });

@@ -5,6 +5,7 @@ import {
   chainHandlers,
 } from "../handler.js";
 import { focusHandler } from "./focus.js";
+import type { NavigationAction } from "../navigation.js";
 
 /**
  * @category Handler

@@ -5,6 +5,7 @@ import {
   horizontalHandler,
   verticalHandler,
   spatialHandler,
+  itemHandler,
 } from "@fiveway/core";
 import {
   NavigationContainer,
@@ -156,9 +157,9 @@ function SpatialItem(props: {
 }) {
   const nav = createNavigationItem({
     id: props.navId,
-    get focusable() {
-      return props.focusable;
-    },
+    handler: itemHandler.prepend((n, a, next) =>
+      props.focusable ? next() : null
+    ),
   });
 
   return (

@@ -32,7 +32,6 @@ export function useNavigationContainer(
       parent,
       initial: options.initial,
       handler: options.handler,
-      focusable: options.focusable,
       order: options.order,
     });
   } else {

@@ -27,7 +27,6 @@ export function createNavigationTree(): NavigationTree {
     initial: null,
     order: 0,
     depth: 0,
-    focusable: true,
     handler: rootHandler,
     providers: new Map(),
     children: [],

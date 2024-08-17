@@ -43,7 +43,6 @@ export function createNavigationContainer(
     parent: options.parent ?? parentNode,
     initial: options.initial,
     order: options.order,
-    focusable: options.focusable,
     handler: options.handler,
   });
 

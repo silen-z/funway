@@ -11,7 +11,6 @@ export type NodeBase = {
   parent: NodeId | null;
   depth: number;
   order: number | null;
-  focusable: boolean;
   handler: NavigationHandler;
   providers: Map<symbol, unknown | (() => unknown)>;
 };
@@ -35,7 +34,6 @@ export type NavigationNode = ContainerNode | ItemNode;
 export type NodeConfig = {
   id: string;
   parent: NodeId;
-  focusable?: boolean;
   order?: number;
   handler?: NavigationHandler;
 };
@@ -58,7 +56,6 @@ export function createItemNode(
     parent: options.parent,
     order: options.order ?? null,
     depth: 0,
-    focusable: options.focusable ?? true,
     handler: options.handler ?? itemHandler,
     providers: new Map(),
     onSelect: options.onSelect ?? null,
@@ -85,7 +82,6 @@ export function createContainerNode(
     initial: options.initial ? scopedId(globalId, options.initial) : null,
     order: options.order ?? null,
     depth: 0,
-    focusable: options.focusable ?? true,
     handler: options.handler ?? containerHandler,
     providers: new Map(),
     children: [],
@@ -107,10 +103,6 @@ export function updateNode<N extends NavigationNode>(
 ) {
   if (options.handler != null) {
     node.handler = options.handler;
-  }
-
-  if (options.focusable != null) {
-    node.focusable = options.focusable;
   }
 
   if (options.order != null) {

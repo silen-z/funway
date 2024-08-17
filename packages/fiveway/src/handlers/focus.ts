@@ -22,10 +22,6 @@ export function focusHandler(
       return next();
     }
 
-    if (!node.focusable) {
-      return null;
-    }
-
     if (node.type === "item") {
       return node.id;
     }
