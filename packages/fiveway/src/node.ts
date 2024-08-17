@@ -1,7 +1,7 @@
 import { createGlobalId, scopedId, type NodeId } from "./id.js";
 import { type NavigationTree, getContainerNode } from "./tree.js";
 import type { NavigationHandler } from "./handler.js";
-import { containerHandler, itemHandler } from "./handlers/default.js";
+import { defaultHandler } from "./handlers/default.js";
 import { binarySearch } from "./array.js";
 
 export type NodeBase = {
@@ -11,7 +11,6 @@ export type NodeBase = {
   parent: NodeId | null;
   depth: number;
   order: number | null;
-  focusable: boolean;
   handler: NavigationHandler;
   providers: Map<symbol, unknown | (() => unknown)>;
 };
@@ -20,15 +19,12 @@ export type NodeChild = { id: NodeId; order: number | null; active: boolean };
 
 export type ContainerNode = NodeBase & {
   type: "container";
-  initial: NodeId | null;
   children: NodeChild[];
-  captureFocus: boolean;
   rememberChildren: boolean;
 };
 
 export type ItemNode = NodeBase & {
   type: "item";
-  onSelect: (() => void) | null;
 };
 
 export type NavigationNode = ContainerNode | ItemNode;
@@ -36,14 +32,11 @@ export type NavigationNode = ContainerNode | ItemNode;
 export type NodeConfig = {
   id: string;
   parent: NodeId;
-  focusable?: boolean;
   order?: number;
   handler?: NavigationHandler;
 };
 
-export type ItemConfig = NodeConfig & {
-  onSelect?: () => void;
-};
+export type ItemConfig = NodeConfig;
 
 export function createItemNode(
   tree: NavigationTree,
@@ -59,16 +52,13 @@ export function createItemNode(
     parent: options.parent,
     order: options.order ?? null,
     depth: 0,
-    focusable: options.focusable ?? true,
-    handler: options.handler ?? itemHandler,
+    handler: options.handler ?? defaultHandler,
     providers: new Map(),
-    onSelect: options.onSelect ?? null,
   };
 }
 
 export type ContainerConfig = NodeConfig & {
   initial?: NodeId;
-  captureFocus?: boolean;
   rememberChildren?: boolean;
 };
 
@@ -84,14 +74,11 @@ export function createContainerNode(
     id: globalId,
     connected: false,
     parent: options.parent,
-    initial: options.initial ? scopedId(globalId, options.initial) : null,
     order: options.order ?? null,
     depth: 0,
-    focusable: options.focusable ?? true,
-    handler: options.handler ?? containerHandler,
+    handler: options.handler ?? defaultHandler,
     providers: new Map(),
     children: [],
-    captureFocus: options.captureFocus ?? false,
     rememberChildren: options.rememberChildren ?? true,
   };
 }
@@ -112,20 +99,8 @@ export function updateNode<N extends NavigationNode>(
     node.handler = options.handler;
   }
 
-  if (options.focusable != null) {
-    node.focusable = options.focusable;
-  }
-
   if (options.order != null) {
     updateNodeOrder(node, options.order);
-  }
-
-  if (node.type === "item" && options.onSelect != null) {
-    node.onSelect = options.onSelect;
-  }
-
-  if (node.type === "container" && options.captureFocus != null) {
-    node.captureFocus = options.captureFocus;
   }
 }
 

@@ -1,4 +1,10 @@
-import { type NodeId, convergingPaths, idsToRoot, isParent, ROOT } from "./id.js";
+import {
+  type NodeId,
+  convergingPaths,
+  idsToRoot,
+  isParent,
+  ROOT,
+} from "./id.js";
 import type { NavigationNode, ContainerNode, ItemNode } from "./node.js";
 import { type ListenerTree, callListeners } from "./events.js";
 import { runHandler } from "./handler.js";
@@ -24,14 +30,11 @@ export function createNavigationTree(): NavigationTree {
     id: ROOT,
     connected: true,
     parent: null,
-    initial: null,
     order: 0,
     depth: 0,
-    focusable: true,
     handler: rootHandler,
     providers: new Map(),
     children: [],
-    captureFocus: true,
     rememberChildren: true,
   });
 
@@ -115,7 +118,6 @@ export function removeNode(tree: NavigationTree, nodeId: NodeId) {
     });
 
     focusNode(tree, targetNode ?? ROOT, {
-      respectCapture: false,
       runHandler: false,
     });
   }
@@ -159,7 +161,6 @@ function disconnectNode(tree: NavigationTree, nodeId: NodeId) {
 }
 
 export type FocusOptions = {
-  respectCapture?: boolean;
   runHandler?: boolean;
 };
 
@@ -190,30 +191,6 @@ export function focusNode(
     targetId = resolvedId;
   }
 
-  if (options.respectCapture ?? true) {
-    let allowFocus = true;
-
-    idsToRoot(tree.focusedId, (id) => {
-      if (isParent(id, targetId)) {
-        return false;
-      }
-
-      const parentNode = tree.nodes.get(id);
-      if (
-        parentNode != null &&
-        parentNode.type === "container" &&
-        parentNode.captureFocus
-      ) {
-        allowFocus = false;
-        return false;
-      }
-    });
-
-    if (!allowFocus) {
-      return false;
-    }
-  }
-
   const lastFocused = tree.focusedId;
   tree.focusedId = targetId;
 
@@ -229,13 +206,11 @@ export function selectNode(
   nodeId: NodeId,
   focus: boolean = true
 ) {
-  const node = getItemNode(tree, nodeId);
-
   if (focus) {
-    focusNode(tree, node.id);
+    focusNode(tree, nodeId);
   }
 
-  node.onSelect?.();
+  runHandler(tree, nodeId, { kind: "select" });
 }
 
 export function getNode(tree: NavigationTree, nodeId: NodeId): NavigationNode {

@@ -20,11 +20,7 @@ export type ItemHandle = NodeHandle & {
   select: (nodeId?: NodeId, focus?: boolean) => void;
 };
 
-export type ItemOptions = NodeOptions & {
-  onSelect?: () => void;
-};
-
-export function useNavigationItem(options: ItemOptions): ItemHandle {
+export function useNavigationItem(options: NodeOptions): ItemHandle {
   const { tree, parentNode } = useNavigationContext();
   const parentId = options.parent ?? parentNode;
 
@@ -34,8 +30,6 @@ export function useNavigationItem(options: ItemOptions): ItemHandle {
       id: options.id,
       parent: parentId,
       handler: options.handler,
-      focusable: options.focusable,
-      onSelect: options.onSelect,
       order: options.order,
     });
   } else {
@@ -67,7 +61,7 @@ export function useNavigationItem(options: ItemOptions): ItemHandle {
   };
 }
 
-type ItemProps = ItemOptions & {
+type ItemProps = NodeOptions & {
   children: ReactNode | ((handle: ItemHandle) => ReactNode);
 };
 

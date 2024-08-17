@@ -25,27 +25,19 @@ import { ElementProvider } from "./hooks.jsx";
 import { useNavigationContext } from "./context.js";
 import { NodeContext, type NodeHandle, type NodeOptions } from "./node.jsx";
 
-export type ContainerOptions = NodeOptions & {
-  initial?: NodeId;
-  captureFocus?: boolean;
-};
-
 export type ContainerHandle = NodeHandle & {
   Context: Component<ParentProps>;
 };
 
 export function createNavigationContainer(
-  options: ContainerOptions
+  options: NodeOptions
 ): ContainerHandle {
   const { tree, parentNode, focusedId } = useNavigationContext();
 
   const node = createContainerNode(tree, {
     id: options.id,
     parent: options.parent ?? parentNode,
-    initial: options.initial,
     order: options.order,
-    captureFocus: options.captureFocus,
-    focusable: options.focusable,
     handler: options.handler,
   });
 
@@ -91,7 +83,7 @@ export function createNavigationContainer(
   };
 }
 
-export type ContainerProps = ContainerOptions & {
+export type ContainerProps = NodeOptions & {
   children?:
     | ((node: Omit<ContainerHandle, "Context">) => JSX.Element)
     | JSX.Element;

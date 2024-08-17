@@ -5,7 +5,6 @@ import { useNavigationContext, NavigationContext } from "./context.js";
 export type NodeOptions = {
   id: NodeId;
   parent?: NodeId;
-  focusable?: boolean;
   order?: number;
   handler?: NavigationHandler;
 };

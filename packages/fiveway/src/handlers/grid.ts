@@ -78,10 +78,10 @@ export const gridMovement: NavigationHandler = (node, action, next) => {
   let shortestDistance: number | null = null;
 
   traverseNodes(node.tree, node.id, (potentialNode) => {
-    // TODO use focus handler?
-    if (!potentialNode.focusable) {
-      return;
-    }
+    // TODO use focus handler
+    // if (!potentialNode.focusable) {
+    //   return;
+    // }
 
     const potentialPos = GridPositionProvider.extract(potentialNode);
     if (potentialPos == null) {

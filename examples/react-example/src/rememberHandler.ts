@@ -1,16 +1,27 @@
 import { useState, useMemo } from "react";
 import {
   type NodeId,
-  type ChainableHandler,
-  makeHandler,
+  type NavigationHandler,
   directChildId,
+  NavigationNode,
+  NavigationAction,
+  HandlerNext,
 } from "@fiveway/core";
 
-export function useRememberHandler(): ChainableHandler {
+export type RememberHandler = NavigationHandler & {
+  lastFocused: NodeId | null;
+  clearMemory: () => void;
+};
+
+export function useRememberHandler(): RememberHandler {
   const [lastFocused, setLastFocused] = useState<NodeId | null>(null);
 
   return useMemo(() => {
-    const handler = makeHandler((node, action, next) => {
+    const handler = (
+      node: NavigationNode,
+      action: NavigationAction,
+      next: HandlerNext
+    ) => {
       if (action.kind === "focus" && lastFocused !== null) {
         try {
           return next(lastFocused, action);
@@ -27,9 +38,6 @@ export function useRememberHandler(): ChainableHandler {
       }
 
       return nextId;
-    }) as ChainableHandler & {
-      lastFocused: NodeId | null;
-      clearMemory: () => void;
     };
 
     handler.lastFocused = lastFocused;
