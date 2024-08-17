@@ -1,11 +1,9 @@
-import { selectNode } from "../tree.js";
 import {
   type NavigationHandler,
   type HandlerChain,
   chainHandlers,
 } from "../handler.js";
 import { focusHandler } from "./focus.js";
-import type { NavigationAction } from "../navigation.js";
 
 /**
  * @category Handler
@@ -21,14 +19,10 @@ export const parentHandler: NavigationHandler = (node, action, next) => {
 /**
  * @category Handler
  */
-export const selectHandler: NavigationHandler = (node, action, next) => {
-  if (action.kind === "select") {
-    selectNode(node.tree, node.id, true);
-    return null;
-  }
-
-  return next();
-};
+export const defaultHandler: HandlerChain = chainHandlers(
+  focusHandler(),
+  parentHandler
+);
 
 /**
  * @category Handler
@@ -38,16 +32,13 @@ export const rootHandler = focusHandler();
 /**
  * @category Handler
  */
-export const itemHandler: HandlerChain = chainHandlers(
-  focusHandler(),
-  selectHandler,
-  parentHandler
-);
+export function selectHandler(onSelect: () => void) {
+  return defaultHandler.prepend((_, action, next) => {
+    if (action.kind === "select") {
+      onSelect();
+      return null;
+    }
 
-/**
- * @category Handler
- */
-export const containerHandler: HandlerChain = chainHandlers(
-  focusHandler(),
-  parentHandler
-);
+    return next();
+  });
+}

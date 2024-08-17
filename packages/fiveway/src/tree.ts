@@ -1,4 +1,10 @@
-import { type NodeId, convergingPaths, idsToRoot, isParent, ROOT } from "./id.js";
+import {
+  type NodeId,
+  convergingPaths,
+  idsToRoot,
+  isParent,
+  ROOT,
+} from "./id.js";
 import type { NavigationNode, ContainerNode, ItemNode } from "./node.js";
 import { type ListenerTree, callListeners } from "./events.js";
 import { runHandler } from "./handler.js";
@@ -24,7 +30,6 @@ export function createNavigationTree(): NavigationTree {
     id: ROOT,
     connected: true,
     parent: null,
-    initial: null,
     order: 0,
     depth: 0,
     handler: rootHandler,
@@ -201,13 +206,11 @@ export function selectNode(
   nodeId: NodeId,
   focus: boolean = true
 ) {
-  const node = getItemNode(tree, nodeId);
-
   if (focus) {
-    focusNode(tree, node.id);
+    focusNode(tree, nodeId);
   }
 
-  node.onSelect?.();
+  runHandler(tree, nodeId, { kind: "select" });
 }
 
 export function getNode(tree: NavigationTree, nodeId: NodeId): NavigationNode {

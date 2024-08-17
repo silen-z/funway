@@ -24,9 +24,7 @@ import { useNavigationContext } from "./context.js";
 import { ElementProvider } from "./hooks.jsx";
 import type { NodeHandle, NodeOptions } from "./node.jsx";
 
-export type ItemOptions = NodeOptions & {
-  onSelect?: () => void;
-};
+export type ItemOptions = NodeOptions
 
 export type ItemHandle = NodeHandle & {
   select: () => void;
@@ -39,7 +37,6 @@ export function createNavigationItem(options: ItemOptions): ItemHandle {
     id: options.id,
     parent: options.parent ?? parentNode,
     order: options.order,
-    onSelect: options.onSelect,
     handler: options.handler,
   });
 

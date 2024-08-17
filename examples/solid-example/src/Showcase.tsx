@@ -5,7 +5,8 @@ import {
   horizontalHandler,
   verticalHandler,
   spatialHandler,
-  itemHandler,
+  selectHandler,
+  defaultHandler,
 } from "@fiveway/core";
 import {
   NavigationContainer,
@@ -104,7 +105,12 @@ function SpatialShowcase() {
       style={{ position: "relative", "min-height": "250px" }}
     >
       <nav.Context>
-        <NavigationItem id="toggle" onSelect={() => setFocusable((on) => !on)}>
+        <NavigationItem
+          id="toggle"
+          handler={selectHandler(() => {
+            setFocusable((on) => !on);
+          })}
+        >
           {(node) => (
             <li
               class={css.item}
@@ -157,7 +163,7 @@ function SpatialItem(props: {
 }) {
   const nav = createNavigationItem({
     id: props.navId,
-    handler: itemHandler.prepend((n, a, next) =>
+    handler: defaultHandler.prepend((n, a, next) =>
       props.focusable ? next() : null
     ),
   });

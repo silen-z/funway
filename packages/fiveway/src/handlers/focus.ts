@@ -26,16 +26,16 @@ export function focusHandler(
       return node.id;
     }
 
-    if (action.direction === "initial" && node.initial !== null) {
-      const initialChild = node.children.find(
-        (c) => c.active && c.id === node.initial
-      );
-      if (initialChild == null) {
-        return null;
-      }
+    // if (action.direction === "initial" && node.initial !== null) {
+    //   const initialChild = node.children.find(
+    //     (c) => c.active && c.id === node.initial
+    //   );
+    //   if (initialChild == null) {
+    //     return null;
+    //   }
 
-      return next(initialChild.id, action);
-    }
+    //   return next(initialChild.id, action);
+    // }
 
     const direction = config.direction?.(action.direction);
     const children = childrenIterator(node, direction);
@@ -64,3 +64,24 @@ export const captureHandler: NavigationHandler = (node, _, next) => {
 
   return id;
 };
+
+export function initialHandler(id: string): NavigationHandler {
+  return (node, action, next) => {
+    if (
+      node.type === "container" &&
+      action.kind === "focus" &&
+      action.direction === "initial"
+    ) {
+      const initialChild = node.children.find(
+        (c) => c.active && c.id === `${node.id}/${id}`
+      );
+      if (initialChild == null) {
+        return null;
+      }
+
+      return next(`${node.id}/${id}`);
+    }
+
+    return next();
+  };
+}

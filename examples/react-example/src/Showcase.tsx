@@ -1,9 +1,11 @@
 import { useState } from "react";
 import {
   GridPositionProvider,
-  containerHandler,
+  defaultHandler,
   gridHandler,
   horizontalHandler,
+  initialHandler,
+  selectHandler,
   verticalHandler,
 } from "@fiveway/core";
 import {
@@ -18,8 +20,7 @@ import { SpatialShowcase } from "./SpatialShowcase.tsx";
 export function Showcase() {
   const nav = useNavigationContainer({
     id: "showcase",
-    handler: gridHandler,
-    initial: "horizontalList",
+    handler: gridHandler.prepend(initialHandler("horizontalList")),
   });
 
   return (
@@ -76,10 +77,12 @@ export function Showcase() {
 }
 
 function ListShowcase(props: { type: "vertical" | "horizontal" }) {
+  const movementHandler =
+    props.type === "vertical" ? verticalHandler : horizontalHandler;
+
   const nav = useNavigationContainer({
     id: "list",
-    handler: props.type === "vertical" ? verticalHandler : horizontalHandler,
-    initial: "item2",
+    handler: movementHandler.prepend(initialHandler("item2")),
   });
 
   return (
@@ -127,12 +130,12 @@ function ConditionalShowcase() {
         <nav.Context>
           <NavigationItem
             id="toggle"
-            onSelect={() => {
+            handler={selectHandler(() => {
               set((on) => !on);
               if (!isOn) {
-                nav.focus("content", { runHandler: false });
+                setTimeout(() => nav.focus("content"));
               }
-            }}
+            })}
           >
             {(node) => (
               <button className={css.item} data-is-focused={node.isFocused()}>
@@ -143,7 +146,7 @@ function ConditionalShowcase() {
 
           <NavigationContainer
             id="content"
-            handler={containerHandler.prepend((node, action, next) => {
+            handler={defaultHandler.prepend((node, action, next) => {
               if (action.kind === "focus" && isOn) {
                 return next() ?? node.id;
               }
@@ -153,9 +156,9 @@ function ConditionalShowcase() {
             {isOn && (
               <NavigationItem
                 id="parking"
-                onSelect={() => {
+                handler={selectHandler(() => {
                   set(false);
-                }}
+                })}
               >
                 {(node) => (
                   <button

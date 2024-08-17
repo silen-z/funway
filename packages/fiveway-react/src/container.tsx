@@ -1,6 +1,5 @@
 import { type ReactNode, useRef, useEffect, useCallback } from "react";
 import {
-  type NodeId,
   type ContainerNode,
   createContainerNode,
   updateNode,
@@ -11,17 +10,11 @@ import { useNavigationContext, NavigationContext } from "./context.js";
 import type { NodeOptions, NodeHandle } from "./node.js";
 import { useFocus, useLazyIsFocused, useRegisterElement } from "./hooks.js";
 
-export type ContainerOptions = NodeOptions & {
-  initial?: NodeId;
-};
-
 export type ContainerHandle = NodeHandle & {
   Context: React.FunctionComponent<{ children: ReactNode }>;
 };
 
-export function useNavigationContainer(
-  options: ContainerOptions
-): ContainerHandle {
+export function useNavigationContainer(options: NodeOptions): ContainerHandle {
   const { tree, parentNode } = useNavigationContext();
   const parent = options.parent ?? parentNode;
 
@@ -30,7 +23,6 @@ export function useNavigationContainer(
     nodeRef.current = createContainerNode(tree, {
       id: options.id,
       parent,
-      initial: options.initial,
       handler: options.handler,
       order: options.order,
     });
@@ -80,7 +72,7 @@ export function useNavigationContainer(
   };
 }
 
-type ContainerProps = ContainerOptions & {
+type ContainerProps = NodeOptions & {
   children?:
     | ReactNode
     | ((props: Omit<ContainerHandle, "Context">) => ReactNode);

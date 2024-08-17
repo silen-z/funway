@@ -1,7 +1,7 @@
 import { createGlobalId, scopedId, type NodeId } from "./id.js";
 import { type NavigationTree, getContainerNode } from "./tree.js";
 import type { NavigationHandler } from "./handler.js";
-import { containerHandler, itemHandler } from "./handlers/default.js";
+import { defaultHandler } from "./handlers/default.js";
 import { binarySearch } from "./array.js";
 
 export type NodeBase = {
@@ -19,14 +19,12 @@ export type NodeChild = { id: NodeId; order: number | null; active: boolean };
 
 export type ContainerNode = NodeBase & {
   type: "container";
-  initial: NodeId | null;
   children: NodeChild[];
   rememberChildren: boolean;
 };
 
 export type ItemNode = NodeBase & {
   type: "item";
-  onSelect: (() => void) | null;
 };
 
 export type NavigationNode = ContainerNode | ItemNode;
@@ -38,9 +36,7 @@ export type NodeConfig = {
   handler?: NavigationHandler;
 };
 
-export type ItemConfig = NodeConfig & {
-  onSelect?: () => void;
-};
+export type ItemConfig = NodeConfig;
 
 export function createItemNode(
   tree: NavigationTree,
@@ -56,9 +52,8 @@ export function createItemNode(
     parent: options.parent,
     order: options.order ?? null,
     depth: 0,
-    handler: options.handler ?? itemHandler,
+    handler: options.handler ?? defaultHandler,
     providers: new Map(),
-    onSelect: options.onSelect ?? null,
   };
 }
 
@@ -79,10 +74,9 @@ export function createContainerNode(
     id: globalId,
     connected: false,
     parent: options.parent,
-    initial: options.initial ? scopedId(globalId, options.initial) : null,
     order: options.order ?? null,
     depth: 0,
-    handler: options.handler ?? containerHandler,
+    handler: options.handler ?? defaultHandler,
     providers: new Map(),
     children: [],
     rememberChildren: options.rememberChildren ?? true,
@@ -107,10 +101,6 @@ export function updateNode<N extends NavigationNode>(
 
   if (options.order != null) {
     updateNodeOrder(node, options.order);
-  }
-
-  if (node.type === "item" && options.onSelect != null) {
-    node.onSelect = options.onSelect;
   }
 }
 
