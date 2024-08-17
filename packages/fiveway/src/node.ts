@@ -22,7 +22,6 @@ export type ContainerNode = NodeBase & {
   type: "container";
   initial: NodeId | null;
   children: NodeChild[];
-  captureFocus: boolean;
   rememberChildren: boolean;
 };
 
@@ -68,7 +67,6 @@ export function createItemNode(
 
 export type ContainerConfig = NodeConfig & {
   initial?: NodeId;
-  captureFocus?: boolean;
   rememberChildren?: boolean;
 };
 
@@ -91,7 +89,6 @@ export function createContainerNode(
     handler: options.handler ?? containerHandler,
     providers: new Map(),
     children: [],
-    captureFocus: options.captureFocus ?? false,
     rememberChildren: options.rememberChildren ?? true,
   };
 }
@@ -122,10 +119,6 @@ export function updateNode<N extends NavigationNode>(
 
   if (node.type === "item" && options.onSelect != null) {
     node.onSelect = options.onSelect;
-  }
-
-  if (node.type === "container" && options.captureFocus != null) {
-    node.captureFocus = options.captureFocus;
   }
 }
 

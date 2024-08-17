@@ -13,7 +13,6 @@ import { useFocus, useLazyIsFocused, useRegisterElement } from "./hooks.js";
 
 export type ContainerOptions = NodeOptions & {
   initial?: NodeId;
-  captureFocus?: boolean;
 };
 
 export type ContainerHandle = NodeHandle & {
@@ -34,7 +33,6 @@ export function useNavigationContainer(
       initial: options.initial,
       handler: options.handler,
       focusable: options.focusable,
-      captureFocus: options.captureFocus,
       order: options.order,
     });
   } else {

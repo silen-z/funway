@@ -31,7 +31,6 @@ export function createNavigationTree(): NavigationTree {
     handler: rootHandler,
     providers: new Map(),
     children: [],
-    captureFocus: true,
     rememberChildren: true,
   });
 
@@ -115,7 +114,6 @@ export function removeNode(tree: NavigationTree, nodeId: NodeId) {
     });
 
     focusNode(tree, targetNode ?? ROOT, {
-      respectCapture: false,
       runHandler: false,
     });
   }
@@ -159,7 +157,6 @@ function disconnectNode(tree: NavigationTree, nodeId: NodeId) {
 }
 
 export type FocusOptions = {
-  respectCapture?: boolean;
   runHandler?: boolean;
 };
 
@@ -188,30 +185,6 @@ export function focusNode(
     }
 
     targetId = resolvedId;
-  }
-
-  if (options.respectCapture ?? true) {
-    let allowFocus = true;
-
-    idsToRoot(tree.focusedId, (id) => {
-      if (isParent(id, targetId)) {
-        return false;
-      }
-
-      const parentNode = tree.nodes.get(id);
-      if (
-        parentNode != null &&
-        parentNode.type === "container" &&
-        parentNode.captureFocus
-      ) {
-        allowFocus = false;
-        return false;
-      }
-    });
-
-    if (!allowFocus) {
-      return false;
-    }
   }
 
   const lastFocused = tree.focusedId;

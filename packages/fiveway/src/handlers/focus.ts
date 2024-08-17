@@ -1,6 +1,7 @@
 import { childrenIterator } from "../children.js";
 import type { NavigationDirection } from "../navigation.js";
 import { type NavigationHandler } from "../handler.js";
+import { isParent } from "../id.js";
 
 export type FocusDirection = "front" | "back" | undefined;
 
@@ -58,3 +59,12 @@ export function focusHandler(
     return null;
   };
 }
+
+export const captureHandler: NavigationHandler = (node, _, next) => {
+  const id = next();
+  if (id === null || !isParent(node.id, id)) {
+    return null;
+  }
+
+  return id;
+};

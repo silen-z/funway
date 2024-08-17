@@ -27,7 +27,6 @@ import { NodeContext, type NodeHandle, type NodeOptions } from "./node.jsx";
 
 export type ContainerOptions = NodeOptions & {
   initial?: NodeId;
-  captureFocus?: boolean;
 };
 
 export type ContainerHandle = NodeHandle & {
@@ -44,7 +43,6 @@ export function createNavigationContainer(
     parent: options.parent ?? parentNode,
     initial: options.initial,
     order: options.order,
-    captureFocus: options.captureFocus,
     focusable: options.focusable,
     handler: options.handler,
   });
