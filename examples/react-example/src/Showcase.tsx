@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { flushSync } from "react-dom";
 import {
   defaultHandler,
   gridHandler,
@@ -133,7 +134,7 @@ function ConditionalShowcase() {
     handler: horizontalHandler,
   });
 
-  const [isOn, set] = useState(false);
+  const [isOn, setOn] = useState(false);
 
   return (
     <div className={css.section} data-is-focused={nav.isFocused()}>
@@ -142,10 +143,11 @@ function ConditionalShowcase() {
           <NavigationItem
             id="toggle"
             handler={defaultHandler.onSelect(() => {
-              set((on) => !on);
-              if (!isOn) {
-                setTimeout(() => nav.focus("content"));
-              }
+              flushSync(() => {
+                setOn((on) => !on);
+              });
+
+              nav.focus("content");
             })}
           >
             {(node) => (
@@ -161,6 +163,7 @@ function ConditionalShowcase() {
               if (action.kind === "focus" && isOn) {
                 return next() ?? node.id;
               }
+
               return next();
             })}
           >
@@ -168,7 +171,7 @@ function ConditionalShowcase() {
               <NavigationItem
                 id="parking"
                 handler={defaultHandler.onSelect(() => {
-                  set(false);
+                  setOn(false);
                 })}
               >
                 {(node) => (

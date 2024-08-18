@@ -9,10 +9,10 @@ export type NodeBase = {
   id: NodeId;
   connected: boolean;
   parent: NodeId | null;
-  depth: number;
   order: number | null;
   handler: NavigationHandler;
 };
+
 
 export type NodeChild = { id: NodeId; order: number | null; active: boolean };
 
@@ -50,7 +50,6 @@ export function createItemNode(
     connected: false,
     parent: options.parent,
     order: options.order ?? null,
-    depth: 0,
     handler: options.handler ?? defaultHandler,
   };
 }
@@ -73,7 +72,6 @@ export function createContainerNode(
     connected: false,
     parent: options.parent,
     order: options.order ?? null,
-    depth: 0,
     handler: options.handler ?? defaultHandler,
     children: [],
     rememberChildren: options.rememberChildren ?? true,

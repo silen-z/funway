@@ -1,13 +1,4 @@
-import {
-  createEffect,
-  createMemo,
-  createSignal,
-  For,
-  Index,
-  onCleanup,
-  Show,
-} from "solid-js";
-import { createStore, reconcile } from "solid-js/store";
+import { createEffect, createSignal, For, onCleanup, Show } from "solid-js";
 import { render } from "solid-js/web";
 import {
   ContainerNode,
@@ -137,7 +128,7 @@ function VisualizeNode(props: { tree: NavigationTree; nodeId: NodeId }) {
             <Show
               when={
                 node().type === "container" &&
-                node().children.some((c) => c.active) &&
+                (node() as ContainerNode).children.some((c) => c.active) &&
                 !isNodeFocused()
               }
             >

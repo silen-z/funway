@@ -32,7 +32,6 @@ export function createNavigationTree(): NavigationTree {
     connected: true,
     parent: null,
     order: 0,
-    depth: 0,
     handler: rootHandler,
     children: [],
     rememberChildren: true,
@@ -67,7 +66,6 @@ export function connectNode(
   // it would be better to handle that explicitly via sentinel nodes (children)
   const parentNode = getContainerNode(tree, node.parent);
   insertChildInOrder(parentNode, node);
-  node.depth = parentNode.depth + 1;
 
   if (node.type === "container") {
     // TODO optimise iteration through all nodes
