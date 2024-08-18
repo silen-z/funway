@@ -38,7 +38,9 @@ function SpatialItem(props: { navId: string; style: CSSProperties }) {
   const elementHandler = useElementHandler();
   const nav = useNavigationItem({
     id: props.navId,
-    handler: defaultHandler.prepend(elementHandler),
+    handler: defaultHandler
+      .prepend(elementHandler)
+      .onSelect(() => nav.focus("#")),
   });
 
   return (

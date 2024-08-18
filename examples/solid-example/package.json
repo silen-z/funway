@@ -16,6 +16,7 @@
   },
   "dependencies": {
     "@fiveway/core": "workspace:^",
+    "@fiveway/devtools": "workspace:^",
     "@fiveway/solid": "workspace:^",
     "solid-js": "^1.8.11"
   }

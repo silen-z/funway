@@ -4,7 +4,7 @@ import type { NavigationTree } from "./tree.js";
 
 export type Listener = {
   node: NodeId;
-  type: "focuschange";
+  type: "focuschange" | "structurechange";
   fn: () => void;
 };
 
@@ -15,19 +15,24 @@ export function registerListener(tree: NavigationTree, listener: Listener) {
     tree.listeners.set(listener.node, []);
   }
 
-  const nodeListeners = tree.listeners.get(listener.node)!;
-  nodeListeners.push(listener);
+  const listeners = tree.listeners.get(listener.node)!;
+  listeners.push(listener);
 
   return () => {
-    const index = nodeListeners.findIndex((l) => l === listener);
+    const listeners = tree.listeners.get(listener.node);
+    if (listeners == null) {
+      return;
+    }
+
+    const index = listeners.findIndex((l) => l === listener);
     if (index === -1) {
       return;
     }
 
-    if (nodeListeners.length === 1) {
+    if (listeners.length === 1) {
       tree.listeners.delete(listener.node);
     } else {
-      swapRemove(nodeListeners, index);
+      swapRemove(listeners, index);
     }
   };
 }
@@ -37,12 +42,12 @@ export function callListeners(
   nodeId: NodeId,
   event: string
 ) {
-  const listenerNode = tree.listeners.get(nodeId);
-  if (listenerNode == null) {
+  const listeners = tree.listeners.get(nodeId);
+  if (listeners == null) {
     return;
   }
 
-  for (const listener of listenerNode) {
+  for (const listener of listeners) {
     if (listener.type === event) {
       listener.fn();
     }

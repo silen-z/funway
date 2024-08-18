@@ -41,7 +41,11 @@ export function createNavigationTree(): NavigationTree {
   return tree;
 }
 
-export function connectNode(tree: NavigationTree, node: NavigationNode) {
+export function connectNode(
+  tree: NavigationTree,
+  node: NavigationNode,
+  notify = true
+) {
   if (node.parent === null) {
     throw new Error("trying to connect root (or node without parent)");
   }
@@ -69,9 +73,13 @@ export function connectNode(tree: NavigationTree, node: NavigationNode) {
     // TODO optimise iteration through all nodes
     for (const n of tree.nodes.values()) {
       if (n.parent === node.id) {
-        connectNode(tree, n);
+        connectNode(tree, n, false);
       }
     }
+  }
+
+  if (notify) {
+    callListeners(tree, ROOT, "structurechange");
   }
 
   if (isParent(tree.focusedId, node.id)) {
@@ -94,6 +102,7 @@ export function removeNode(tree: NavigationTree, nodeId: NodeId) {
   }
 
   tree.nodes.delete(nodeId);
+  callListeners(tree, ROOT, "structurechange");
 
   if (isFocused(tree, nodeId)) {
     idsToRoot(node.parent!, (id) => {

@@ -1,19 +1,19 @@
 import { defineConfig } from "vite";
-import dts from "vite-plugin-dts";
 import { resolve } from "path";
-import react from "@vitejs/plugin-react";
+import solid from "vite-plugin-solid";
+import cssInjectedByJsPlugin from "vite-plugin-css-injected-by-js";
 
 export default defineConfig({
   build: {
+    minify: false,
     lib: {
       entry: resolve(__dirname, "src/index.tsx"),
-      name: "@fiveway/core",
       formats: ["es"],
-      fileName: "index",
     },
     rollupOptions: {
-      external: ["@fiveway/react", "react", "react/jsx-runtime"],
+      external: ["@fiveway/core"],
     },
   },
-  plugins: [react(), dts()],
+
+  plugins: [solid({ hot: false, dev: false }), cssInjectedByJsPlugin()],
 });

@@ -1,24 +1,22 @@
 {
-  "name": "@xfiveway/devtools",
+  "name": "@fiveway/devtools",
   "type": "module",
   "private": true,
   "scripts": {
     "build": "vite build"
   },
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
+  "main": "./dist/devtools.js",
   "dependencies": {
     "@fiveway/core": "workspace:*",
-    "@fiveway/react": "workspace:*",
     "clsx": "^2.0.0",
-    "react": "^18.2.0"
+    "solid-js": "^1.8.21"
   },
   "devDependencies": {
-    "@types/node": "^20.6.3",
-    "@types/react": "^18.2.15",
-    "@vitejs/plugin-react": "^4.0.3",
+    "@iconify-icon/solid": "^2.1.1",
     "typescript": "^5.4.3",
     "vite": "^4.4.5",
-    "vite-plugin-dts": "^3.5.4"
+    "vite-plugin-css-injected-by-js": "^3.5.1",
+    "vite-plugin-libcss": "^1.1.1",
+    "vite-plugin-solid": "^2.8.2"
   }
 }
