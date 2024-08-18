@@ -1,4 +1,4 @@
-import { createGlobalId, scopedId, type NodeId } from "./id.js";
+import { createGlobalId, type NodeId } from "./id.js";
 import { type NavigationTree, getContainerNode } from "./tree.js";
 import type { NavigationHandler } from "./handler.js";
 import { defaultHandler } from "./handlers/default.js";
@@ -12,7 +12,6 @@ export type NodeBase = {
   depth: number;
   order: number | null;
   handler: NavigationHandler;
-  providers: Map<symbol, unknown | (() => unknown)>;
 };
 
 export type NodeChild = { id: NodeId; order: number | null; active: boolean };
@@ -53,7 +52,6 @@ export function createItemNode(
     order: options.order ?? null,
     depth: 0,
     handler: options.handler ?? defaultHandler,
-    providers: new Map(),
   };
 }
 
@@ -77,7 +75,6 @@ export function createContainerNode(
     order: options.order ?? null,
     depth: 0,
     handler: options.handler ?? defaultHandler,
-    providers: new Map(),
     children: [],
     rememberChildren: options.rememberChildren ?? true,
   };

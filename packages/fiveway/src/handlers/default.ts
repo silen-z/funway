@@ -9,7 +9,7 @@ import { focusHandler } from "./focus.js";
  * @category Handler
  */
 export const parentHandler: NavigationHandler = (node, action, next) => {
-  if (node.parent !== null) {
+  if (node.parent !== null && action.kind !== "query") {
     return next(node.parent, action);
   }
 
@@ -32,13 +32,13 @@ export const rootHandler = focusHandler();
 /**
  * @category Handler
  */
-export function selectHandler(onSelect: () => void) {
-  return defaultHandler.prepend((_, action, next) => {
+export function selectHandler(onSelect: () => void): NavigationHandler {
+  return (_, action, next) => {
     if (action.kind === "select") {
       onSelect();
       return null;
     }
 
     return next();
-  });
+  };
 }

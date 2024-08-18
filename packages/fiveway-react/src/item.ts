@@ -9,12 +9,8 @@ import {
 } from "@fiveway/core";
 import { useNavigationContext } from "./context.js";
 import type { NodeHandle, NodeOptions } from "./node.js";
-import {
-  useFocus,
-  useSelect,
-  useRegisterElement,
-  useLazyIsFocused,
-} from "./hooks.js";
+import { useFocus, useSelect } from "./hooks.js";
+import { useLazyIsFocused } from "./internal.js";
 
 export type ItemHandle = NodeHandle & {
   select: (nodeId?: NodeId, focus?: boolean) => void;
@@ -45,8 +41,6 @@ export function useNavigationItem(options: NodeOptions): ItemHandle {
     };
   }, [tree, nodeId]);
 
-  const registerElement = useRegisterElement(nodeRef.current);
-
   const isFocused = useLazyIsFocused(tree, nodeId);
   const focus = useFocus(nodeId);
   const select = useSelect(nodeId);
@@ -56,8 +50,6 @@ export function useNavigationItem(options: NodeOptions): ItemHandle {
     isFocused,
     focus: (id, options) => focus(id ?? nodeId, options),
     select: (id, focus) => select(id ?? nodeId, focus),
-    provide: (provider, value) => provider.provide(nodeRef.current, value),
-    registerElement,
   };
 }
 

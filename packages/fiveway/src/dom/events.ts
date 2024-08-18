@@ -10,6 +10,10 @@ const eventKeyToAction: Record<string, NavigationAction> = {
   Backspace: { kind: "move", direction: "back" },
 };
 
-export function defaultEventMapping(e: KeyboardEvent): NavigationAction | null {
-  return eventKeyToAction[e.key] ?? null;
+export function defaultEventMapping(e: Event): NavigationAction | null {
+  if (e instanceof KeyboardEvent) {
+    return eventKeyToAction[e.key] ?? null;
+  }
+
+  return null
 }

@@ -4,7 +4,7 @@
   "version": "0.3.0",
   "repository": "github:silen-z/fiveway",
   "scripts": {
-    "build": "tsc --project ."
+    "build": "tsc -b"
   },
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",

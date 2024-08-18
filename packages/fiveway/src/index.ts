@@ -11,4 +11,4 @@ export * from "./handlers/grid.js";
 export * from "./handlers/spatial.js";
 
 export * from "./navigation.js";
-export * from "./provider.js";
+export * from "./query.js";

@@ -33,7 +33,6 @@ export function createNavigationTree(): NavigationTree {
     order: 0,
     depth: 0,
     handler: rootHandler,
-    providers: new Map(),
     children: [],
     rememberChildren: true,
   });

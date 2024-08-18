@@ -1,16 +1,16 @@
 import { createSignal, type JSX } from "solid-js";
 import {
-  GridPositionProvider,
   gridHandler,
   horizontalHandler,
   verticalHandler,
   spatialHandler,
-  selectHandler,
   defaultHandler,
+  GridPosition,
 } from "@fiveway/core";
 import {
   NavigationContainer,
   NavigationItem,
+  createElementHandler,
   createNavigationContainer,
   createNavigationItem,
 } from "@fiveway/solid";
@@ -28,25 +28,31 @@ export function Showcase() {
 
       <div class={css.layout}>
         <nav.Context>
-          <NavigationContainer id="verticalList">
-            {(node) => {
-              node.provide(GridPositionProvider, () => ({ row: 1, col: 1 }));
-              return <ListShowcase type="vertical" />;
-            }}
+          <NavigationContainer
+            id="verticalList"
+            handler={defaultHandler.prepend(
+              GridPosition.handler({ row: 1, col: 1 })
+            )}
+          >
+            <ListShowcase type="vertical" />
           </NavigationContainer>
 
-          <NavigationContainer id="horizontalList">
-            {(node) => {
-              node.provide(GridPositionProvider, () => ({ row: 1, col: 2 }));
-              return <ListShowcase type="horizontal" />;
-            }}
+          <NavigationContainer
+            id="horizontalList"
+            handler={defaultHandler.prepend(
+              GridPosition.handler({ row: 1, col: 2 })
+            )}
+          >
+            <ListShowcase type="horizontal" />
           </NavigationContainer>
 
-          <NavigationContainer id="spatial">
-            {(node) => {
-              node.provide(GridPositionProvider, () => ({ row: 1, col: 3 }));
-              return <SpatialShowcase />;
-            }}
+          <NavigationContainer
+            id="spatial"
+            handler={defaultHandler.prepend(
+              GridPosition.handler({ row: 1, col: 3 })
+            )}
+          >
+            <SpatialShowcase />
           </NavigationContainer>
         </nav.Context>
       </div>
@@ -98,6 +104,8 @@ function SpatialShowcase() {
     handler: spatialHandler,
   });
 
+  const toggleHandler = createElementHandler();
+
   return (
     <div
       class={css.section}
@@ -107,14 +115,14 @@ function SpatialShowcase() {
       <nav.Context>
         <NavigationItem
           id="toggle"
-          handler={selectHandler(() => {
-            setFocusable((on) => !on);
-          })}
+          handler={defaultHandler
+            .prepend(toggleHandler)
+            .onSelect(() => setFocusable((on) => !on))}
         >
           {(node) => (
             <li
               class={css.item}
-              ref={node.registerElement}
+              ref={toggleHandler.register}
               data-is-focused={node.isFocused()}
             >
               toggle spatial
@@ -161,17 +169,19 @@ function SpatialItem(props: {
   focusable: boolean;
   style: JSX.CSSProperties;
 }) {
+  const elementHandler = createElementHandler();
   const nav = createNavigationItem({
     id: props.navId,
-    handler: defaultHandler.prepend((n, a, next) =>
-      props.focusable ? next() : null
-    ),
+    handler: defaultHandler
+      .prepend(elementHandler)
+      .prepend((n, a, next) => (props.focusable ? next() : null)),
   });
 
   return (
     <div
+      tabIndex={0}
       class={css.item}
-      ref={nav.registerElement}
+      ref={elementHandler.register}
       data-is-focused={nav.isFocused()}
       style={props.style}
     >

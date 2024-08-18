@@ -1,5 +1,5 @@
 import type { NodeId } from "../id.js";
-import { getItemNode, traverseNodes } from "../tree.js";
+import { traverseNodes } from "../tree.js";
 import type { NavigationDirection } from "../navigation.js";
 import {
   type NavigationHandler,
@@ -8,9 +8,9 @@ import {
 } from "../handler.js";
 import { parentHandler } from "./default.js";
 import { focusHandler } from "./focus.js";
-import { createProvider, type Provider } from "../provider.js";
+import { queryable } from "../query.js";
 
-export const PositionProvider: Provider<DOMRect> = createProvider("position");
+export const NodePosition = queryable<DOMRect>("Position");
 
 /**
  * @category Handler
@@ -20,8 +20,7 @@ export const spatialMovement: NavigationHandler = (node, action, next) => {
     return next();
   }
 
-  const focusedNode = getItemNode(node.tree, node.tree.focusedId);
-  const focusedPos = PositionProvider.extract(focusedNode);
+  const focusedPos = NodePosition.query(node.tree, node.tree.focusedId);
   if (focusedPos == null) {
     return next();
   }
@@ -37,7 +36,7 @@ export const spatialMovement: NavigationHandler = (node, action, next) => {
     //   return;
     // }
 
-    const potentialPos = PositionProvider.extract(potentialNode);
+    const potentialPos = NodePosition.query(node.tree, potentialNode.id);
     if (potentialPos == null) {
       return;
     }

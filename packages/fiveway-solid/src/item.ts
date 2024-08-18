@@ -14,23 +14,19 @@ import {
   connectNode,
   updateNode,
   removeNode,
-  PositionProvider,
   isFocused,
   focusNode,
   scopedId,
   selectNode,
 } from "@fiveway/core";
-import { useNavigationContext } from "./context.js";
-import { ElementProvider } from "./hooks.jsx";
+import { useNavigationContext } from "./context.jsx";
 import type { NodeHandle, NodeOptions } from "./node.jsx";
-
-export type ItemOptions = NodeOptions
 
 export type ItemHandle = NodeHandle & {
   select: () => void;
 };
 
-export function createNavigationItem(options: ItemOptions): ItemHandle {
+export function createNavigationItem(options: NodeOptions): ItemHandle {
   const { tree, parentNode, focusedId } = useNavigationContext();
 
   const node = createItemNode(tree, {
@@ -52,14 +48,6 @@ export function createNavigationItem(options: ItemOptions): ItemHandle {
     });
   });
 
-  const registerElement = (el: HTMLElement) => {
-    ElementProvider.provide(node, el);
-
-    PositionProvider.provide(node, () => {
-      return el.getBoundingClientRect();
-    });
-  };
-
   return {
     id: node.id,
     isFocused: createLazyMemo(on(focusedId, () => isFocused(tree, node.id))),
@@ -73,14 +61,10 @@ export function createNavigationItem(options: ItemOptions): ItemHandle {
     select: (nodeId?: NodeId) => {
       selectNode(tree, nodeId != null ? scopedId(parentNode, nodeId) : node.id);
     },
-    registerElement,
-    provide: (provider, value) => {
-      provider.provide(node, value);
-    },
   };
 }
 
-export type ItemProps = ItemOptions & {
+export type ItemProps = NodeOptions & {
   children: JSX.Element | ((node: ItemHandle) => JSX.Element);
 };
 

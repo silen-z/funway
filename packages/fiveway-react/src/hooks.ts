@@ -1,10 +1,4 @@
-import {
-  useCallback,
-  useEffect,
-  useSyncExternalStore,
-  useRef,
-  useState,
-} from "react";
+import { useCallback, useEffect, useSyncExternalStore, useRef } from "react";
 import {
   type NodeId,
   type FocusOptions,
@@ -13,10 +7,6 @@ import {
   registerListener,
   focusNode,
   scopedId,
-  createProvider,
-  type NavigationNode,
-  type NavigationTree,
-  PositionProvider,
 } from "@fiveway/core";
 import { useNavigationContext } from "./context.js";
 
@@ -102,51 +92,4 @@ export function useSelect(scope?: NodeId) {
     },
     [tree, scope]
   );
-}
-
-export const ElementProvider = createProvider<HTMLElement>("element");
-
-/**
- * @internal
- */
-export function useRegisterElement(node: NavigationNode) {
-  return useCallback((element: HTMLElement | null) => {
-    ElementProvider.provide(node, element ?? null);
-
-    PositionProvider.provide(node, () => {
-      return element?.getBoundingClientRect() ?? null;
-    });
-  }, []);
-}
-
-const noopSubscribe = () => () => {};
-
-/**
- * @internal
- */
-export function useLazyIsFocused(tree: NavigationTree, nodeId: NodeId) {
-  const [subscribed, setSubscribed] = useState(false);
-
-  const subscribe = useCallback(
-    (callback: () => void) =>
-      registerListener(tree, {
-        type: "focuschange",
-        node: nodeId,
-        fn: callback,
-      }),
-    [tree, nodeId]
-  );
-
-  const subscribedValue = useSyncExternalStore(
-    subscribed ? subscribe : noopSubscribe,
-    () => isFocused(tree, nodeId)
-  );
-
-  return () => {
-    if (!subscribed) {
-      setSubscribed(true);
-    }
-
-    return subscribedValue;
-  };
 }

@@ -3,7 +3,7 @@
   "type": "module",
   "version": "0.2.1",
   "scripts": {
-    "build": "tsc --project ."
+    "build": "tsc -b"
   },
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",

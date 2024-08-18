@@ -15,14 +15,12 @@ import {
   connectNode,
   updateNode,
   removeNode,
-  PositionProvider,
   isFocused,
   focusNode,
   scopedId,
   type FocusOptions,
 } from "@fiveway/core";
-import { ElementProvider } from "./hooks.jsx";
-import { useNavigationContext } from "./context.js";
+import { useNavigationContext } from "./context.jsx";
 import { NodeContext, type NodeHandle, type NodeOptions } from "./node.jsx";
 
 export type ContainerHandle = NodeHandle & {
@@ -53,14 +51,6 @@ export function createNavigationContainer(
     });
   });
 
-  const registerElement = (el: HTMLElement) => {
-    ElementProvider.provide(node, el);
-
-    PositionProvider.provide(node, () => {
-      return el.getBoundingClientRect();
-    });
-  };
-
   return {
     id: node.id,
     isFocused: createLazyMemo(on(focusedId, () => isFocused(tree, node.id))),
@@ -71,12 +61,6 @@ export function createNavigationContainer(
         options
       );
     },
-    provide: (provider, value) => {
-      createEffect(() => {
-        provider.provide(node, value());
-      });
-    },
-    registerElement,
     Context: (props: ParentProps) => (
       <NodeContext node={node.id}>{props.children}</NodeContext>
     ),

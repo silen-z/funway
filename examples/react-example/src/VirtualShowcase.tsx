@@ -3,7 +3,8 @@ import {
   verticalHandler,
   directChildId,
   gridHandler,
-  GridPositionProvider,
+  defaultHandler,
+  GridPosition,
 } from "@fiveway/core";
 import {
   useNavigationContainer,
@@ -193,26 +194,29 @@ export function VirtualGrid() {
     >
       <div className={css.grid} style={{ "--cols": cols } as CSSProperties}>
         <nav.Context>
-          {mapRange(items, gridRange, (item) => (
-            <NavigationItem
-              key={item.id}
-              id={item.id}
-              order={item.order}
-              onSelect={() => nav.focus("#")}
-            >
-              {(node) => {
-                node.provide(GridPositionProvider, {
-                  row: Math.floor(item.order / cols),
-                  col: item.order % cols,
-                });
-                return (
+          {mapRange(items, gridRange, (item) => {
+            const gridItemHandler = GridPosition.handler({
+              row: Math.floor(item.order / cols),
+              col: item.order % cols,
+            });
+
+            return (
+              <NavigationItem
+                key={item.id}
+                id={item.id}
+                order={item.order}
+                handler={defaultHandler
+                  .prepend(gridItemHandler)
+                  .onSelect(() => nav.focus("#"))}
+              >
+                {(node) => (
                   <div className={css.item} data-is-focused={node.isFocused()}>
                     {item.label}
                   </div>
-                );
-              }}
-            </NavigationItem>
-          ))}
+                )}
+              </NavigationItem>
+            );
+          })}
         </nav.Context>
       </div>
     </div>

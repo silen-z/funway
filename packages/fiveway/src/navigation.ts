@@ -6,7 +6,8 @@ export type NavigationDirection = "up" | "down" | "left" | "right";
 export type DefaultNavigationAction =
   | { kind: "select" }
   | { kind: "move"; direction: NavigationDirection | "back" }
-  | { kind: "focus"; direction: NavigationDirection | "initial" | null };
+  | { kind: "focus"; direction: NavigationDirection | "initial" | null }
+  | { kind: "query"; key: string; value: unknown | null };
 
 export interface Register {
   // action: DefaultNavigationAction;

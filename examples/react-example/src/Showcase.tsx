@@ -1,11 +1,10 @@
 import { useState } from "react";
 import {
-  GridPositionProvider,
   defaultHandler,
   gridHandler,
+  GridPosition,
   horizontalHandler,
   initialHandler,
-  selectHandler,
   verticalHandler,
 } from "@fiveway/core";
 import {
@@ -29,46 +28,58 @@ export function Showcase() {
 
       <div className={css.layout}>
         <nav.Context>
-          <NavigationContainer id="verticalList">
-            {(node) => {
-              node.provide(GridPositionProvider, { row: 1, col: 1 });
-              return <ListShowcase type="vertical" />;
-            }}
+          <NavigationContainer
+            id="verticalList"
+            handler={defaultHandler.prepend(
+              GridPosition.handler({ row: 1, col: 1 })
+            )}
+          >
+            <ListShowcase type="vertical" />
           </NavigationContainer>
 
-          <NavigationContainer id="horizontalList">
-            {(node) => {
-              node.provide(GridPositionProvider, { row: 1, col: 2 });
-              return <ListShowcase type="horizontal" />;
-            }}
+          <NavigationContainer
+            id="horizontalList"
+            handler={defaultHandler.prepend(
+              GridPosition.handler({ row: 1, col: 2 })
+            )}
+          >
+            <ListShowcase type="horizontal" />
           </NavigationContainer>
 
-          <NavigationContainer id="virtual">
-            {(node) => {
-              node.provide(GridPositionProvider, { row: 1, col: 3 });
-              return <VirtualList />;
-            }}
+          <NavigationContainer
+            id="virtual"
+            handler={defaultHandler.prepend(
+              GridPosition.handler({ row: 1, col: 3 })
+            )}
+          >
+            <VirtualList />
           </NavigationContainer>
 
-          <NavigationContainer id="virtual-grid">
-            {(node) => {
-              node.provide(GridPositionProvider, { row: 1, col: 4 });
-              return <VirtualGrid />;
-            }}
+          <NavigationContainer
+            id="virtual-grid"
+            handler={defaultHandler.prepend(
+              GridPosition.handler({ row: 1, col: 4 })
+            )}
+          >
+            <VirtualGrid />
           </NavigationContainer>
 
-          <NavigationContainer id="spatial">
-            {(node) => {
-              node.provide(GridPositionProvider, { row: 2, col: 1 });
-              return <SpatialShowcase />;
-            }}
+          <NavigationContainer
+            id="spatial"
+            handler={defaultHandler.prepend(
+              GridPosition.handler({ row: 2, col: 1 })
+            )}
+          >
+            <SpatialShowcase />
           </NavigationContainer>
 
-          <NavigationContainer id="conditional">
-            {(node) => {
-              node.provide(GridPositionProvider, { row: 2, col: 2 });
-              return <ConditionalShowcase />;
-            }}
+          <NavigationContainer
+            id="conditional"
+            handler={defaultHandler.prepend(
+              GridPosition.handler({ row: 2, col: 2 })
+            )}
+          >
+            <ConditionalShowcase />
           </NavigationContainer>
         </nav.Context>
       </div>
@@ -130,7 +141,7 @@ function ConditionalShowcase() {
         <nav.Context>
           <NavigationItem
             id="toggle"
-            handler={selectHandler(() => {
+            handler={defaultHandler.onSelect(() => {
               set((on) => !on);
               if (!isOn) {
                 setTimeout(() => nav.focus("content"));
@@ -156,7 +167,7 @@ function ConditionalShowcase() {
             {isOn && (
               <NavigationItem
                 id="parking"
-                handler={selectHandler(() => {
+                handler={defaultHandler.onSelect(() => {
                   set(false);
                 })}
               >

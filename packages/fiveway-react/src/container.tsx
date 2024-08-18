@@ -8,7 +8,8 @@ import {
 } from "@fiveway/core";
 import { useNavigationContext, NavigationContext } from "./context.js";
 import type { NodeOptions, NodeHandle } from "./node.js";
-import { useFocus, useLazyIsFocused, useRegisterElement } from "./hooks.js";
+import { useFocus } from "./hooks.js";
+import { useLazyIsFocused } from "./internal.js";
 
 export type ContainerHandle = NodeHandle & {
   Context: React.FunctionComponent<{ children: ReactNode }>;
@@ -39,8 +40,6 @@ export function useNavigationContainer(options: NodeOptions): ContainerHandle {
     };
   }, [tree, nodeId]);
 
-  const registerElement = useRegisterElement(nodeRef.current);
-
   const Context: ContainerHandle["Context"] = useCallback(
     (props: { children: ReactNode }) => {
       const context = {
@@ -66,9 +65,7 @@ export function useNavigationContainer(options: NodeOptions): ContainerHandle {
     id: nodeId,
     isFocused,
     focus: (id, options) => focus(id ?? nodeId, options),
-    provide: (provider, value) => provider.provide(nodeRef.current, value),
     Context,
-    registerElement,
   };
 }
 

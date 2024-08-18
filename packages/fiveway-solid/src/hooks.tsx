@@ -3,15 +3,12 @@ import {
   type NodeId,
   type FocusOptions,
   selectNode,
-  createProvider,
   scopedId,
   focusNode,
   isFocused,
   registerListener,
 } from "@fiveway/core";
-import { useNavigationContext } from "./context.js";
-
-export const ElementProvider = createProvider<HTMLElement>("element");
+import { useNavigationContext } from "./context.jsx";
 
 export function useIsFocused(nodeId: NodeId): Accessor<boolean> {
   const { tree, parentNode } = useNavigationContext();

@@ -1,5 +1,5 @@
 import { directChildId, type NodeId } from "../id.js";
-import { getNode, traverseNodes } from "../tree.js";
+import { traverseNodes } from "../tree.js";
 import type { NavigationDirection } from "../navigation.js";
 import {
   type NavigationHandler,
@@ -8,14 +8,14 @@ import {
 } from "../handler.js";
 import { parentHandler } from "./default.js";
 import { focusHandler } from "./focus.js";
-import { createProvider, type Provider } from "../provider.js";
+import { queryable } from "../query.js";
 
 export type GridPosition = {
   row: number;
   col: number;
 };
-export const GridPositionProvider: Provider<GridPosition> =
-  createProvider("GridPosition");
+
+export const GridPosition = queryable<GridPosition>("GridPosition");
 
 const distanceFns: Record<
   NavigationDirection,
@@ -65,9 +65,7 @@ export const gridMovement: NavigationHandler = (node, action, next) => {
     return next();
   }
 
-  const focusedPos = GridPositionProvider.extract(
-    getNode(node.tree, focusedId)
-  );
+  const focusedPos = GridPosition.query(node.tree, focusedId);
   if (focusedPos == null) {
     return next();
   }
@@ -83,7 +81,7 @@ export const gridMovement: NavigationHandler = (node, action, next) => {
     //   return;
     // }
 
-    const potentialPos = GridPositionProvider.extract(potentialNode);
+    const potentialPos = GridPosition.query(node.tree, potentialNode.id);
     if (potentialPos == null) {
       return;
     }

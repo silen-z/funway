@@ -1,6 +1,6 @@
 import type { Accessor, JSX } from "solid-js";
-import type { NavigationHandler, NodeId, Provider } from "@fiveway/core";
-import { useNavigationContext, NavigationContext } from "./context.js";
+import type { NavigationHandler, NodeId } from "@fiveway/core";
+import { useNavigationContext, NavigationContext } from "./context.jsx";
 
 export type NodeOptions = {
   id: NodeId;
@@ -13,11 +13,6 @@ export type NodeHandle = {
   id: NodeId;
   isFocused: Accessor<boolean>;
   focus: (nodeId?: NodeId) => void;
-  provide: <P extends Provider<unknown>>(
-    provider: P,
-    value: P extends Provider<infer V> ? Accessor<V> : never
-  ) => void;
-  registerElement: (el: HTMLElement) => void;
 };
 
 export function NodeContext(props: { node: NodeId; children: JSX.Element }) {

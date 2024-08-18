@@ -2,6 +2,7 @@ import type { NodeId } from "./id.js";
 import type { NavigationAction } from "./navigation.js";
 import type { NavigationNode } from "./node.js";
 import { getNode, type NavigationTree } from "./tree.js";
+import { selectHandler } from "./handlers/default.js";
 
 export type HandlerNext = {
   (): NodeId | null;
@@ -36,6 +37,14 @@ export function runHandler(
 
 export type HandlerChain = NavigationHandler & {
   prepend(another: NavigationHandler): HandlerChain;
+  onSelect(fn: () => void): HandlerChain;
+  // TODO consider other helper handlers
+  // onLeft(fn: () => void): HandlerChain;
+  // onRight(fn: () => void): HandlerChain;
+  // onUp(fn: () => void): HandlerChain;
+  // onDown(fn: () => void): HandlerChain;
+  // onBack(fn: () => void): HandlerChain;
+  // onMove(fn: (d: NavigationDirection) => void): HandlerChain;
 };
 
 /**
@@ -51,7 +60,7 @@ export function chainHandlers(...handlers: NavigationHandler[]): HandlerChain {
 }
 
 function chainedHandler(chain: ChainLink | null) {
-  const handler = (
+  const chained = (
     node: NavigationNode,
     action: NavigationAction,
     next: HandlerNext
@@ -75,10 +84,15 @@ function chainedHandler(chain: ChainLink | null) {
     return dispatch(chain);
   };
 
-  handler.prepend = (handler: NavigationHandler) =>
+  chained.prepend = (handler: NavigationHandler) =>
     chainedHandler({ handler, next: chain });
 
-  return handler;
+  chained.onSelect = (fn: () => void) => {
+    const handler = selectHandler(fn);
+    return chainedHandler({ handler, next: chain });
+  };
+
+  return chained;
 }
 
 type ChainLink = {
