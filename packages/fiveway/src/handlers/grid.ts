@@ -8,14 +8,14 @@ import {
 } from "../handler.js";
 import { parentHandler } from "./default.js";
 import { focusHandler } from "./focus.js";
-import { queryable } from "../query.js";
+import { queryable, type Queryable } from "../query.js";
 
 export type GridPosition = {
   row: number;
   col: number;
 };
 
-export const GridPosition = queryable<GridPosition>("GridPosition");
+export const GridPosition: Queryable<GridPosition> = queryable("GridPosition");
 
 const distanceFns: Record<
   NavigationDirection,

@@ -195,10 +195,10 @@ export function VirtualGrid() {
       <div className={css.grid} style={{ "--cols": cols } as CSSProperties}>
         <nav.Context>
           {mapRange(items, gridRange, (item) => {
-            const gridItemHandler = GridPosition.handler({
+            const gridPosition = {
               row: Math.floor(item.order / cols),
               col: item.order % cols,
-            });
+            };
 
             return (
               <NavigationItem
@@ -206,8 +206,10 @@ export function VirtualGrid() {
                 id={item.id}
                 order={item.order}
                 handler={defaultHandler
-                  .prepend(gridItemHandler)
-                  .onSelect(() => nav.focus("#"))}
+                  .provide(GridPosition, gridPosition)
+                  .onSelect(() => {
+                    nav.focus("#");
+                  })}
               >
                 {(node) => (
                   <div className={css.item} data-is-focused={node.isFocused()}>

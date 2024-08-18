@@ -3,6 +3,7 @@ import type { NavigationAction } from "./navigation.js";
 import type { NavigationNode } from "./node.js";
 import { getNode, type NavigationTree } from "./tree.js";
 import { selectHandler } from "./handlers/default.js";
+import type { Queryable } from "./query.js";
 
 export type HandlerNext = {
   (): NodeId | null;
@@ -35,9 +36,17 @@ export function runHandler(
   return node.handler(node, action, next);
 }
 
+type QueryableValue<Q extends Queryable<any>> = Q extends Queryable<infer V>
+  ? V | null
+  : never;
+
 export type HandlerChain = NavigationHandler & {
   prepend(another: NavigationHandler): HandlerChain;
   onSelect(fn: () => void): HandlerChain;
+  provide<Q extends Queryable<any>>(
+    queryable: Q,
+    value: QueryableValue<Q> | (() => QueryableValue<Q>)
+  ): HandlerChain;
   // TODO consider other helper handlers
   // onLeft(fn: () => void): HandlerChain;
   // onRight(fn: () => void): HandlerChain;
@@ -89,6 +98,15 @@ function chainedHandler(chain: ChainLink | null) {
 
   chained.onSelect = (fn: () => void) => {
     const handler = selectHandler(fn);
+    return chainedHandler({ handler, next: chain });
+  };
+
+  chained.provide = <Q extends Queryable<any>>(
+    queryable: Q,
+    value: QueryableValue<Q> | (() => QueryableValue<Q>)
+  ) => {
+    const fn = typeof value !== "function" ? () => value : value;
+    const handler = queryable.handler(fn);
     return chainedHandler({ handler, next: chain });
   };
 

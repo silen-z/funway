@@ -8,10 +8,11 @@ import {
   handleAction,
   type NavigationAction,
   type HandlerChain,
+  type Queryable,
 } from "@fiveway/core";
 import { defaultEventMapping } from "@fiveway/core/dom";
 
-export const NodeElement = queryable<HTMLElement>("Element");
+export const NodeElement: Queryable<HTMLElement> = queryable("Element");
 
 export type ElementHandler = HandlerChain & {
   register: (e: HTMLElement | null) => void;

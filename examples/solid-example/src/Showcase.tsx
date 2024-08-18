@@ -30,27 +30,21 @@ export function Showcase() {
         <nav.Context>
           <NavigationContainer
             id="verticalList"
-            handler={defaultHandler.prepend(
-              GridPosition.handler({ row: 1, col: 1 })
-            )}
+            handler={defaultHandler.provide(GridPosition, { row: 1, col: 1 })}
           >
             <ListShowcase type="vertical" />
           </NavigationContainer>
 
           <NavigationContainer
             id="horizontalList"
-            handler={defaultHandler.prepend(
-              GridPosition.handler({ row: 1, col: 2 })
-            )}
+            handler={defaultHandler.provide(GridPosition, { row: 1, col: 2 })}
           >
             <ListShowcase type="horizontal" />
           </NavigationContainer>
 
           <NavigationContainer
             id="spatial"
-            handler={defaultHandler.prepend(
-              GridPosition.handler({ row: 1, col: 3 })
-            )}
+            handler={defaultHandler.provide(GridPosition, { row: 1, col: 3 })}
           >
             <SpatialShowcase />
           </NavigationContainer>

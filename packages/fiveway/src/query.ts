@@ -3,19 +3,21 @@ import type { NodeId } from "./id.js";
 import type { NavigationAction } from "./navigation.js";
 import type { NavigationTree } from "./tree.js";
 
-export function queryable<T extends object>(key: string) {
+export type Queryable<T> = {
+  handler: (v: () => T | null) => NavigationHandler;
+  query: (tree: NavigationTree, id: NodeId) => T | null;
+};
+
+export function queryable<T>(key: string): Queryable<T> {
   return {
-    handler:
-      (value: (() => T | null) | T): NavigationHandler =>
-      (_, action, next) => {
-        if (action.kind === "query" && action.key === key) {
-          action.value = typeof value === "function" ? value() : value;
-          return null;
-        }
+    handler: (value) => (_, action, next) => {
+      if (action.kind === "query" && action.key === key) {
+        action.value = value();
+        return null;
+      }
 
-        return next();
-      },
-
+      return next();
+    },
     query: (tree: NavigationTree, id: NodeId) => {
       let query: NavigationAction = { kind: "query", key, value: null };
       runHandler(tree, id, query);

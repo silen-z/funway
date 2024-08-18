@@ -8,9 +8,9 @@ import {
 } from "../handler.js";
 import { parentHandler } from "./default.js";
 import { focusHandler } from "./focus.js";
-import { queryable } from "../query.js";
+import { queryable, type Queryable } from "../query.js";
 
-export const NodePosition = queryable<DOMRect>("Position");
+export const NodePosition: Queryable<DOMRect> = queryable("NodePosition");
 
 /**
  * @category Handler
