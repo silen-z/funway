@@ -10,6 +10,7 @@ import { type ListenerTree, callListeners } from "./events.js";
 import { runHandler } from "./handler.js";
 import { rootHandler } from "./handlers/default.js";
 import { binarySearch, swapRemove } from "./array.js";
+import type { NavigationDirection } from "./navigation.js";
 
 export type NavigationTree = {
   nodes: Map<NodeId, NavigationNode>;
@@ -65,6 +66,7 @@ export function connectNode(tree: NavigationTree, node: NavigationNode) {
   node.depth = parentNode.depth + 1;
 
   if (node.type === "container") {
+    // TODO optimise iteration through all nodes
     for (const n of tree.nodes.values()) {
       if (n.parent === node.id) {
         connectNode(tree, n);
@@ -73,13 +75,7 @@ export function connectNode(tree: NavigationTree, node: NavigationNode) {
   }
 
   if (isParent(tree.focusedId, node.id)) {
-    const nodeToFocus = runHandler(tree, tree.focusedId, {
-      kind: "focus",
-      direction: "initial",
-    });
-    if (nodeToFocus) {
-      focusNode(tree, nodeToFocus, { runHandler: false });
-    }
+    focusNode(tree, tree.focusedId, { direction: "initial" });
   }
 }
 
@@ -94,30 +90,21 @@ export function removeNode(tree: NavigationTree, nodeId: NodeId) {
   }
 
   if (node.connected) {
-    disconnectNode(tree, node.id);
+    disconnectNode(tree, nodeId);
   }
 
-  tree.nodes.delete(node.id);
+  tree.nodes.delete(nodeId);
 
-  if (isFocused(tree, node.id)) {
-    let targetNode = null;
-
+  if (isFocused(tree, nodeId)) {
     idsToRoot(node.parent!, (id) => {
-      if (id === node.id) {
+      // skip the removed id
+      if (id === nodeId) {
         return true;
       }
 
-      targetNode = runHandler(tree, id, {
-        kind: "focus",
-        direction: "initial",
-      });
-      if (targetNode !== null) {
+      if (focusNode(tree, id, { direction: "initial" })) {
         return false;
       }
-    });
-
-    focusNode(tree, targetNode ?? ROOT, {
-      runHandler: false,
     });
   }
 }
@@ -160,7 +147,7 @@ function disconnectNode(tree: NavigationTree, nodeId: NodeId) {
 }
 
 export type FocusOptions = {
-  runHandler?: boolean;
+  direction?: NavigationDirection | "initial";
 };
 
 export function focusNode(
@@ -173,25 +160,21 @@ export function focusNode(
     return false;
   }
 
-  if (tree.focusedId === targetId) {
+  const resolvedId = runHandler(tree, targetId, {
+    kind: "focus",
+    direction: options.direction ?? null,
+  });
+
+  if (tree.focusedId === resolvedId) {
     return true;
   }
 
-  if (options.runHandler ?? true) {
-    const resolvedId = runHandler(tree, targetId, {
-      kind: "focus",
-      direction: null,
-    });
-
-    if (resolvedId === null) {
-      return false;
-    }
-
-    targetId = resolvedId;
+  if (resolvedId === null) {
+    return false;
   }
 
   const lastFocused = tree.focusedId;
-  tree.focusedId = targetId;
+  tree.focusedId = resolvedId;
 
   convergingPaths(lastFocused, tree.focusedId, (id) => {
     callListeners(tree, id, "focuschange");

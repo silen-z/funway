@@ -1,83 +1,50 @@
 import { type NodeId, directChildId } from "../id.js";
-import type { ContainerNode } from "../node.js";
+import type { ContainerNode, NavigationNode } from "../node.js";
 import {
-  type NavigationHandler,
   type HandlerChain,
   chainHandlers,
+  type HandlerNext,
 } from "../handler.js";
 import { parentHandler } from "./default.js";
 import { type FocusDirection, focusHandler } from "./focus.js";
-import type { NavigationDirection } from "../navigation.js";
+import type { NavigationAction, NavigationDirection } from "../navigation.js";
 
 /**
  * @category Handler
  */
-export const verticalMovement: NavigationHandler = (node, action, next) => {
+export function verticalMovementHandler(
+  node: NavigationNode,
+  action: NavigationAction,
+  next: HandlerNext
+) {
   if (node.type !== "container") {
-    throw Error("verticalList handler can only be used on containers");
+    throw Error("verticalMovementHandler can only be used on containers");
   }
 
-  if (action.kind === "move") {
-    switch (action.direction) {
-      case "up": {
-        let childId = directChildId(node.id, node.tree.focusedId);
-        if (childId === null) {
-          return next();
-        }
+  if (action.kind !== "move") {
+    return next();
+  }
 
-        for (;;) {
-          const prevChildId = previousChild(node, childId);
-          if (prevChildId === null) {
-            return next();
-          }
+  if (action.direction === "up") {
+    const previousId = findPreviousChild(node, (id) =>
+      next(id, { kind: "focus", direction: "up" })
+    );
 
-          const targetNode = next(prevChildId, {
-            kind: "focus",
-            direction: action.direction,
-          });
+    return previousId ?? next();
+  }
 
-          if (targetNode === null) {
-            childId = prevChildId;
-            continue;
-          }
+  if (action.direction === "down") {
+    const nextId = findNextChild(node, (id) =>
+      next(id, { kind: "focus", direction: "down" })
+    );
 
-          return targetNode;
-        }
-      }
-      case "down": {
-        let childId = directChildId(node.id, node.tree.focusedId);
-        if (childId === null) {
-          return next();
-        }
-
-        for (;;) {
-          const nextChildId = nextChild(node, childId);
-          if (nextChildId === null) {
-            return next();
-          }
-
-          const targetNode = next(nextChildId, {
-            kind: "focus",
-            direction: action.direction,
-          });
-
-          if (targetNode === null) {
-            childId = nextChildId;
-            continue;
-          }
-
-          return targetNode;
-        }
-      }
-    }
+    return nextId ?? next();
   }
 
   return next();
-};
+}
 
-function verticalFocusDirection(
-  dir: NavigationDirection | "initial" | null
-): FocusDirection {
+function verticalFocusDirection(dir: NavigationDirection | "initial" | null) {
   if (dir === "up") {
     return "back";
   }
@@ -92,79 +59,46 @@ function verticalFocusDirection(
  */
 export const verticalHandler: HandlerChain = chainHandlers(
   focusHandler({ direction: verticalFocusDirection }),
-  verticalMovement,
+  verticalMovementHandler,
   parentHandler
 );
 
 /**
  * @category Handler
  */
-export const horizontalMovement: NavigationHandler = (node, action, next) => {
+export function horizontalMovementHandler(
+  node: NavigationNode,
+  action: NavigationAction,
+  next: HandlerNext
+) {
   if (node.type !== "container") {
-    throw Error("horizontalList handler can only be used on containers");
+    throw Error("horizontalMovementHandler can only be used on containers");
   }
 
-  if (action.kind === "move") {
-    switch (action.direction) {
-      case "left": {
-        let childId = directChildId(node.id, node.tree.focusedId);
-        if (childId === null) {
-          return next();
-        }
+  if (action.kind !== "move") {
+    return next();
+  }
 
-        for (;;) {
-          const prevChildId = previousChild(node, childId);
-          if (prevChildId === null) {
-            return next();
-          }
+  if (action.direction === "left") {
+    const previousId = findPreviousChild(node, (id) =>
+      next(id, { kind: "focus", direction: "left" })
+    );
 
-          const targetNode = next(prevChildId, {
-            kind: "focus",
-            direction: action.direction,
-          });
+    return previousId ?? next();
+  }
 
-          if (targetNode === null) {
-            childId = prevChildId;
-            continue;
-          }
+  if (action.direction === "right") {
+    const nextId = findNextChild(node, (id) =>
+      next(id, { kind: "focus", direction: "right" })
+    );
 
-          return targetNode;
-        }
-      }
-
-      case "right": {
-        let childId = directChildId(node.id, node.tree.focusedId);
-        if (childId === null) {
-          return next();
-        }
-        for (;;) {
-          const nextChildId = nextChild(node, childId);
-          if (nextChildId === null) {
-            return next();
-          }
-
-          const targetNode = next(nextChildId, {
-            kind: "focus",
-            direction: action.direction,
-          });
-
-          if (targetNode === null) {
-            childId = nextChildId;
-            continue;
-          }
-
-          return targetNode;
-        }
-      }
-    }
+    return nextId ?? next();
   }
 
   return next();
-};
+}
 
-function horizontalFocusDirection(
-  dir: NavigationDirection | "initial" | null
-): FocusDirection {
+function horizontalFocusDirection(dir: NavigationDirection | "initial" | null) {
   if (dir === "left") {
     return "back";
   }
@@ -179,41 +113,57 @@ function horizontalFocusDirection(
  */
 export const horizontalHandler: HandlerChain = chainHandlers(
   focusHandler({ direction: horizontalFocusDirection }),
-  horizontalMovement,
+  horizontalMovementHandler,
   parentHandler
 );
 
-function previousChild(node: ContainerNode, nodeId: NodeId): NodeId | null {
-  const currentIndex = node.children.findIndex((child) => child.id === nodeId);
-
-  if (currentIndex === -1) {
-    throw new Error("unexpected");
+function findNextChild(
+  node: ContainerNode,
+  check: (id: NodeId) => NodeId | null
+) {
+  const currentChildId = directChildId(node.id, node.tree.focusedId);
+  if (currentChildId === null) {
+    return null;
   }
 
-  let prexIndex = currentIndex - 1;
-  while (prexIndex >= 0) {
-    if (node.children[prexIndex]?.active) {
-      return node.children[prexIndex]!.id;
+  const currentIndex = node.children.findIndex((c) => c.id === currentChildId);
+
+  for (let i = currentIndex + 1; i < node.children.length; i++) {
+    const child = node.children[i]!;
+    if (!child.active) {
+      continue;
     }
-    prexIndex -= 1;
+
+    const nextId = check(child.id);
+    if (nextId !== null) {
+      return nextId;
+    }
   }
 
   return null;
 }
 
-function nextChild(node: ContainerNode, nodeId: NodeId): NodeId | null {
-  const currentIndex = node.children.findIndex((child) => child.id === nodeId);
-
-  if (currentIndex === -1) {
-    throw new Error("unexpected");
+function findPreviousChild(
+  node: ContainerNode,
+  check: (id: NodeId) => NodeId | null
+) {
+  const currentChildId = directChildId(node.id, node.tree.focusedId);
+  if (currentChildId === null) {
+    return null;
   }
 
-  let nextIndex = currentIndex + 1;
-  while (nextIndex < node.children.length) {
-    if (node.children[nextIndex]?.active) {
-      return node.children[nextIndex]!.id;
+  const currentIndex = node.children.findIndex((c) => c.id === currentChildId);
+
+  for (let i = currentIndex - 1; i >= 0; i--) {
+    const child = node.children[i]!;
+    if (!child.active) {
+      continue;
     }
-    nextIndex += 1;
+
+    const nextId = check(child.id);
+    if (nextId !== null) {
+      return nextId;
+    }
   }
 
   return null;

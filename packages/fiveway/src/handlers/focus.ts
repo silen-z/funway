@@ -1,12 +1,13 @@
-import { childrenIterator } from "../children.js";
 import type { NavigationDirection } from "../navigation.js";
 import { type NavigationHandler } from "../handler.js";
 import { isParent } from "../id.js";
 
-export type FocusDirection = "front" | "back" | undefined;
+export type FocusDirection = "front" | "back";
 
 export type FocusHandlerConfig = {
-  direction?: (d: NavigationDirection | "initial" | null) => FocusDirection;
+  direction?: (
+    d: NavigationDirection | "initial" | null
+  ) => FocusDirection | undefined;
 };
 
 /**
@@ -26,29 +27,33 @@ export function focusHandler(
       return node.id;
     }
 
-    // if (action.direction === "initial" && node.initial !== null) {
-    //   const initialChild = node.children.find(
-    //     (c) => c.active && c.id === node.initial
-    //   );
-    //   if (initialChild == null) {
-    //     return null;
-    //   }
+    const direction = config.direction?.(action.direction) ?? "front";
 
-    //   return next(initialChild.id, action);
-    // }
+    if (direction === "back") {
+      for (let i = node.children.length - 1; i >= 0; i--) {
+        const child = node.children[i]!;
+        if (!child.active) {
+          continue;
+        }
 
-    const direction = config.direction?.(action.direction);
-    const children = childrenIterator(node, direction);
+        const nextId = next(child.id);
+        if (nextId !== null) {
+          return nextId;
+        }
+      }
 
-    for (const child of children) {
+      return null;
+    }
+
+    for (let i = 0; i < node.children.length; i++) {
+      const child = node.children[i]!;
       if (!child.active) {
         continue;
       }
 
-      const focusableNode = next(child.id, action);
-
-      if (focusableNode !== null) {
-        return focusableNode;
+      const nextId = next(child.id);
+      if (nextId !== null) {
+        return nextId;
       }
     }
 
@@ -67,19 +72,27 @@ export const captureHandler: NavigationHandler = (node, _, next) => {
 
 export function initialHandler(id: string): NavigationHandler {
   return (node, action, next) => {
-    if (
-      node.type === "container" &&
-      action.kind === "focus" &&
-      action.direction === "initial"
-    ) {
-      const initialChild = node.children.find(
-        (c) => c.active && c.id === `${node.id}/${id}`
-      );
-      if (initialChild == null) {
+    const initialId = `${node.id}/${id}`;
+
+    if (node.type !== "container" || action.kind !== "focus") {
+      return next();
+    }
+
+    if (action.direction === "initial") {
+      const child = node.children.find((c) => c.active && c.id === initialId);
+      if (child == null) {
         return null;
       }
 
-      return next(`${node.id}/${id}`);
+      return next(initialId);
+    }
+
+    if (action.direction === null) {
+      const child = node.children.find((c) => c.active && c.id === initialId);
+
+      if (child != null) {
+        return next(child.id);
+      }
     }
 
     return next();
