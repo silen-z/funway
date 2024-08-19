@@ -1,14 +1,14 @@
 import { useRef, useMemo, useEffect } from "react";
 import {
-  queryable,
-  chainHandlers,
-  NodePosition,
-  registerListener,
   type NavigationTree,
-  handleAction,
   type NavigationAction,
   type HandlerChain,
   type Queryable,
+  handleAction,
+  chainedHandler,
+  registerListener,
+  queryable,
+  NodePosition,
 } from "@fiveway/core";
 import { defaultEventMapping } from "@fiveway/core/dom";
 
@@ -22,12 +22,11 @@ export function useElementHandler() {
   const elementRef = useRef<HTMLElement | null>(null);
 
   return useMemo(() => {
-    const handler = chainHandlers(
-      NodeElement.handler(() => elementRef.current),
-      NodePosition.handler(
-        () => elementRef.current?.getBoundingClientRect() ?? null
-      )
-    ) as ElementHandler;
+    const position = () => elementRef.current?.getBoundingClientRect() ?? null;
+
+    const handler = chainedHandler()
+      .prepend(NodeElement.handler(() => elementRef.current))
+      .prepend(NodePosition.handler(position)) as ElementHandler;
 
     handler.register = (element) => {
       elementRef.current = element;

@@ -10,13 +10,17 @@ export type Queryable<T> = {
 
 export function queryable<T>(key: string): Queryable<T> {
   return {
-    handler: (value) => (_, action, next) => {
-      if (action.kind === "query" && action.key === key) {
-        action.value = value();
-        return null;
-      }
+    handler: (value) => {
+      const queryHandler: NavigationHandler = (_, action, next) => {
+        if (action.kind === "query" && action.key === key) {
+          action.value = value();
+          return null;
+        }
 
-      return next();
+        return next();
+      };
+
+      return queryHandler;
     },
     query: (tree: NavigationTree, id: NodeId) => {
       let query: NavigationAction = { kind: "query", key, value: null };
@@ -25,3 +29,9 @@ export function queryable<T>(key: string): Queryable<T> {
     },
   };
 }
+
+export type QueryableValue<Q extends Queryable<any>> = Q extends Queryable<
+  infer V
+>
+  ? V | null
+  : never;

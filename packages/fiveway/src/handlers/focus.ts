@@ -15,10 +15,8 @@ export type FocusHandlerConfig = {
  * @param config
  * @returns
  */
-export function focusHandler(
-  config: FocusHandlerConfig = {}
-): NavigationHandler {
-  return (node, action, next) => {
+function createFocusHandler(config: FocusHandlerConfig = {}) {
+  const focusHandler: NavigationHandler = (node, action, next) => {
     if (action.kind !== "focus") {
       return next();
     }
@@ -59,6 +57,8 @@ export function focusHandler(
 
     return null;
   };
+
+  return focusHandler;
 }
 
 export const captureHandler: NavigationHandler = (node, _, next) => {
@@ -70,8 +70,8 @@ export const captureHandler: NavigationHandler = (node, _, next) => {
   return id;
 };
 
-export function initialHandler(id: string): NavigationHandler {
-  return (node, action, next) => {
+function createInitialHandler(id: string) {
+  const initialHandler: NavigationHandler = (node, action, next) => {
     const initialId = `${node.id}/${id}`;
 
     if (node.type !== "container" || action.kind !== "focus") {
@@ -97,4 +97,11 @@ export function initialHandler(id: string): NavigationHandler {
 
     return next();
   };
+
+  return initialHandler;
 }
+
+export {
+  createFocusHandler as focusHandler,
+  createInitialHandler as initialHandler,
+};

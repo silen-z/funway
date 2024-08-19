@@ -5,7 +5,7 @@
     "example:react": "pnpm --filter \"@fiveway/react-example\" run dev",
     "example:solid": "pnpm --filter \"@fiveway/solid-example\" run dev",
     "dev:libs": "pnpm --filter \"@fiveway/core\" --filter \"@fiveway/react\" --filter \"@fiveway/solid\" --filter \"@fiveway/devtools\" --parallel run build --watch",
-    "build": "pnpm --filter \"@fiveway/core\" --filter \"@fiveway/react\" --filter \"@fiveway/solid\" run build"
+    "build": "pnpm --filter \"@fiveway/core\" --filter \"@fiveway/react\" --filter \"@fiveway/solid\" --filter \"@fiveway/devtools\" run build"
   },
   "devDependencies": {
     "typedoc": "^0.26.5",

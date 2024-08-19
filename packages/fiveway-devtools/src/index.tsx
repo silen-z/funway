@@ -1,4 +1,12 @@
-import { createEffect, createSignal, For, onCleanup, Show } from "solid-js";
+import {
+  createEffect,
+  createMemo,
+  createSignal,
+  For,
+  onCleanup,
+  Setter,
+  Show,
+} from "solid-js";
 import { render } from "solid-js/web";
 import {
   ContainerNode,
@@ -45,6 +53,7 @@ function DevtoolPanel(props: { tree: NavigationTree }) {
 
 function Sidebar(props: { tree: NavigationTree; close: () => void }) {
   const [side, setSide] = createSignal("right");
+  const [isAllExpanded, setAllExpanded] = createSignal(false);
 
   return (
     <div class={css.sidebar} data-side={side()}>
@@ -63,13 +72,23 @@ function Sidebar(props: { tree: NavigationTree; close: () => void }) {
         <Icon icon="ic:round-close" onClick={props.close} />
       </header>
       <div class={css.content}>
-        <VisualizeNode tree={props.tree} nodeId="#" />
+        <VisualizeNode
+          tree={props.tree}
+          nodeId="#"
+          isAllExpanded={isAllExpanded()}
+          setAllExpanded={setAllExpanded}
+        />
       </div>
     </div>
   );
 }
 
-function VisualizeNode(props: { tree: NavigationTree; nodeId: NodeId }) {
+function VisualizeNode(props: {
+  tree: NavigationTree;
+  nodeId: NodeId;
+  isAllExpanded: boolean;
+  setAllExpanded?: Setter<boolean>;
+}) {
   const [node, setNode] = createSignal<NavigationNode | undefined>(
     props.tree.nodes.get(props.nodeId),
     { equals: () => false }
@@ -104,7 +123,11 @@ function VisualizeNode(props: { tree: NavigationTree; nodeId: NodeId }) {
     onCleanup(cleanup);
   });
 
-  const [isOpen, setOpen] = createSignal(false);
+  const [isNodeOpen, setOpen] = createSignal(false);
+
+  const isOpen = createMemo(
+    () => isNodeOpen() || isNodeFocused() || props.isAllExpanded
+  );
 
   return (
     <Show when={node()}>
@@ -119,11 +142,28 @@ function VisualizeNode(props: { tree: NavigationTree; nodeId: NodeId }) {
               {node().id === "#" ? "root" : getLocalId(props.nodeId)}
             </span>
 
-            <Show when={node().type === "item" && isNodeFocused()}>
-              <span class={clsx(css.nodeTag, css.nodeTagSuccess)}>
-                <Icon icon="heroicons:viewfinder-dot-solid" /> focus
-              </span>
+            <Show when={node().id === "#"}>
+              <Icon
+                icon={
+                  props.isAllExpanded
+                    ? "bx:collapse-vertical"
+                    : "bx:expand-vertical"
+                }
+                onClick={() => props.setAllExpanded?.((e) => !e)}
+              />
             </Show>
+
+            <span
+              style={{
+                display:
+                  node().type === "item" && isNodeFocused()
+                    ? undefined
+                    : "none",
+              }}
+              class={clsx(css.nodeTag, css.nodeTagSuccess)}
+            >
+              <Icon icon="heroicons:viewfinder-dot-solid" /> focus
+            </span>
 
             <Show
               when={
@@ -144,13 +184,14 @@ function VisualizeNode(props: { tree: NavigationTree; nodeId: NodeId }) {
             </Show>
           </div>
           <Show when={node().type === "container"}>
-            <div
-              class={css.nodeContainer}
-              data-open={isNodeFocused() || isOpen()}
-            >
+            <div class={css.nodeContainer} data-open={isOpen()}>
               <For each={(node() as ContainerNode).children}>
                 {(child) => (
-                  <VisualizeNode tree={props.tree} nodeId={child.id} />
+                  <VisualizeNode
+                    tree={props.tree}
+                    nodeId={child.id}
+                    isAllExpanded={props.isAllExpanded}
+                  />
                 )}
               </For>
             </div>

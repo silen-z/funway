@@ -1,6 +1,6 @@
 import { createEffect, createSignal, onCleanup } from "solid-js";
 import {
-  chainHandlers,
+  chainedHandler,
   handleAction,
   NodePosition,
   queryable,
@@ -19,12 +19,12 @@ export type ElementHandler = HandlerChain & {
 };
 
 export function createElementHandler() {
-  let [element, setElement] = createSignal<HTMLElement | null>(null);
+  const [element, setElement] = createSignal<HTMLElement | null>(null);
+  const position = () => element()?.getBoundingClientRect() ?? null;
 
-  const handler = chainHandlers(
-    NodeElement.handler(element),
-    NodePosition.handler(() => element()?.getBoundingClientRect() ?? null)
-  ) as ElementHandler;
+  const handler = chainedHandler()
+    .prepend(NodeElement.handler(element))
+    .prepend(NodePosition.handler(position)) as ElementHandler;
 
   handler.register = setElement;
 

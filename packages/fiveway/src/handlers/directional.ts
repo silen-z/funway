@@ -1,13 +1,10 @@
 import { type NodeId, directChildId } from "../id.js";
 import type { ContainerNode, NavigationNode } from "../node.js";
-import {
-  type HandlerChain,
-  chainHandlers,
-  type HandlerNext,
-} from "../handler.js";
-import { parentHandler } from "./default.js";
-import { type FocusDirection, focusHandler } from "./focus.js";
 import type { NavigationAction, NavigationDirection } from "../navigation.js";
+import type { HandlerNext } from "../handler.js";
+import { parentHandler } from "./default.js";
+import { focusHandler } from "./focus.js";
+import { type HandlerChain, chainedHandler } from "./chain.js";
 
 /**
  * @category Handler
@@ -57,11 +54,10 @@ function verticalFocusDirection(dir: NavigationDirection | "initial" | null) {
 /**
  * @category Handler
  */
-export const verticalHandler: HandlerChain = chainHandlers(
-  focusHandler({ direction: verticalFocusDirection }),
-  verticalMovementHandler,
-  parentHandler
-);
+export const verticalHandler: HandlerChain = chainedHandler()
+  .prepend(parentHandler)
+  .prepend(verticalMovementHandler)
+  .prepend(focusHandler({ direction: verticalFocusDirection }));
 
 /**
  * @category Handler
@@ -111,11 +107,10 @@ function horizontalFocusDirection(dir: NavigationDirection | "initial" | null) {
 /**
  * @category Handler
  */
-export const horizontalHandler: HandlerChain = chainHandlers(
-  focusHandler({ direction: horizontalFocusDirection }),
-  horizontalMovementHandler,
-  parentHandler
-);
+export const horizontalHandler: HandlerChain = chainedHandler()
+  .prepend(parentHandler)
+  .prepend(horizontalMovementHandler)
+  .prepend(focusHandler({ direction: horizontalFocusDirection }));
 
 function findNextChild(
   node: ContainerNode,

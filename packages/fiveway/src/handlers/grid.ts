@@ -1,14 +1,11 @@
-import { directChildId, type NodeId } from "../id.js";
+import { type NodeId, directChildId } from "../id.js";
 import { traverseNodes } from "../tree.js";
 import type { NavigationDirection } from "../navigation.js";
-import {
-  type NavigationHandler,
-  type HandlerChain,
-  chainHandlers,
-} from "../handler.js";
+import type { NavigationHandler } from "../handler.js";
 import { parentHandler } from "./default.js";
 import { focusHandler } from "./focus.js";
-import { queryable, type Queryable } from "../query.js";
+import { type Queryable, queryable } from "../query.js";
+import { type HandlerChain, chainedHandler } from "./chain.js";
 
 export type GridPosition = {
   row: number;
@@ -107,8 +104,7 @@ export const gridMovement: NavigationHandler = (node, action, next) => {
 /**
  * @category Handler
  */
-export const gridHandler: HandlerChain = chainHandlers(
-  focusHandler(),
-  gridMovement,
-  parentHandler
-);
+export const gridHandler: HandlerChain = chainedHandler()
+  .prepend(parentHandler)
+  .prepend(gridMovement)
+  .prepend(focusHandler());
