@@ -21,7 +21,7 @@ function createFocusHandler(config: FocusHandlerConfig = {}) {
       return next();
     }
 
-    if (node.type === "item") {
+    if (node.children.length === 0) {
       return node.id;
     }
 
@@ -74,8 +74,12 @@ function createInitialHandler(id: string) {
   const initialHandler: NavigationHandler = (node, action, next) => {
     const initialId = `${node.id}/${id}`;
 
-    if (node.type !== "container" || action.kind !== "focus") {
+    if (action.kind !== "focus") {
       return next();
+    }
+
+    if (node.children.length === 0) {
+      return node.id;
     }
 
     if (action.direction === "initial") {

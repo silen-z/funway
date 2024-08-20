@@ -9,7 +9,6 @@ import {
 } from "solid-js";
 import { render } from "solid-js/web";
 import {
-  ContainerNode,
   NavigationNode,
   NavigationTree,
   NodeId,
@@ -89,7 +88,7 @@ function VisualizeNode(props: {
   isAllExpanded: boolean;
   setAllExpanded?: Setter<boolean>;
 }) {
-  const [node, setNode] = createSignal<NavigationNode | undefined>(
+  const [maybeNode, setNode] = createSignal<NavigationNode | undefined>(
     props.tree.nodes.get(props.nodeId),
     { equals: () => false }
   );
@@ -130,74 +129,72 @@ function VisualizeNode(props: {
   );
 
   return (
-    <Show when={node()}>
-      {(node) => (
-        <div>
-          <div
-            class={css.node}
-            data-root={node().id === "#"}
-            data-focused={isNodeFocused()}
-          >
-            <span class={css.nodeLabel} title={props.nodeId}>
-              {node().id === "#" ? "root" : getLocalId(props.nodeId)}
-            </span>
+    <Show when={maybeNode()}>
+      {(node) => {
+        const hasChildren = createMemo(() =>
+          node().children.some((c) => c.active)
+        );
 
-            <Show when={node().id === "#"}>
-              <Icon
-                icon={
-                  props.isAllExpanded
-                    ? "bx:collapse-vertical"
-                    : "bx:expand-vertical"
-                }
-                onClick={() => props.setAllExpanded?.((e) => !e)}
-              />
-            </Show>
-
-            <span
-              style={{
-                display:
-                  node().type === "item" && isNodeFocused()
-                    ? undefined
-                    : "none",
-              }}
-              class={clsx(css.nodeTag, css.nodeTagSuccess)}
+        return (
+          <div>
+            <div
+              class={css.node}
+              data-root={node().id === "#"}
+              data-focused={isNodeFocused()}
             >
-              <Icon icon="heroicons:viewfinder-dot-solid" /> focus
-            </span>
+              <span class={css.nodeLabel} title={props.nodeId}>
+                {node().id === "#" ? "root" : getLocalId(props.nodeId)}
+              </span>
 
-            <Show
-              when={
-                node().type === "container" &&
-                (node() as ContainerNode).children.some((c) => c.active) &&
-                !isNodeFocused()
-              }
-            >
-              <div onClick={() => setOpen((o) => !o)} class={css.nodeTag}>
+              <Show when={node().id === "#"}>
                 <Icon
                   icon={
-                    isOpen()
-                      ? "heroicons:chevron-up"
-                      : "heroicons:ellipsis-horizontal"
+                    props.isAllExpanded
+                      ? "bx:collapse-vertical"
+                      : "bx:expand-vertical"
                   }
+                  onClick={() => props.setAllExpanded?.((e) => !e)}
                 />
+              </Show>
+
+              <span
+                style={{
+                  display:
+                    !hasChildren() && isNodeFocused() ? undefined : "none",
+                }}
+                class={clsx(css.nodeTag, css.nodeTagSuccess)}
+              >
+                <Icon icon="heroicons:viewfinder-dot-solid" /> focus
+              </span>
+
+              <Show when={!isNodeFocused() && hasChildren()}>
+                <div onClick={() => setOpen((o) => !o)} class={css.nodeTag}>
+                  <Icon
+                    icon={
+                      isOpen()
+                        ? "heroicons:chevron-up"
+                        : "heroicons:ellipsis-horizontal"
+                    }
+                  />
+                </div>
+              </Show>
+            </div>
+            <Show when={hasChildren()}>
+              <div class={css.nodeContainer} data-open={isOpen()}>
+                <For each={node().children}>
+                  {(child) => (
+                    <VisualizeNode
+                      tree={props.tree}
+                      nodeId={child.id}
+                      isAllExpanded={props.isAllExpanded}
+                    />
+                  )}
+                </For>
               </div>
             </Show>
           </div>
-          <Show when={node().type === "container"}>
-            <div class={css.nodeContainer} data-open={isOpen()}>
-              <For each={(node() as ContainerNode).children}>
-                {(child) => (
-                  <VisualizeNode
-                    tree={props.tree}
-                    nodeId={child.id}
-                    isAllExpanded={props.isAllExpanded}
-                  />
-                )}
-              </For>
-            </div>
-          </Show>
-        </div>
-      )}
+        );
+      }}
     </Show>
   );
 }

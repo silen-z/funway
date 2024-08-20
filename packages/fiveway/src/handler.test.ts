@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vitest";
 import { connectNode, createNavigationTree } from "./tree.js";
+import { createNode } from "./node.js";
 import { NodeId } from "./id.js";
-import { createItemNode } from "./node.js";
 import { NavigationHandler, runHandler } from "./handler.js";
 import { chainedHandler } from "./handlers/chain.js";
 
@@ -22,14 +22,14 @@ describe("handlers", () => {
       };
 
     const testTree = createNavigationTree();
-    const testNode = createItemNode(testTree, {
+    const testNode = createNode(testTree, {
       id: "node1",
       parent: "#",
       handler: chainedHandler(logHandler("4")).prepend(logHandler("3")),
     });
     connectNode(testTree, testNode);
 
-    const testNode2 = createItemNode(testTree, {
+    const testNode2 = createNode(testTree, {
       id: "node2",
       parent: "#",
       handler: chainedHandler(logHandler("2", "#/node1")).prepend(

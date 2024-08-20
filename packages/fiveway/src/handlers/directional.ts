@@ -1,10 +1,10 @@
+import type { NavigationNode } from "../node.js";
 import { type NodeId, directChildId } from "../id.js";
-import type { ContainerNode, NavigationNode } from "../node.js";
 import type { NavigationAction, NavigationDirection } from "../navigation.js";
 import type { HandlerNext } from "../handler.js";
+import { type HandlerChain, chainedHandler } from "./chain.js";
 import { parentHandler } from "./default.js";
 import { focusHandler } from "./focus.js";
-import { type HandlerChain, chainedHandler } from "./chain.js";
 
 /**
  * @category Handler
@@ -14,10 +14,6 @@ export function verticalMovementHandler(
   action: NavigationAction,
   next: HandlerNext
 ) {
-  if (node.type !== "container") {
-    throw Error("verticalMovementHandler can only be used on containers");
-  }
-
   if (action.kind !== "move") {
     return next();
   }
@@ -67,10 +63,6 @@ export function horizontalMovementHandler(
   action: NavigationAction,
   next: HandlerNext
 ) {
-  if (node.type !== "container") {
-    throw Error("horizontalMovementHandler can only be used on containers");
-  }
-
   if (action.kind !== "move") {
     return next();
   }
@@ -113,7 +105,7 @@ export const horizontalHandler: HandlerChain = chainedHandler()
   .prepend(focusHandler({ direction: horizontalFocusDirection }));
 
 function findNextChild(
-  node: ContainerNode,
+  node: NavigationNode,
   check: (id: NodeId) => NodeId | null
 ) {
   const currentChildId = directChildId(node.id, node.tree.focusedId);
@@ -139,7 +131,7 @@ function findNextChild(
 }
 
 function findPreviousChild(
-  node: ContainerNode,
+  node: NavigationNode,
   check: (id: NodeId) => NodeId | null
 ) {
   const currentChildId = directChildId(node.id, node.tree.focusedId);

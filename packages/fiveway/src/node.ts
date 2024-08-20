@@ -1,32 +1,20 @@
 import { createGlobalId, type NodeId } from "./id.js";
-import { type NavigationTree, getContainerNode } from "./tree.js";
+import { type NavigationTree, getNode } from "./tree.js";
 import type { NavigationHandler } from "./handler.js";
 import { defaultHandler } from "./handlers/default.js";
 import { binarySearch } from "./array.js";
 
-export type NodeBase = {
+export type NavigationNode = {
   tree: NavigationTree;
   id: NodeId;
   connected: boolean;
   parent: NodeId | null;
   order: number | null;
   handler: NavigationHandler;
+  children: NodeChild[];
 };
-
 
 export type NodeChild = { id: NodeId; order: number | null; active: boolean };
-
-export type ContainerNode = NodeBase & {
-  type: "container";
-  children: NodeChild[];
-  rememberChildren: boolean;
-};
-
-export type ItemNode = NodeBase & {
-  type: "item";
-};
-
-export type NavigationNode = ContainerNode | ItemNode;
 
 export type NodeConfig = {
   id: string;
@@ -35,22 +23,20 @@ export type NodeConfig = {
   handler?: NavigationHandler;
 };
 
-export type ItemConfig = NodeConfig;
-
-export function createItemNode(
+export function createNode(
   tree: NavigationTree,
-  options: ItemConfig
-): ItemNode {
+  options: NodeConfig
+): NavigationNode {
   const globalId = createGlobalId(options.parent, options.id);
 
   return {
-    type: "item",
     tree,
     id: globalId,
     connected: false,
     parent: options.parent,
     order: options.order ?? null,
     handler: options.handler ?? defaultHandler,
+    children: [],
   };
 }
 
@@ -59,36 +45,9 @@ export type ContainerConfig = NodeConfig & {
   rememberChildren?: boolean;
 };
 
-export function createContainerNode(
-  tree: NavigationTree,
-  options: ContainerConfig
-): ContainerNode {
-  const globalId = createGlobalId(options.parent, options.id);
-
-  return {
-    type: "container",
-    tree,
-    id: globalId,
-    connected: false,
-    parent: options.parent,
-    order: options.order ?? null,
-    handler: options.handler ?? defaultHandler,
-    children: [],
-    rememberChildren: options.rememberChildren ?? true,
-  };
-}
-
-export function updateNode(
-  node: ItemNode,
-  config: Omit<ItemConfig, "id" | "parent">
-): void;
-export function updateNode(
-  node: ContainerNode,
-  config: Omit<ContainerConfig, "id" | "parent">
-): void;
 export function updateNode<N extends NavigationNode>(
   node: N,
-  options: Omit<ItemConfig & ContainerConfig, "id" | "parent">
+  options: Omit<NodeConfig, "id" | "parent">
 ) {
   if (options.handler != null) {
     node.handler = options.handler;
@@ -105,7 +64,7 @@ function updateNodeOrder(node: NavigationNode, order: number) {
 
     // update children inside parent
     // TODO handle parent not being connected
-    const parentNode = getContainerNode(node.tree, node.parent);
+    const parentNode = getNode(node.tree, node.parent);
 
     const childIndex = parentNode.children.findIndex((i) => i.id === node.id);
     const newIndex = binarySearch(

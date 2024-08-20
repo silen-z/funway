@@ -8,17 +8,13 @@ import {
   initialHandler,
   verticalHandler,
 } from "@fiveway/core";
-import {
-  NavigationContainer,
-  NavigationItem,
-  useNavigationContainer,
-} from "@fiveway/react";
+import { NavigationNode, useNavigationNode } from "@fiveway/react";
 import css from "./Showcase.module.css";
 import { VirtualList, VirtualGrid } from "./VirtualShowcase.tsx";
 import { SpatialShowcase } from "./SpatialShowcase.tsx";
 
 export function Showcase() {
-  const nav = useNavigationContainer({
+  const nav = useNavigationNode({
     id: "showcase",
     handler: gridHandler.prepend(initialHandler("horizontalList")),
   });
@@ -29,47 +25,47 @@ export function Showcase() {
 
       <div className={css.layout}>
         <nav.Context>
-          <NavigationContainer
+          <NavigationNode
             id="verticalList"
             handler={defaultHandler.provide(GridPosition, { row: 1, col: 1 })}
           >
             <ListShowcase type="vertical" />
-          </NavigationContainer>
+          </NavigationNode>
 
-          <NavigationContainer
+          <NavigationNode
             id="horizontalList"
             handler={defaultHandler.provide(GridPosition, { row: 1, col: 2 })}
           >
             <ListShowcase type="horizontal" />
-          </NavigationContainer>
+          </NavigationNode>
 
-          <NavigationContainer
+          <NavigationNode
             id="virtual"
             handler={defaultHandler.provide(GridPosition, { row: 1, col: 3 })}
           >
             <VirtualList />
-          </NavigationContainer>
+          </NavigationNode>
 
-          <NavigationContainer
+          <NavigationNode
             id="virtual-grid"
             handler={defaultHandler.provide(GridPosition, { row: 1, col: 4 })}
           >
             <VirtualGrid />
-          </NavigationContainer>
+          </NavigationNode>
 
-          <NavigationContainer
+          <NavigationNode
             id="spatial"
             handler={defaultHandler.provide(GridPosition, { row: 2, col: 1 })}
           >
             <SpatialShowcase />
-          </NavigationContainer>
+          </NavigationNode>
 
-          <NavigationContainer
+          <NavigationNode
             id="conditional"
             handler={defaultHandler.provide(GridPosition, { row: 2, col: 2 })}
           >
             <ConditionalShowcase />
-          </NavigationContainer>
+          </NavigationNode>
         </nav.Context>
       </div>
     </div>
@@ -80,7 +76,7 @@ function ListShowcase(props: { type: "vertical" | "horizontal" }) {
   const movementHandler =
     props.type === "vertical" ? verticalHandler : horizontalHandler;
 
-  const nav = useNavigationContainer({
+  const nav = useNavigationNode({
     id: "list",
     handler: movementHandler.prepend(initialHandler("item2")),
   });
@@ -89,27 +85,27 @@ function ListShowcase(props: { type: "vertical" | "horizontal" }) {
     <div className={css.section} data-is-focused={nav.isFocused()}>
       <ul className={css.list} data-type={props.type}>
         <nav.Context>
-          <NavigationItem id="item1">
+          <NavigationNode id="item1">
             {(node) => (
               <li className={css.item} data-is-focused={node.isFocused()}>
                 Item 1
               </li>
             )}
-          </NavigationItem>
-          <NavigationItem id="item2">
+          </NavigationNode>
+          <NavigationNode id="item2">
             {(node) => (
               <li className={css.item} data-is-focused={node.isFocused()}>
                 Item 2
               </li>
             )}
-          </NavigationItem>
-          <NavigationItem id="item3">
+          </NavigationNode>
+          <NavigationNode id="item3">
             {(node) => (
               <li className={css.item} data-is-focused={node.isFocused()}>
                 Item 3
               </li>
             )}
-          </NavigationItem>
+          </NavigationNode>
         </nav.Context>
       </ul>
     </div>
@@ -117,7 +113,7 @@ function ListShowcase(props: { type: "vertical" | "horizontal" }) {
 }
 
 function ConditionalShowcase() {
-  const nav = useNavigationContainer({
+  const nav = useNavigationNode({
     id: "section",
     handler: horizontalHandler,
   });
@@ -128,7 +124,7 @@ function ConditionalShowcase() {
     <div className={css.section} data-is-focused={nav.isFocused()}>
       <div style={{ display: "flex" }}>
         <nav.Context>
-          <NavigationItem
+          <NavigationNode
             id="toggle"
             handler={defaultHandler.onSelect(() => {
               flushSync(() => {
@@ -143,9 +139,9 @@ function ConditionalShowcase() {
                 {isOn ? "hide" : "show"}
               </button>
             )}
-          </NavigationItem>
+          </NavigationNode>
 
-          <NavigationContainer
+          <NavigationNode
             id="content"
             handler={defaultHandler.prepend((node, action, next) => {
               if (action.kind === "focus" && isOn) {
@@ -156,7 +152,7 @@ function ConditionalShowcase() {
             })}
           >
             {isOn && (
-              <NavigationItem
+              <NavigationNode
                 id="parking"
                 handler={defaultHandler.onSelect(() => {
                   setOn(false);
@@ -170,9 +166,9 @@ function ConditionalShowcase() {
                     remove
                   </button>
                 )}
-              </NavigationItem>
+              </NavigationNode>
             )}
-          </NavigationContainer>
+          </NavigationNode>
         </nav.Context>
       </div>
     </div>

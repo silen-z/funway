@@ -5,7 +5,7 @@ import {
   isParent,
   ROOT,
 } from "./id.js";
-import type { NavigationNode, ContainerNode, ItemNode } from "./node.js";
+import type { NavigationNode } from "./node.js";
 import { type ListenerTree, callListeners } from "./events.js";
 import { runHandler } from "./handler.js";
 import { rootHandler } from "./handlers/default.js";
@@ -64,15 +64,13 @@ export function connectNode(
 
   // TODO preserving order probably depends on nodes Map being ordered
   // it would be better to handle that explicitly via sentinel nodes (children)
-  const parentNode = getContainerNode(tree, node.parent);
+  const parentNode = getNode(tree, node.parent);
   insertChildInOrder(parentNode, node);
 
-  if (node.type === "container") {
-    // TODO optimise iteration through all nodes
-    for (const n of tree.nodes.values()) {
-      if (n.parent === node.id) {
-        connectNode(tree, n, false);
-      }
+  // TODO optimize iteration through all nodes
+  for (const n of tree.nodes.values()) {
+    if (n.parent === node.id) {
+      connectNode(tree, n, false);
     }
   }
 
@@ -122,32 +120,29 @@ function disconnectNode(tree: NavigationTree, nodeId: NodeId) {
     return;
   }
 
-  const parentNode = getContainerNode(tree, node.parent!);
+  const parentNode = getNode(tree, node.parent!);
 
-  if (parentNode.rememberChildren) {
-    // tombstone id of removed node in parent
-    const parentChildRecord = parentNode.children.find(
-      (child) => child.id === nodeId
-    );
-    if (parentChildRecord == null) {
-      throw new Error("broken tree");
-    }
-    parentChildRecord.active = false;
-  } else {
-    const parentChildIndex = parentNode.children.findIndex(
-      (child) => child.id === nodeId
-    );
-
-    if (parentChildIndex === -1) {
-      throw new Error("broken tree");
-    }
-    swapRemove(parentNode.children, parentChildIndex);
+  // tombstone id of removed node in parent
+  const parentChildRecord = parentNode.children.find(
+    (child) => child.id === nodeId
+  );
+  if (parentChildRecord == null) {
+    throw new Error("broken tree");
   }
+  parentChildRecord.active = false;
 
-  if (node.type === "container") {
-    for (const child of node.children) {
-      disconnectNode(tree, child.id);
-    }
+  // TODO configureable or automatic remebering of children?
+  // const parentChildIndex = parentNode.children.findIndex(
+  //   (child) => child.id === nodeId
+  // );
+
+  // if (parentChildIndex === -1) {
+  //   throw new Error("broken tree");
+  // }
+  // swapRemove(parentNode.children, parentChildIndex);
+
+  for (const child of node.children) {
+    disconnectNode(tree, child.id);
   }
 
   node.connected = false;
@@ -215,27 +210,6 @@ export function getNode(tree: NavigationTree, nodeId: NodeId): NavigationNode {
   return node;
 }
 
-export function getContainerNode(
-  tree: NavigationTree,
-  nodeId: NodeId
-): ContainerNode {
-  const node = getNode(tree, nodeId);
-  if (node.type !== "container") {
-    throw new Error(`node '${nodeId}' is expected to be a container`);
-  }
-
-  return node;
-}
-
-export function getItemNode(tree: NavigationTree, nodeId: NodeId): ItemNode {
-  const node = getNode(tree, nodeId);
-  if (node.type !== "item") {
-    throw new Error(`node '${nodeId}' is expected to be an item`);
-  }
-
-  return node;
-}
-
 export function isFocused(tree: NavigationTree, nodeId: NodeId): boolean {
   if (tree.focusedId === nodeId) {
     return true;
@@ -258,17 +232,20 @@ export function traverseNodes(
     return;
   }
 
-  if (node.type === "container") {
-    for (const child of node.children) {
-      if (child.active) {
-        traverseNodes(tree, child.id, fn, depth - 1);
-      }
+  for (const child of node.children) {
+    if (child.active) {
+      traverseNodes(tree, child.id, fn, depth - 1);
     }
   }
 }
 
-function insertChildInOrder(parentNode: ContainerNode, node: NavigationNode) {
-  const tombstone = parentNode.children.find((child) => child.id === node.id);
+function insertChildInOrder(
+  parentNode: NavigationNode,
+  childNode: NavigationNode
+) {
+  const tombstone = parentNode.children.find(
+    (child) => child.id === childNode.id
+  );
   if (tombstone != null) {
     // TODO: handle if node has explicit order
     tombstone.active = true;
@@ -278,12 +255,12 @@ function insertChildInOrder(parentNode: ContainerNode, node: NavigationNode) {
   const newIndex = binarySearch(
     parentNode.children,
     // TODO handle null in order better?
-    (child) => (node.order ?? 0) < (child.order ?? 0)
+    (child) => (childNode.order ?? 0) < (child.order ?? 0)
   );
 
   parentNode.children.splice(newIndex, 0, {
     active: true,
-    id: node.id,
-    order: node.order,
+    id: childNode.id,
+    order: childNode.order,
   });
 }

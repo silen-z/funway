@@ -1,29 +1,29 @@
 import { expect, test } from "vitest";
 import { connectNode, createNavigationTree } from "./tree.js";
-import { createContainerNode, createItemNode, updateNode } from "./node.js";
+import { createNode, updateNode } from "./node.js";
 
 test("updateNode correctly sorts children", () => {
   const tree = createNavigationTree();
 
-  const container = createContainerNode(tree, {
+  const container = createNode(tree, {
     id: "container",
     parent: "#",
   });
   connectNode(tree, container);
 
-  const node1 = createItemNode(tree, {
+  const node1 = createNode(tree, {
     id: "node1",
     parent: container.id,
   });
   connectNode(tree, node1);
 
-  const node2 = createItemNode(tree, {
+  const node2 = createNode(tree, {
     id: "node2",
     parent: container.id,
   });
   connectNode(tree, node2);
 
-  const node3 = createItemNode(tree, {
+  const node3 = createNode(tree, {
     id: "node3",
     parent: container.id,
   });

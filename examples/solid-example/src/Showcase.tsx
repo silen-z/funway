@@ -8,16 +8,14 @@ import {
   GridPosition,
 } from "@fiveway/core";
 import {
-  NavigationContainer,
-  NavigationItem,
+  NavigationNode,
   createElementHandler,
-  createNavigationContainer,
-  createNavigationItem,
+  createNavigationNode,
 } from "@fiveway/solid";
 import css from "./Showcase.module.css";
 
 export function Showcase() {
-  const nav = createNavigationContainer({
+  const nav = createNavigationNode({
     id: "showcase",
     handler: gridHandler,
   });
@@ -28,26 +26,26 @@ export function Showcase() {
 
       <div class={css.layout}>
         <nav.Context>
-          <NavigationContainer
+          <NavigationNode
             id="verticalList"
             handler={defaultHandler.provide(GridPosition, { row: 1, col: 1 })}
           >
             <ListShowcase type="vertical" />
-          </NavigationContainer>
+          </NavigationNode>
 
-          <NavigationContainer
+          <NavigationNode
             id="horizontalList"
             handler={defaultHandler.provide(GridPosition, { row: 1, col: 2 })}
           >
             <ListShowcase type="horizontal" />
-          </NavigationContainer>
+          </NavigationNode>
 
-          <NavigationContainer
+          <NavigationNode
             id="spatial"
             handler={defaultHandler.provide(GridPosition, { row: 1, col: 3 })}
           >
             <SpatialShowcase />
-          </NavigationContainer>
+          </NavigationNode>
         </nav.Context>
       </div>
     </div>
@@ -55,7 +53,7 @@ export function Showcase() {
 }
 
 function ListShowcase(props: { type: "vertical" | "horizontal" }) {
-  const nav = createNavigationContainer({
+  const nav = createNavigationNode({
     id: "list",
     handler: props.type === "vertical" ? verticalHandler : horizontalHandler,
   });
@@ -64,27 +62,27 @@ function ListShowcase(props: { type: "vertical" | "horizontal" }) {
     <div class={css.section} data-is-focused={nav.isFocused()}>
       <ul class={css.list} data-type={props.type}>
         <nav.Context>
-          <NavigationItem id="item1">
+          <NavigationNode id="item1">
             {(node) => (
               <li class={css.item} data-is-focused={node.isFocused()}>
                 Item 1
               </li>
             )}
-          </NavigationItem>
-          <NavigationItem id="item2">
+          </NavigationNode>
+          <NavigationNode id="item2">
             {(node) => (
               <li class={css.item} data-is-focused={node.isFocused()}>
                 Item 2
               </li>
             )}
-          </NavigationItem>
-          <NavigationItem id="item3">
+          </NavigationNode>
+          <NavigationNode id="item3">
             {(node) => (
               <li class={css.item} data-is-focused={node.isFocused()}>
                 Item 3
               </li>
             )}
-          </NavigationItem>
+          </NavigationNode>
         </nav.Context>
       </ul>
     </div>
@@ -93,7 +91,7 @@ function ListShowcase(props: { type: "vertical" | "horizontal" }) {
 
 function SpatialShowcase() {
   const [isFocusable, setFocusable] = createSignal(true);
-  const nav = createNavigationContainer({
+  const nav = createNavigationNode({
     id: "spatial",
     handler: spatialHandler,
   });
@@ -107,7 +105,7 @@ function SpatialShowcase() {
       style={{ position: "relative", "min-height": "250px" }}
     >
       <nav.Context>
-        <NavigationItem
+        <NavigationNode
           id="toggle"
           handler={defaultHandler
             .prepend(toggleHandler)
@@ -122,7 +120,7 @@ function SpatialShowcase() {
               toggle spatial
             </li>
           )}
-        </NavigationItem>
+        </NavigationNode>
         <SpatialItem
           navId="item1"
           focusable={isFocusable()}
@@ -164,7 +162,7 @@ function SpatialItem(props: {
   style: JSX.CSSProperties;
 }) {
   const elementHandler = createElementHandler();
-  const nav = createNavigationItem({
+  const nav = createNavigationNode({
     id: props.navId,
     handler: defaultHandler
       .prepend(elementHandler)

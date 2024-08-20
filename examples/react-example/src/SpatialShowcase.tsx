@@ -1,11 +1,11 @@
 import { spatialHandler, captureHandler, defaultHandler } from "@fiveway/core";
-import { useNavigationContainer, useNavigationItem } from "@fiveway/react";
+import { useNavigationNode } from "@fiveway/react";
 import { CSSProperties } from "react";
 import css from "./Showcase.module.css";
 import { useElementHandler } from "@fiveway/react";
 
 export function SpatialShowcase() {
-  const nav = useNavigationContainer({
+  const nav = useNavigationNode({
     id: "spatial",
     handler: spatialHandler.prepend(captureHandler),
   });
@@ -36,7 +36,7 @@ export function SpatialShowcase() {
 
 function SpatialItem(props: { navId: string; style: CSSProperties }) {
   const elementHandler = useElementHandler();
-  const nav = useNavigationItem({
+  const nav = useNavigationNode({
     id: props.navId,
     handler: defaultHandler
       .prepend(elementHandler)

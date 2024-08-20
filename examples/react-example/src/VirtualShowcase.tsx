@@ -7,9 +7,9 @@ import {
   GridPosition,
 } from "@fiveway/core";
 import {
-  useNavigationContainer,
+  useNavigationNode,
   useOnFocus,
-  NavigationItem,
+  NavigationNode,
 } from "@fiveway/react";
 import css from "./Showcase.module.css";
 
@@ -61,7 +61,7 @@ export function VirtualList() {
   const [listPosition, setListPosition] = useState(0);
   const windowRange = offsetWindow(items.length, listPosition, 3);
 
-  const nav = useNavigationContainer({
+  const nav = useNavigationNode({
     id: "virtual-list",
     handler: verticalHandler.prepend((node, action, next) => {
       if (action.kind === "focus") {
@@ -113,13 +113,13 @@ export function VirtualList() {
       <ul className={css.list}>
         <nav.Context>
           {mapRange(items, windowRange, (item) => (
-            <NavigationItem key={item.id} id={item.id} order={item.order}>
+            <NavigationNode key={item.id} id={item.id} order={item.order}>
               {(node) => (
                 <li className={css.item} data-is-focused={node.isFocused()}>
                   {item.label}
                 </li>
               )}
-            </NavigationItem>
+            </NavigationNode>
           ))}
         </nav.Context>
       </ul>
@@ -141,7 +141,7 @@ export function VirtualGrid() {
     (windowRange[1] + 1) * cols - 1,
   ];
 
-  const nav = useNavigationContainer({
+  const nav = useNavigationNode({
     id: "virtual-grid",
     handler: gridHandler.prepend((node, action, next) => {
       if (action.kind === "focus") {
@@ -201,7 +201,7 @@ export function VirtualGrid() {
             };
 
             return (
-              <NavigationItem
+              <NavigationNode
                 key={item.id}
                 id={item.id}
                 order={item.order}
@@ -216,7 +216,7 @@ export function VirtualGrid() {
                     {item.label}
                   </div>
                 )}
-              </NavigationItem>
+              </NavigationNode>
             );
           })}
         </nav.Context>
