@@ -6,11 +6,7 @@ import {
   defaultHandler,
   GridPosition,
 } from "@fiveway/core";
-import {
-  useNavigationNode,
-  useOnFocus,
-  NavigationNode,
-} from "@fiveway/react";
+import { useNavigationNode, useOnFocus, NavigationNode } from "@fiveway/react";
 import css from "./Showcase.module.css";
 
 const items = [...new Array(42)].map((_, i) => {
@@ -31,7 +27,7 @@ function offsetWindow(
     start = 0;
   }
 
-  let end = index + offsetEnd + overflow; //TODO try overflow or 1
+  let end = index + offsetEnd + overflow;
   if (end > length - 1) {
     start = Math.max(0, start - (end - (length - 1)));
     end = length - 1;
@@ -45,7 +41,7 @@ function mapRange<T, U>(
   [start, end]: [number, number],
   mapFn: (e: T) => U
 ) {
-  let mapped = [];
+  const mapped = [];
   for (
     let index = Math.max(start, 0);
     index <= end && index < array.length;
@@ -67,7 +63,9 @@ export function VirtualList() {
       if (action.kind === "focus") {
         try {
           return next(`${node.id}/${items[listPosition].id}`);
-        } catch {}
+        } catch {
+          return next();
+        }
       }
 
       return next();
@@ -148,7 +146,9 @@ export function VirtualGrid() {
         try {
           const rowStart = listPosition - (listPosition % cols);
           return next(`${node.id}/${items[rowStart].id}`);
-        } catch {}
+        } catch {
+          return next();
+        }
       }
 
       return next();

@@ -8,12 +8,13 @@ import {
   on,
   onCleanup,
   splitProps,
+  untrack,
 } from "solid-js";
 import {
   type FocusOptions,
   type NavigationHandler,
   type NodeId,
-  connectNode,
+  insertNode,
   createNode,
   focusNode,
   isFocused,
@@ -51,7 +52,7 @@ export function createNavigationNode(options: NodeOptions): NodeHandle {
   });
 
   createEffect(() => {
-    connectNode(tree, node);
+    insertNode(tree, node);
 
     createEffect(() => {
       updateNode(node, options);
@@ -102,9 +103,10 @@ export function NavigationNode(props: NodeProps) {
 
 function NodeContext(props: { node: NodeId; children: JSX.Element }) {
   const context = useNavigationContext();
+  const parentNode = untrack(() => props.node);
 
   return (
-    <NavigationContext.Provider value={{ ...context, parentNode: props.node }}>
+    <NavigationContext.Provider value={{ ...context, parentNode }}>
       {props.children}
     </NavigationContext.Provider>
   );

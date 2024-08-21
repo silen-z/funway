@@ -1,15 +1,9 @@
-import {
-  type NodeId,
-  convergingPaths,
-  idsToRoot,
-  isParent,
-  ROOT,
-} from "./id.js";
+import { type NodeId, convergingPaths, idsToRoot, isParent } from "./id.js";
 import type { NavigationNode } from "./node.js";
 import { type ListenerTree, callListeners } from "./events.js";
 import { runHandler } from "./handler.js";
-import { rootHandler } from "./handlers/default.js";
-import { binarySearch, swapRemove } from "./array.js";
+import { focusHandler } from "./handlers/focus.js";
+import { binarySearch } from "./array.js";
 import type { NavigationDirection } from "./navigation.js";
 
 export type NavigationTree = {
@@ -20,27 +14,26 @@ export type NavigationTree = {
 
 export function createNavigationTree(): NavigationTree {
   let tree = {
-    focusedId: ROOT,
+    focusedId: "#",
     nodes: new Map(),
     listeners: new Map(),
   };
 
-  tree.nodes.set(ROOT, {
-    type: "container",
+  tree.nodes.set("#", {
     tree,
-    id: ROOT,
+    id: "#",
     connected: true,
     parent: null,
     order: 0,
-    handler: rootHandler,
+    handler: focusHandler(),
     children: [],
-    rememberChildren: true,
   });
 
   return tree;
 }
 
-export function connectNode(
+// TODO split into insertNode/connectNode
+export function insertNode(
   tree: NavigationTree,
   node: NavigationNode,
   notify = true
@@ -63,28 +56,29 @@ export function connectNode(
   node.connected = true;
 
   // TODO preserving order probably depends on nodes Map being ordered
-  // it would be better to handle that explicitly via sentinel nodes (children)
+  // it would be better to handle that explicitly via sentinel nodes (with children)
   const parentNode = getNode(tree, node.parent);
   insertChildInOrder(parentNode, node);
 
   // TODO optimize iteration through all nodes
+  // either with sentinel nodes or just array of disconnected ids
   for (const n of tree.nodes.values()) {
     if (n.parent === node.id) {
-      connectNode(tree, n, false);
+      insertNode(tree, n, false);
     }
   }
 
   if (notify) {
-    callListeners(tree, ROOT, "structurechange");
-  }
+    callListeners(tree, "#", "structurechange");
 
-  if (isParent(tree.focusedId, node.id)) {
-    focusNode(tree, tree.focusedId, { direction: "initial" });
+    if (tree.focusedId === "#" || isFocused(tree, node.parent)) {
+      focusNode(tree, node.parent, { direction: "initial" });
+    }
   }
 }
 
 export function removeNode(tree: NavigationTree, nodeId: NodeId) {
-  if (nodeId === ROOT) {
+  if (nodeId === "#") {
     throw new Error("cannot remove root node");
   }
 
@@ -98,16 +92,14 @@ export function removeNode(tree: NavigationTree, nodeId: NodeId) {
   }
 
   tree.nodes.delete(nodeId);
-  callListeners(tree, ROOT, "structurechange");
+  callListeners(tree, "#", "structurechange");
 
   if (isFocused(tree, nodeId)) {
     idsToRoot(node.parent!, (id) => {
-      // skip the removed id
-      if (id === nodeId) {
-        return true;
-      }
+      const focused = focusNode(tree, id, { direction: "initial" });
 
-      if (focusNode(tree, id, { direction: "initial" })) {
+      // if we managed to focus a node we can stop searching
+      if (focused) {
         return false;
       }
     });
@@ -120,26 +112,24 @@ function disconnectNode(tree: NavigationTree, nodeId: NodeId) {
     return;
   }
 
-  const parentNode = getNode(tree, node.parent!);
+  // its fine if parent is already diconnected/removed
+  const parentNode = tree.nodes.get(node.parent!);
+  if (parentNode != null) {
+    // tombstone id of removed node in parent
+    const parentChildIndex = parentNode.children.findIndex(
+      (child) => child.id === nodeId
+    );
+    if (parentChildIndex === -1) {
+      console.error("encountered broken tree");
+    }
 
-  // tombstone id of removed node in parent
-  const parentChildRecord = parentNode.children.find(
-    (child) => child.id === nodeId
-  );
-  if (parentChildRecord == null) {
-    throw new Error("broken tree");
+    // remember the position if its not explicitly set
+    if (node.order === null) {
+      parentNode.children[parentChildIndex]!.active = false;
+    } else {
+      parentNode.children.splice(parentChildIndex, 1);
+    }
   }
-  parentChildRecord.active = false;
-
-  // TODO configureable or automatic remebering of children?
-  // const parentChildIndex = parentNode.children.findIndex(
-  //   (child) => child.id === nodeId
-  // );
-
-  // if (parentChildIndex === -1) {
-  //   throw new Error("broken tree");
-  // }
-  // swapRemove(parentNode.children, parentChildIndex);
 
   for (const child of node.children) {
     disconnectNode(tree, child.id);
@@ -218,23 +208,22 @@ export function isFocused(tree: NavigationTree, nodeId: NodeId): boolean {
   return isParent(nodeId, tree.focusedId);
 }
 
-// TODO better implementation for depth
 export function traverseNodes(
   tree: NavigationTree,
   nodeId: NodeId,
-  fn: (node: NavigationNode) => void,
+  callback: (id: NodeId) => void,
   depth = 1
 ) {
-  const node = getNode(tree, nodeId);
-  fn(node);
-
   if (depth === 0) {
     return;
   }
 
+  const node = getNode(tree, nodeId);
+
   for (const child of node.children) {
     if (child.active) {
-      traverseNodes(tree, child.id, fn, depth - 1);
+      callback(child.id);
+      traverseNodes(tree, child.id, callback, depth - 1);
     }
   }
 }
@@ -243,18 +232,23 @@ function insertChildInOrder(
   parentNode: NavigationNode,
   childNode: NavigationNode
 ) {
-  const tombstone = parentNode.children.find(
+  const oldIndex = parentNode.children.findIndex(
     (child) => child.id === childNode.id
   );
-  if (tombstone != null) {
-    // TODO: handle if node has explicit order
-    tombstone.active = true;
-    return;
+
+  if (oldIndex !== -1) {
+    if (childNode.order === null) {
+      // if node doesn't have explicit order use the remembered position
+      parentNode.children[oldIndex]!.active = true;
+      return;
+    }
+
+    // otherwise remove the tobstone so it can be inserted again at correct index
+    parentNode.children.splice(oldIndex, 1);
   }
 
   const newIndex = binarySearch(
     parentNode.children,
-    // TODO handle null in order better?
     (child) => (childNode.order ?? 0) < (child.order ?? 0)
   );
 

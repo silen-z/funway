@@ -24,6 +24,12 @@ export function runHandler(
 ): NodeId | null {
   const nextHandler = (id?: NodeId, anotherAction?: NavigationAction) => {
     if (id != null) {
+      try {
+        getNode(tree, id);
+      } catch {
+        return null;
+      }
+
       return runHandler(tree, id, anotherAction ?? action);
     }
 

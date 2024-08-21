@@ -53,7 +53,12 @@ function verticalFocusDirection(dir: NavigationDirection | "initial" | null) {
 export const verticalHandler: HandlerChain = chainedHandler()
   .prepend(parentHandler)
   .prepend(verticalMovementHandler)
-  .prepend(focusHandler({ direction: verticalFocusDirection }));
+  .prepend(
+    focusHandler({
+      skipEmpty: true,
+      direction: verticalFocusDirection,
+    })
+  );
 
 /**
  * @category Handler
@@ -102,7 +107,12 @@ function horizontalFocusDirection(dir: NavigationDirection | "initial" | null) {
 export const horizontalHandler: HandlerChain = chainedHandler()
   .prepend(parentHandler)
   .prepend(horizontalMovementHandler)
-  .prepend(focusHandler({ direction: horizontalFocusDirection }));
+  .prepend(
+    focusHandler({
+      skipEmpty: true,
+      direction: horizontalFocusDirection,
+    })
+  );
 
 function findNextChild(
   node: NavigationNode,

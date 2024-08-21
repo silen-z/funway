@@ -20,7 +20,6 @@ export const defaultHandler: HandlerChain = chainedHandler()
   .prepend(parentHandler)
   .prepend(focusHandler());
 
-/**
- * @category Handler
- */
-export const rootHandler = focusHandler();
+export const containerHandler: HandlerChain = chainedHandler()
+  .prepend(parentHandler)
+  .prepend(focusHandler({ skipEmpty: true }));

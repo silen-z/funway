@@ -1,12 +1,12 @@
 import { verticalHandler } from "@fiveway/core";
-import { NavigationItem, useNavigationContainer } from "@fiveway/react";
+import { NavigationNode, useNavigationNode } from "@fiveway/react";
 
 const items = [...new Array(10)].map((_, i) => {
   return { id: `item-${i + 1}`, order: i, label: `Item ${i + 1}` };
 });
 
 export function Items(props: { id: string; order: number; depth: number }) {
-  const nav = useNavigationContainer({
+  const nav = useNavigationNode({
     id: props.id,
     order: props.order,
     handler: verticalHandler,
@@ -17,13 +17,13 @@ export function Items(props: { id: string; order: number; depth: number }) {
       <div>
         <nav.Context>
           {items.map((item) => (
-            <NavigationItem key={item.id} id={item.id} order={item.order}>
+            <NavigationNode key={item.id} id={item.id} order={item.order}>
               {(node) => (
                 <div>
                   {item.label} {node.isFocused() ? "(focused)" : ""}
                 </div>
               )}
-            </NavigationItem>
+            </NavigationNode>
           ))}
         </nav.Context>
       </div>

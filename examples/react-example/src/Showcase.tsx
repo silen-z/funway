@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { flushSync } from "react-dom";
 import {
+  containerHandler,
   defaultHandler,
   gridHandler,
   GridPosition,
@@ -27,42 +27,42 @@ export function Showcase() {
         <nav.Context>
           <NavigationNode
             id="verticalList"
-            handler={defaultHandler.provide(GridPosition, { row: 1, col: 1 })}
+            handler={containerHandler.provide(GridPosition, { row: 1, col: 1 })}
           >
             <ListShowcase type="vertical" />
           </NavigationNode>
 
           <NavigationNode
             id="horizontalList"
-            handler={defaultHandler.provide(GridPosition, { row: 1, col: 2 })}
+            handler={containerHandler.provide(GridPosition, { row: 1, col: 2 })}
           >
             <ListShowcase type="horizontal" />
           </NavigationNode>
 
           <NavigationNode
             id="virtual"
-            handler={defaultHandler.provide(GridPosition, { row: 1, col: 3 })}
+            handler={containerHandler.provide(GridPosition, { row: 1, col: 3 })}
           >
             <VirtualList />
           </NavigationNode>
 
           <NavigationNode
             id="virtual-grid"
-            handler={defaultHandler.provide(GridPosition, { row: 1, col: 4 })}
+            handler={containerHandler.provide(GridPosition, { row: 1, col: 4 })}
           >
             <VirtualGrid />
           </NavigationNode>
 
           <NavigationNode
             id="spatial"
-            handler={defaultHandler.provide(GridPosition, { row: 2, col: 1 })}
+            handler={containerHandler.provide(GridPosition, { row: 2, col: 1 })}
           >
             <SpatialShowcase />
           </NavigationNode>
 
           <NavigationNode
             id="conditional"
-            handler={defaultHandler.provide(GridPosition, { row: 2, col: 2 })}
+            handler={containerHandler.provide(GridPosition, { row: 2, col: 2 })}
           >
             <ConditionalShowcase />
           </NavigationNode>
@@ -127,11 +127,10 @@ function ConditionalShowcase() {
           <NavigationNode
             id="toggle"
             handler={defaultHandler.onSelect(() => {
-              flushSync(() => {
-                setOn((on) => !on);
-              });
-
-              nav.focus("content");
+              setOn((on) => !on);
+              if (!isOn) {
+                nav.focus("content");
+              }
             })}
           >
             {(node) => (
@@ -141,21 +140,13 @@ function ConditionalShowcase() {
             )}
           </NavigationNode>
 
-          <NavigationNode
-            id="content"
-            handler={defaultHandler.prepend((node, action, next) => {
-              if (action.kind === "focus" && isOn) {
-                return next() ?? node.id;
-              }
-
-              return next();
-            })}
-          >
+          <NavigationNode id="content">
             {isOn && (
               <NavigationNode
                 id="parking"
                 handler={defaultHandler.onSelect(() => {
                   setOn(false);
+                  nav.focus();
                 })}
               >
                 {(node) => (
