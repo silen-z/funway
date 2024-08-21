@@ -12,7 +12,11 @@ export type HandlerChain = NavigationHandler & {
     queryable: Q,
     value: QueryableValue<Q> | (() => QueryableValue<Q>)
   ): HandlerChain;
-  // TODO consider other helper handlers
+
+  // TODO consider other helper handlers 
+  // in thats case it would be good to consider reusing functions
+  // to prevent every chainedHandler from creating many of them
+  //
   // onLeft(fn: () => void): HandlerChain;
   // onRight(fn: () => void): HandlerChain;
   // onUp(fn: () => void): HandlerChain;

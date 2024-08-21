@@ -5,6 +5,7 @@ import { isParent } from "../id.js";
 export type FocusDirection = "front" | "back";
 
 export type FocusHandlerConfig = {
+  skipEmpty?: boolean;
   direction?: (
     d: NavigationDirection | "initial" | null
   ) => FocusDirection | undefined;
@@ -21,7 +22,11 @@ function createFocusHandler(config: FocusHandlerConfig = {}) {
       return next();
     }
 
-    if (node.children.length === 0) {
+    if (!node.children.some((c) => c.active)) {
+      if (config.skipEmpty ?? false) {
+        return null;
+      }
+
       return node.id;
     }
 
@@ -72,30 +77,19 @@ export const captureHandler: NavigationHandler = (node, _, next) => {
 
 function createInitialHandler(id: string) {
   const initialHandler: NavigationHandler = (node, action, next) => {
-    const initialId = `${node.id}/${id}`;
-
     if (action.kind !== "focus") {
       return next();
     }
 
-    if (node.children.length === 0) {
-      return node.id;
-    }
-
-    if (action.direction === "initial") {
-      const child = node.children.find((c) => c.active && c.id === initialId);
-      if (child == null) {
-        return null;
+    if (action.direction === "initial" || action.direction === null) {
+      if (!node.children.some((c) => c.active)) {
+        return next();
       }
 
-      return next(initialId);
-    }
-
-    if (action.direction === null) {
+      const initialId = `${node.id}/${id}`;
       const child = node.children.find((c) => c.active && c.id === initialId);
-
       if (child != null) {
-        return next(child.id);
+        return next(child.id) ?? next();
       }
     }
 

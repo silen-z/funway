@@ -27,24 +27,23 @@ export const spatialMovement: NavigationHandler = (node, action, next) => {
   let closestId: NodeId | null = null;
   let shortestDistance: number | null = null;
 
-  traverseNodes(node.tree, node.id, (potentialNode) => {
-    // TODO use focus handler
-    // if (!potentialNode.focusable) {
-    //   return;
-    // }
+  traverseNodes(node.tree, node.id, (id) => {
+    if (next(id, { kind: "focus", direction: null }) === null) {
+      return null;
+    }
 
-    const potentialPos = NodePosition.query(node.tree, potentialNode.id);
-    if (potentialPos == null) {
+    const pos = NodePosition.query(node.tree, id);
+    if (pos === null) {
       return;
     }
 
-    if (!isCorrectDirection(focusedPos, potentialPos)) {
+    if (!isCorrectDirection(focusedPos, pos)) {
       return;
     }
 
-    const distance = distanceSquared(focusedPos, potentialPos);
+    const distance = distanceSquared(focusedPos, pos);
     if (shortestDistance === null || distance < shortestDistance) {
-      closestId = potentialNode.id;
+      closestId = id;
       shortestDistance = distance;
     }
   });
@@ -58,7 +57,11 @@ export const spatialMovement: NavigationHandler = (node, action, next) => {
 export const spatialHandler: HandlerChain = chainedHandler()
   .prepend(parentHandler)
   .prepend(spatialMovement)
-  .prepend(focusHandler());
+  .prepend(
+    focusHandler({
+      skipEmpty: true,
+    })
+  );
 
 type DirectionFilter = (current: DOMRect, potential: DOMRect) => boolean;
 

@@ -1,5 +1,5 @@
 import { createGlobalId, type NodeId } from "./id.js";
-import { type NavigationTree, getNode } from "./tree.js";
+import { type NavigationTree } from "./tree.js";
 import type { NavigationHandler } from "./handler.js";
 import { defaultHandler } from "./handlers/default.js";
 import { binarySearch } from "./array.js";
@@ -59,26 +59,29 @@ export function updateNode<N extends NavigationNode>(
 }
 
 function updateNodeOrder(node: NavigationNode, order: number) {
-  if (node.order !== order && node.parent !== null) {
-    node.order = order;
-
-    // update children inside parent
-    // TODO handle parent not being connected
-    const parentNode = getNode(node.tree, node.parent);
-
-    const childIndex = parentNode.children.findIndex((i) => i.id === node.id);
-    const newIndex = binarySearch(
-      parentNode.children,
-      // TODO handle null in order better?
-      (child) => order < (child.order ?? 0)
-    );
-
-    if (newIndex === -1 || newIndex === childIndex) {
-      return;
-    }
-
-    parentNode.children[childIndex!]!.order = order;
-    const removed = parentNode.children.splice(childIndex, 1);
-    parentNode.children.splice(newIndex, 0, ...removed);
+  if (node.order === order || node.parent === null) {
+    return;
   }
+
+  node.order = order;
+
+  // update children inside parent
+  const parentNode = node.tree.nodes.get(node.parent);
+  if (parentNode == null) {
+    return;
+  }
+
+  const childIndex = parentNode.children.findIndex((i) => i.id === node.id);
+  const newIndex = binarySearch(
+    parentNode.children,
+    (child) => order < (child.order ?? 0)
+  );
+
+  if (newIndex === -1 || newIndex === childIndex) {
+    return;
+  }
+
+  parentNode.children[childIndex!]!.order = order;
+  const removed = parentNode.children.splice(childIndex, 1);
+  parentNode.children.splice(newIndex, 0, ...removed);
 }

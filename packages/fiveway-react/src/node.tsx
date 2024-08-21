@@ -5,7 +5,7 @@ import type {
   NavigationNode,
 } from "@fiveway/core";
 import { type ReactNode, useRef, useEffect, useCallback } from "react";
-import { updateNode, connectNode, removeNode, createNode } from "@fiveway/core";
+import { updateNode, insertNode, removeNode, createNode } from "@fiveway/core";
 import { NavigationContext, useNavigationContext } from "./context.js";
 import { useFocus, useSelect } from "./hooks.js";
 import { useLazyIsFocused } from "./internal.js";
@@ -43,10 +43,11 @@ export function useNavigationNode(options: NodeOptions): NodeHandle {
   const nodeId = nodeRef.current.id;
 
   useEffect(() => {
-    connectNode(tree, nodeRef.current);
+    insertNode(tree, nodeRef.current);
 
     return () => {
       removeNode(tree, nodeId);
+      
     };
   }, [tree, nodeId]);
 

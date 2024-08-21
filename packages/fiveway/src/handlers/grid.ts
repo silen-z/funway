@@ -72,24 +72,23 @@ export const gridMovement: NavigationHandler = (node, action, next) => {
   let closestId: NodeId | null = null;
   let shortestDistance: number | null = null;
 
-  traverseNodes(node.tree, node.id, (potentialNode) => {
-    // TODO use focus handler
-    // if (!potentialNode.focusable) {
-    //   return;
-    // }
-
-    const potentialPos = GridPosition.query(node.tree, potentialNode.id);
-    if (potentialPos == null) {
+  traverseNodes(node.tree, node.id, (id) => {
+    const pos = GridPosition.query(node.tree, id);
+    if (pos === null) {
       return;
     }
 
-    const distance = getDistance(focusedPos, potentialPos);
+    if (next(id, { kind: "focus", direction: null }) === null) {
+      return null;
+    }
+
+    const distance = getDistance(focusedPos, pos);
     if (distance === null) {
       return;
     }
 
     if (shortestDistance === null || distance < shortestDistance) {
-      closestId = potentialNode.id;
+      closestId = id;
       shortestDistance = distance;
     }
   });
@@ -107,4 +106,8 @@ export const gridMovement: NavigationHandler = (node, action, next) => {
 export const gridHandler: HandlerChain = chainedHandler()
   .prepend(parentHandler)
   .prepend(gridMovement)
-  .prepend(focusHandler());
+  .prepend(
+    focusHandler({
+      skipEmpty: true,
+    })
+  );

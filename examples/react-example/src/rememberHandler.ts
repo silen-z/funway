@@ -25,7 +25,9 @@ export function useRememberHandler(): RememberHandler {
       if (action.kind === "focus" && lastFocused !== null) {
         try {
           return next(lastFocused, action);
-        } catch {}
+        } catch {
+          // continue
+        }
       }
 
       const nextId = next();
