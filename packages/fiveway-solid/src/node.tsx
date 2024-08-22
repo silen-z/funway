@@ -22,6 +22,7 @@ import {
   scopedId,
   selectNode,
   updateNode,
+  type NavigationNode,
 } from "@fiveway/core";
 import { useNavigationContext, NavigationContext } from "./context.jsx";
 import { createLazyMemo } from "@solid-primitives/memo";
@@ -44,7 +45,7 @@ export type NodeHandle = {
 export function createNavigationNode(options: NodeOptions): NodeHandle {
   const { tree, parentNode, focusedId } = useNavigationContext();
 
-  const node = createNode(tree, {
+  const node = createNode({
     id: options.id,
     parent: options.parent ?? parentNode,
     order: options.order,

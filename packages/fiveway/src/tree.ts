@@ -1,5 +1,5 @@
 import { type NodeId, convergingPaths, idsToRoot, isParent } from "./id.js";
-import type { NavigationNode } from "./node.js";
+import type { DisconnectedNode, NavigationNode } from "./node.js";
 import { type ListenerTree, callListeners } from "./events.js";
 import { runHandler } from "./handler.js";
 import { focusHandler } from "./handlers/focus.js";
@@ -35,16 +35,19 @@ export function createNavigationTree(): NavigationTree {
 // TODO split into insertNode/connectNode
 export function insertNode(
   tree: NavigationTree,
-  node: NavigationNode,
+  node: DisconnectedNode,
   notify = true
-) {
+): NavigationNode {
   if (node.parent === null) {
     throw new Error("trying to connect root (or node without parent)");
   }
 
+  const connnectedNode = node as NavigationNode;
+  connnectedNode.tree = tree;
+
   if (!tree.nodes.has(node.parent)) {
-    tree.nodes.set(node.id, node);
-    return;
+    tree.nodes.set(node.id, connnectedNode);
+    return connnectedNode;
   }
 
   const existingNode = tree.nodes.get(node.id);
@@ -52,13 +55,13 @@ export function insertNode(
     console.warn(`trying to connect existing node: ${node.id}`);
   }
 
-  tree.nodes.set(node.id, node);
+  tree.nodes.set(node.id, connnectedNode);
   node.connected = true;
 
   // TODO preserving order probably depends on nodes Map being ordered
   // it would be better to handle that explicitly via sentinel nodes (with children)
   const parentNode = getNode(tree, node.parent);
-  insertChildInOrder(parentNode, node);
+  insertChildInOrder(parentNode, connnectedNode);
 
   // TODO optimize iteration through all nodes
   // either with sentinel nodes or just array of disconnected ids
@@ -75,6 +78,8 @@ export function insertNode(
       focusNode(tree, node.parent, { direction: "initial" });
     }
   }
+
+  return connnectedNode;
 }
 
 export function removeNode(tree: NavigationTree, nodeId: NodeId) {
@@ -135,7 +140,7 @@ function disconnectNode(tree: NavigationTree, nodeId: NodeId) {
     disconnectNode(tree, child.id);
   }
 
-  node.connected = false;
+  (node as DisconnectedNode).connected = false;
 }
 
 export type FocusOptions = {

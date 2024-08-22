@@ -5,9 +5,9 @@ import {
   verticalHandler,
   spatialHandler,
   defaultHandler,
-  GridPosition,
   initialHandler,
   containerHandler,
+  GridItem,
 } from "@fiveway/core";
 import {
   NavigationNode,
@@ -30,21 +30,21 @@ export function Showcase() {
         <nav.Context>
           <NavigationNode
             id="verticalList"
-            handler={containerHandler.provide(GridPosition, { row: 1, col: 1 })}
+            handler={containerHandler.meta(GridItem, { row: 1, col: 1 })}
           >
             <ListShowcase type="vertical" />
           </NavigationNode>
 
           <NavigationNode
             id="horizontalList"
-            handler={containerHandler.provide(GridPosition, { row: 1, col: 2 })}
+            handler={containerHandler.meta(GridItem, { row: 1, col: 2 })}
           >
             <ListShowcase type="horizontal" />
           </NavigationNode>
 
           <NavigationNode
             id="spatial"
-            handler={containerHandler.provide(GridPosition, { row: 1, col: 3 })}
+            handler={containerHandler.meta(GridItem, { row: 1, col: 3 })}
           >
             <SpatialShowcase />
           </NavigationNode>

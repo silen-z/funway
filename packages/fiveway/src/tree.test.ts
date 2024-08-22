@@ -1,33 +1,41 @@
 import { expect, test } from "vitest";
-import { connectNode, createNavigationTree } from "./tree.js";
+import { insertNode, createNavigationTree } from "./tree.js";
 import { createNode, updateNode } from "./node.js";
 
 test("updateNode correctly sorts children", () => {
   const tree = createNavigationTree();
 
-  const container = createNode(tree, {
-    id: "container",
-    parent: "#",
-  });
-  connectNode(tree, container);
+  const container = insertNode(
+    tree,
+    createNode({
+      id: "container",
+      parent: "#",
+    })
+  );
 
-  const node1 = createNode(tree, {
-    id: "node1",
-    parent: container.id,
-  });
-  connectNode(tree, node1);
+  insertNode(
+    tree,
+    createNode({
+      id: "node1",
+      parent: container.id,
+    })
+  );
 
-  const node2 = createNode(tree, {
-    id: "node2",
-    parent: container.id,
-  });
-  connectNode(tree, node2);
+  const node2 = insertNode(
+    tree,
+    createNode({
+      id: "node2",
+      parent: container.id,
+    })
+  );
 
-  const node3 = createNode(tree, {
-    id: "node3",
-    parent: container.id,
-  });
-  connectNode(tree, node3);
+  insertNode(
+    tree,
+    createNode({
+      id: "node3",
+      parent: container.id,
+    })
+  );
 
   expect(container.children.map((c) => c.id)).toStrictEqual([
     "#/container/node1",

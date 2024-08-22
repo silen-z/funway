@@ -4,14 +4,19 @@ import type { NavigationHandler } from "./handler.js";
 import { defaultHandler } from "./handlers/default.js";
 import { binarySearch } from "./array.js";
 
-export type NavigationNode = {
-  tree: NavigationTree;
+export type DisconnectedNode = {
+  tree?: NavigationTree;
   id: NodeId;
   connected: boolean;
   parent: NodeId | null;
   order: number | null;
   handler: NavigationHandler;
   children: NodeChild[];
+};
+
+export type NavigationNode = DisconnectedNode & {
+  tree: NavigationTree;
+  connected: true;
 };
 
 export type NodeChild = { id: NodeId; order: number | null; active: boolean };
@@ -23,14 +28,10 @@ export type NodeConfig = {
   handler?: NavigationHandler;
 };
 
-export function createNode(
-  tree: NavigationTree,
-  options: NodeConfig
-): NavigationNode {
+export function createNode(options: NodeConfig): DisconnectedNode {
   const globalId = createGlobalId(options.parent, options.id);
 
   return {
-    tree,
     id: globalId,
     connected: false,
     parent: options.parent,
@@ -45,8 +46,8 @@ export type ContainerConfig = NodeConfig & {
   rememberChildren?: boolean;
 };
 
-export function updateNode<N extends NavigationNode>(
-  node: N,
+export function updateNode(
+  node: DisconnectedNode,
   options: Omit<NodeConfig, "id" | "parent">
 ) {
   if (options.handler != null) {
@@ -58,12 +59,16 @@ export function updateNode<N extends NavigationNode>(
   }
 }
 
-function updateNodeOrder(node: NavigationNode, order: number) {
+function updateNodeOrder(node: DisconnectedNode, order: number) {
   if (node.order === order || node.parent === null) {
     return;
   }
 
   node.order = order;
+
+  if (node.tree == null) {
+    return;
+  }
 
   // update children inside parent
   const parentNode = node.tree.nodes.get(node.parent);

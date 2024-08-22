@@ -2,7 +2,7 @@ import type {
   NodeId,
   NavigationHandler,
   FocusOptions,
-  NavigationNode,
+  DisconnectedNode,
 } from "@fiveway/core";
 import { type ReactNode, useRef, useEffect, useCallback } from "react";
 import { updateNode, insertNode, removeNode, createNode } from "@fiveway/core";
@@ -25,13 +25,15 @@ export type NodeHandle = {
   Context: React.FunctionComponent<{ children: ReactNode }>;
 };
 
+const NULL_NODE = {} as DisconnectedNode;
+
 export function useNavigationNode(options: NodeOptions): NodeHandle {
   const { tree, parentNode } = useNavigationContext();
   const parent = options.parent ?? parentNode;
 
-  const nodeRef = useRef<NavigationNode>(null as unknown as NavigationNode);
-  if (nodeRef.current === null) {
-    nodeRef.current = createNode(tree, {
+  const nodeRef = useRef(NULL_NODE);
+  if (nodeRef.current === NULL_NODE) {
+    nodeRef.current = createNode({
       id: options.id,
       parent,
       handler: options.handler,
@@ -47,7 +49,6 @@ export function useNavigationNode(options: NodeOptions): NodeHandle {
 
     return () => {
       removeNode(tree, nodeId);
-      
     };
   }, [tree, nodeId]);
 
