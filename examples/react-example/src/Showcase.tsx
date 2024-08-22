@@ -3,7 +3,7 @@ import {
   containerHandler,
   defaultHandler,
   gridHandler,
-  GridPosition,
+  GridItem,
   horizontalHandler,
   initialHandler,
   verticalHandler,
@@ -27,42 +27,42 @@ export function Showcase() {
         <nav.Context>
           <NavigationNode
             id="verticalList"
-            handler={containerHandler.provide(GridPosition, { row: 1, col: 1 })}
+            handler={containerHandler.meta(GridItem, { row: 1, col: 1 })}
           >
             <ListShowcase type="vertical" />
           </NavigationNode>
 
           <NavigationNode
             id="horizontalList"
-            handler={containerHandler.provide(GridPosition, { row: 1, col: 2 })}
+            handler={containerHandler.meta(GridItem, { row: 1, col: 2 })}
           >
             <ListShowcase type="horizontal" />
           </NavigationNode>
 
           <NavigationNode
             id="virtual"
-            handler={containerHandler.provide(GridPosition, { row: 1, col: 3 })}
+            handler={containerHandler.meta(GridItem, { row: 1, col: 3 })}
           >
             <VirtualList />
           </NavigationNode>
 
           <NavigationNode
             id="virtual-grid"
-            handler={containerHandler.provide(GridPosition, { row: 1, col: 4 })}
+            handler={containerHandler.meta(GridItem, { row: 1, col: 4 })}
           >
             <VirtualGrid />
           </NavigationNode>
 
           <NavigationNode
             id="spatial"
-            handler={containerHandler.provide(GridPosition, { row: 2, col: 1 })}
+            handler={containerHandler.meta(GridItem, { row: 2, col: 1 })}
           >
             <SpatialShowcase />
           </NavigationNode>
 
           <NavigationNode
             id="conditional"
-            handler={containerHandler.provide(GridPosition, { row: 2, col: 2 })}
+            handler={containerHandler.meta(GridItem, { row: 2, col: 2 })}
           >
             <ConditionalShowcase />
           </NavigationNode>

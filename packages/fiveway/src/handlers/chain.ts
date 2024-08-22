@@ -1,19 +1,20 @@
-import type { NavigationHandler, HandlerNext } from "../handler.js";
+import { type NavigationHandler, type HandlerNext } from "../handler.js";
 import type { NodeId } from "../id.js";
 import type { NavigationAction } from "../navigation.js";
-import type { NavigationNode } from "../node.js";
-import type { Queryable, QueryableValue } from "../query.js";
+import { type NavigationNode } from "../node.js";
+import type { Metadata, MetadataValue } from "../metadata.js";
 import { selectHandler } from "./select.js";
+import { defaultHandlerInfo } from "../introspection.js";
 
 export type HandlerChain = NavigationHandler & {
   prepend(another: NavigationHandler): HandlerChain;
   onSelect(fn: () => void): HandlerChain;
-  provide<Q extends Queryable<any>>(
-    queryable: Q,
-    value: QueryableValue<Q> | (() => QueryableValue<Q>)
+  meta<M extends Metadata<any>>(
+    meta: M,
+    value: MetadataValue<M> | (() => MetadataValue<M>)
   ): HandlerChain;
 
-  // TODO consider other helper handlers 
+  // TODO consider other helper handlers
   // in thats case it would be good to consider reusing functions
   // to prevent every chainedHandler from creating many of them
   //
@@ -26,6 +27,7 @@ export type HandlerChain = NavigationHandler & {
 };
 
 type ChainLink = {
+  accept?: Set<string>;
   handler: NavigationHandler;
   next: ChainLink | null;
 };
@@ -62,26 +64,32 @@ function createChainedHandler(
         return next();
       }
 
+      if (import.meta.env.DEV) {
+        defaultHandlerInfo(link.handler, node, action);
+      }
+
       return link.handler(node, action, linkHandler.bind(null, link.next));
     };
 
     return linkHandler(handler);
   };
 
-  chainedHandler.prepend = (prepended: NavigationHandler) =>
-    createChainedHandler({ handler: prepended, next: handler });
+  // TODO connecting chains
+  chainedHandler.prepend = (prepended: NavigationHandler) => {
+    return createChainedHandler({ handler: prepended, next: handler });
+  };
 
   chainedHandler.onSelect = (fn: () => void) => {
     return createChainedHandler({ handler: selectHandler(fn), next: handler });
   };
 
-  chainedHandler.provide = <Q extends Queryable<any>>(
-    queryable: Q,
-    value: QueryableValue<Q> | (() => QueryableValue<Q>)
+  chainedHandler.meta = <M extends Metadata<any>>(
+    meta: M,
+    value: MetadataValue<M> | (() => MetadataValue<M>)
   ) => {
     const fn = typeof value !== "function" ? () => value : value;
     return createChainedHandler({
-      handler: queryable.handler(fn),
+      handler: meta.providerHandler(fn),
       next: handler,
     });
   };

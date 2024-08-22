@@ -1,18 +1,24 @@
 import type { NodeId } from "../id.js";
-import type { NavigationHandler } from "../handler.js";
+import { type NavigationHandler } from "../handler.js";
 import type { NavigationDirection } from "../navigation.js";
 import { type HandlerChain, chainedHandler } from "./chain.js";
 import { traverseNodes } from "../tree.js";
 import { parentHandler } from "./default.js";
 import { focusHandler } from "./focus.js";
-import { type Queryable, queryable } from "../query.js";
+import { type Metadata, defineMetadata } from "../metadata.js";
+import { handlerInfo } from "../introspection.js";
 
-export const NodePosition: Queryable<DOMRect> = queryable("NodePosition");
+export const NodePosition: Metadata<DOMRect> =
+  defineMetadata("core:node-position");
 
 /**
  * @category Handler
  */
 export const spatialMovement: NavigationHandler = (node, action, next) => {
+  if (import.meta.env.DEV) {
+    handlerInfo(action, { name: "core:spatial" });
+  }
+
   if (action.kind !== "move" || action.direction === "back") {
     return next();
   }
@@ -57,11 +63,7 @@ export const spatialMovement: NavigationHandler = (node, action, next) => {
 export const spatialHandler: HandlerChain = chainedHandler()
   .prepend(parentHandler)
   .prepend(spatialMovement)
-  .prepend(
-    focusHandler({
-      skipEmpty: true,
-    })
-  );
+  .prepend(focusHandler({ skipEmpty: true }));
 
 type DirectionFilter = (current: DOMRect, potential: DOMRect) => boolean;
 

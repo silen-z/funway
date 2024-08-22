@@ -1,6 +1,7 @@
 import type { NavigationDirection } from "../navigation.js";
 import { type NavigationHandler } from "../handler.js";
 import { isParent } from "../id.js";
+import { handlerInfo } from "../introspection.js";
 
 export type FocusDirection = "front" | "back";
 
@@ -17,13 +18,19 @@ export type FocusHandlerConfig = {
  * @returns
  */
 function createFocusHandler(config: FocusHandlerConfig = {}) {
+  const skipEmpty = config.skipEmpty ?? false;
+
   const focusHandler: NavigationHandler = (node, action, next) => {
+    if (import.meta.env.DEV) {
+      handlerInfo(action, { name: "core:focus", skipEmpty });
+    }
+
     if (action.kind !== "focus") {
       return next();
     }
 
     if (!node.children.some((c) => c.active)) {
-      if (config.skipEmpty ?? false) {
+      if (skipEmpty) {
         return null;
       }
 
@@ -66,7 +73,11 @@ function createFocusHandler(config: FocusHandlerConfig = {}) {
   return focusHandler;
 }
 
-export const captureHandler: NavigationHandler = (node, _, next) => {
+export const captureHandler: NavigationHandler = (node, action, next) => {
+  if (import.meta.env.DEV) {
+    handlerInfo(action, { name: "core:capture" });
+  }
+
   const id = next();
   if (id === null || !isParent(node.id, id)) {
     return null;
@@ -77,6 +88,10 @@ export const captureHandler: NavigationHandler = (node, _, next) => {
 
 function createInitialHandler(id: string) {
   const initialHandler: NavigationHandler = (node, action, next) => {
+    if (import.meta.env.DEV) {
+      handlerInfo(action, { name: "core:initial", initial: id });
+    }
+
     if (action.kind !== "focus") {
       return next();
     }

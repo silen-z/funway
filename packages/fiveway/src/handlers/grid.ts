@@ -1,22 +1,23 @@
 import { type NodeId, directChildId } from "../id.js";
 import { traverseNodes } from "../tree.js";
 import type { NavigationDirection } from "../navigation.js";
-import type { NavigationHandler } from "../handler.js";
+import { type NavigationHandler } from "../handler.js";
 import { parentHandler } from "./default.js";
 import { focusHandler } from "./focus.js";
-import { type Queryable, queryable } from "../query.js";
+import { type Metadata, defineMetadata } from "../metadata.js";
 import { type HandlerChain, chainedHandler } from "./chain.js";
+import { handlerInfo } from "../introspection.js";
 
-export type GridPosition = {
+export type GridItem = {
   row: number;
   col: number;
 };
 
-export const GridPosition: Queryable<GridPosition> = queryable("GridPosition");
+export const GridItem: Metadata<GridItem> = defineMetadata("core:grid-item");
 
 const distanceFns: Record<
   NavigationDirection,
-  (current: GridPosition, potential: GridPosition) => number | null
+  (current: GridItem, potential: GridItem) => number | null
 > = {
   up: (current, potential) => {
     if (potential.col !== current.col) {
@@ -53,6 +54,10 @@ const distanceFns: Record<
  * @category Handler
  */
 export const gridMovement: NavigationHandler = (node, action, next) => {
+  if (import.meta.env.DEV) {
+    handlerInfo(action, { name: "core:grid" });
+  }
+
   if (action.kind !== "move" || action.direction === "back") {
     return next();
   }
@@ -62,7 +67,7 @@ export const gridMovement: NavigationHandler = (node, action, next) => {
     return next();
   }
 
-  const focusedPos = GridPosition.query(node.tree, focusedId);
+  const focusedPos = GridItem.query(node.tree, focusedId);
   if (focusedPos == null) {
     return next();
   }
@@ -73,7 +78,7 @@ export const gridMovement: NavigationHandler = (node, action, next) => {
   let shortestDistance: number | null = null;
 
   traverseNodes(node.tree, node.id, (id) => {
-    const pos = GridPosition.query(node.tree, id);
+    const pos = GridItem.query(node.tree, id);
     if (pos === null) {
       return;
     }
@@ -106,8 +111,4 @@ export const gridMovement: NavigationHandler = (node, action, next) => {
 export const gridHandler: HandlerChain = chainedHandler()
   .prepend(parentHandler)
   .prepend(gridMovement)
-  .prepend(
-    focusHandler({
-      skipEmpty: true,
-    })
-  );
+  .prepend(focusHandler({ skipEmpty: true }));

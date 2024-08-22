@@ -3,16 +3,12 @@ import {
   type NavigationTree,
   type NavigationAction,
   type HandlerChain,
-  type Queryable,
   handleAction,
   chainedHandler,
   registerListener,
-  queryable,
   NodePosition,
 } from "@fiveway/core";
-import { defaultEventMapping } from "@fiveway/core/dom";
-
-export const NodeElement: Queryable<HTMLElement> = queryable("Element");
+import { defaultEventMapping, NodeElement } from "@fiveway/core/dom";
 
 export type ElementHandler = HandlerChain & {
   register: (e: HTMLElement | null) => void;
@@ -25,8 +21,8 @@ export function useElementHandler() {
     const position = () => elementRef.current?.getBoundingClientRect() ?? null;
 
     const handler = chainedHandler()
-      .prepend(NodeElement.handler(() => elementRef.current))
-      .prepend(NodePosition.handler(position)) as ElementHandler;
+      .meta(NodeElement, () => elementRef.current)
+      .meta(NodePosition, position) as ElementHandler;
 
     handler.register = (element) => {
       elementRef.current = element;

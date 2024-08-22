@@ -1,3 +1,9 @@
+declare global {
+  interface ImportMeta {
+    env: { DEV?: boolean };
+  }
+}
+
 export * from "./id.js";
 export * from "./node.js";
 export * from "./tree.js";
@@ -12,4 +18,4 @@ export * from "./handlers/grid.js";
 export * from "./handlers/spatial.js";
 
 export * from "./navigation.js";
-export * from "./query.js";
+export * from "./metadata.js";

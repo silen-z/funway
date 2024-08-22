@@ -1,17 +1,24 @@
 import { type NavigationHandler, runHandler } from "./handler.js";
 import type { NodeId } from "./id.js";
+import { handlerInfo } from "./introspection.js";
 import type { NavigationAction } from "./navigation.js";
 import type { NavigationTree } from "./tree.js";
 
-export type Queryable<T> = {
-  handler: (v: () => T | null) => NavigationHandler;
+export type Metadata<T> = {
+  key: string;
+  providerHandler: (v: () => T | null) => NavigationHandler;
   query: (tree: NavigationTree, id: NodeId) => T | null;
 };
 
-export function queryable<T>(key: string): Queryable<T> {
+export function defineMetadata<T>(key: string): Metadata<T> {
   return {
-    handler: (value) => {
-      const queryHandler: NavigationHandler = (_, action, next) => {
+    key,
+    providerHandler: (value) => {
+      const metadataProvider: NavigationHandler = (_, action, next) => {
+        if (import.meta.env.DEV) {
+          handlerInfo(action, { name: "core:metadata-provider", key });
+        }
+
         if (action.kind === "query" && action.key === key) {
           action.value = value();
           return null;
@@ -20,7 +27,7 @@ export function queryable<T>(key: string): Queryable<T> {
         return next();
       };
 
-      return queryHandler;
+      return metadataProvider;
     },
     query: (tree: NavigationTree, id: NodeId) => {
       let query: NavigationAction = { kind: "query", key, value: null };
@@ -30,8 +37,6 @@ export function queryable<T>(key: string): Queryable<T> {
   };
 }
 
-export type QueryableValue<Q extends Queryable<any>> = Q extends Queryable<
-  infer V
->
+export type MetadataValue<Q extends Metadata<any>> = Q extends Metadata<infer V>
   ? V | null
   : never;

@@ -14,6 +14,7 @@ import {
   NodeId,
   isFocused,
   registerListener,
+  runHandler,
 } from "@fiveway/core";
 import { clsx } from "clsx";
 import css from "./styles.module.css";
@@ -53,6 +54,23 @@ function DevtoolPanel(props: { tree: NavigationTree }) {
 function Sidebar(props: { tree: NavigationTree; close: () => void }) {
   const [side, setSide] = createSignal("right");
   const [isAllExpanded, setAllExpanded] = createSignal(false);
+  const [selectedNode, setSelectedNode] = createSignal<NodeId | null>(null);
+
+  const nodeInfo = createMemo(() => {
+    const id = selectedNode();
+    if (id === null) {
+      return null;
+    }
+
+    const value = [] as Array<Record<string, string>>;
+    runHandler(props.tree, id, {
+      kind: "query",
+      key: "core:handler-info",
+      value,
+    });
+
+    return value;
+  });
 
   return (
     <div class={css.sidebar} data-side={side()}>
@@ -76,7 +94,20 @@ function Sidebar(props: { tree: NavigationTree; close: () => void }) {
           nodeId="#"
           isAllExpanded={isAllExpanded()}
           setAllExpanded={setAllExpanded}
+          setSelectedNode={setSelectedNode}
         />
+
+        <Show when={nodeInfo()}>
+          {(info) => (
+            <div>
+              <div>node: {selectedNode()}</div>
+              <div>
+                <div>handlers:</div>
+                <pre>{JSON.stringify(info(), null, 2)}</pre>
+              </div>
+            </div>
+          )}
+        </Show>
       </div>
     </div>
   );
@@ -85,6 +116,7 @@ function Sidebar(props: { tree: NavigationTree; close: () => void }) {
 function VisualizeNode(props: {
   tree: NavigationTree;
   nodeId: NodeId;
+  setSelectedNode: Setter<NodeId | null>;
   isAllExpanded: boolean;
   setAllExpanded?: Setter<boolean>;
 }) {
@@ -142,7 +174,11 @@ function VisualizeNode(props: {
               data-root={node().id === "#"}
               data-focused={isNodeFocused()}
             >
-              <span class={css.nodeLabel} title={props.nodeId}>
+              <span
+                class={css.nodeLabel}
+                title={props.nodeId}
+                onClick={() => props.setSelectedNode(props.nodeId)}
+              >
                 {node().id === "#" ? "root" : getLocalId(props.nodeId)}
               </span>
 
@@ -187,6 +223,7 @@ function VisualizeNode(props: {
                       tree={props.tree}
                       nodeId={child.id}
                       isAllExpanded={props.isAllExpanded}
+                      setSelectedNode={props.setSelectedNode}
                     />
                   )}
                 </For>
