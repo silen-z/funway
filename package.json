@@ -5,10 +5,13 @@
     "example:react": "pnpm --filter \"@fiveway/react-example\" run dev",
     "example:solid": "pnpm --filter \"@fiveway/solid-example\" run dev",
     "dev:libs": "pnpm --filter \"@fiveway/core\" --filter \"@fiveway/react\" --filter \"@fiveway/solid\" --filter \"@fiveway/devtools\" --parallel run build --watch",
-    "build": "pnpm --filter \"@fiveway/core\" --filter \"@fiveway/react\" --filter \"@fiveway/solid\" --filter \"@fiveway/devtools\" run build"
+    "build": "pnpm --filter \"@fiveway/core\" --filter \"@fiveway/react\" --filter \"@fiveway/solid\" --filter \"@fiveway/devtools\" run build",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage"
   },
   "devDependencies": {
-    "typedoc": "^0.26.5",
-    "vitest": "^1.6.0"
+    "@vitest/coverage-v8": "^2.0.5",
+    "typedoc": "^0.26.6",
+    "vitest": "^2.0.5"
   }
 }

@@ -1,17 +1,33 @@
-import type { NavigationHandler } from "./handler.js";
+import { runHandler, type NavigationHandler } from "./handler.js";
+import type { NodeId } from "./id.js";
 import type { NavigationAction } from "./navigation.js";
 import type { NavigationNode } from "./node.js";
+import type { NavigationTree } from "./tree.js";
 
 export type HandlerInfo = Record<string, string | { toString(): string }>;
 
-export function handlerInfo(action: NavigationAction, info: HandlerInfo) {
+export function describeHandler(action: NavigationAction, info: HandlerInfo) {
   if (action.kind === "query" && action.key === "core:handler-info") {
-    if (action.value === null) {
+    if (!Array.isArray(action.value)) {
       action.value = [];
     }
 
-    (action.value as Array<HandlerInfo>).push(info);
+    (action.value as HandlerInfo[]).push(info);
   }
+}
+
+export function getHandlerInfo(
+  tree: NavigationTree,
+  id: NodeId
+): HandlerInfo[] {
+  const value = [] as HandlerInfo[];
+  runHandler(tree, id, {
+    kind: "query",
+    key: "core:handler-info",
+    value,
+  });
+
+  return value;
 }
 
 export function defaultHandlerInfo(
@@ -26,7 +42,7 @@ export function defaultHandlerInfo(
   const value: Array<HandlerInfo> = [];
   handler(node, { kind: "query", key: "core:handler-info", value }, () => null);
   if (value.length === 0) {
-    handlerInfo(action, {
+    describeHandler(action, {
       name: handler.name !== "" ? handler.name : "custom",
     });
   }

@@ -1,12 +1,12 @@
 import type { NodeId } from "../id.js";
 import { type NavigationHandler } from "../handler.js";
 import type { NavigationDirection } from "../navigation.js";
-import { type HandlerChain, chainedHandler } from "./chain.js";
+import { type HandlerChain, chainedHandler } from "./chained.js";
 import { traverseNodes } from "../tree.js";
 import { parentHandler } from "./default.js";
 import { focusHandler } from "./focus.js";
 import { type Metadata, defineMetadata } from "../metadata.js";
-import { handlerInfo } from "../introspection.js";
+import { describeHandler } from "../introspection.js";
 
 export const NodePosition: Metadata<DOMRect> =
   defineMetadata("core:node-position");
@@ -16,7 +16,7 @@ export const NodePosition: Metadata<DOMRect> =
  */
 export const spatialMovement: NavigationHandler = (node, action, next) => {
   if (import.meta.env.DEV) {
-    handlerInfo(action, { name: "core:spatial" });
+    describeHandler(action, { name: "core:spatial" });
   }
 
   if (action.kind !== "move" || action.direction === "back") {
@@ -33,9 +33,9 @@ export const spatialMovement: NavigationHandler = (node, action, next) => {
   let closestId: NodeId | null = null;
   let shortestDistance: number | null = null;
 
-  traverseNodes(node.tree, node.id, (id) => {
+  traverseNodes(node.tree, node.id, 1, (id) => {
     if (next(id, { kind: "focus", direction: null }) === null) {
-      return null;
+      return;
     }
 
     const pos = NodePosition.query(node.tree, id);

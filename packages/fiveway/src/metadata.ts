@@ -1,6 +1,6 @@
 import { type NavigationHandler, runHandler } from "./handler.js";
 import type { NodeId } from "./id.js";
-import { handlerInfo } from "./introspection.js";
+import { describeHandler } from "./introspection.js";
 import type { NavigationAction } from "./navigation.js";
 import type { NavigationTree } from "./tree.js";
 
@@ -16,7 +16,7 @@ export function defineMetadata<T>(key: string): Metadata<T> {
     providerHandler: (value) => {
       const metadataProvider: NavigationHandler = (_, action, next) => {
         if (import.meta.env.DEV) {
-          handlerInfo(action, { name: "core:metadata-provider", key });
+          describeHandler(action, { name: "core:metadata-provider", key });
         }
 
         if (action.kind === "query" && action.key === key) {

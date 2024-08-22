@@ -3,6 +3,10 @@
  * It's potentionaly faster becase it doesn't have to shift the rest of elements
  */
 export function swapRemove(array: unknown[], idx: number) {
+  if (idx >= array.length) {
+    return
+  }
+
   array[idx] = array[array.length - 1];
   array.length -= 1;
 }

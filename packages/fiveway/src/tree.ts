@@ -216,8 +216,8 @@ export function isFocused(tree: NavigationTree, nodeId: NodeId): boolean {
 export function traverseNodes(
   tree: NavigationTree,
   nodeId: NodeId,
-  callback: (id: NodeId) => void,
-  depth = 1
+  depth: number | null,
+  callback: (id: NodeId) => void
 ) {
   if (depth === 0) {
     return;
@@ -228,7 +228,12 @@ export function traverseNodes(
   for (const child of node.children) {
     if (child.active) {
       callback(child.id);
-      traverseNodes(tree, child.id, callback, depth - 1);
+      traverseNodes(
+        tree,
+        child.id,
+        depth !== null ? depth - 1 : null,
+        callback
+      );
     }
   }
 }

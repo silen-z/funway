@@ -5,8 +5,8 @@ import { type NavigationHandler } from "../handler.js";
 import { parentHandler } from "./default.js";
 import { focusHandler } from "./focus.js";
 import { type Metadata, defineMetadata } from "../metadata.js";
-import { type HandlerChain, chainedHandler } from "./chain.js";
-import { handlerInfo } from "../introspection.js";
+import { type HandlerChain, chainedHandler } from "./chained.js";
+import { describeHandler } from "../introspection.js";
 
 export type GridItem = {
   row: number;
@@ -55,7 +55,7 @@ const distanceFns: Record<
  */
 export const gridMovement: NavigationHandler = (node, action, next) => {
   if (import.meta.env.DEV) {
-    handlerInfo(action, { name: "core:grid" });
+    describeHandler(action, { name: "core:grid" });
   }
 
   if (action.kind !== "move" || action.direction === "back") {
@@ -77,7 +77,7 @@ export const gridMovement: NavigationHandler = (node, action, next) => {
   let closestId: NodeId | null = null;
   let shortestDistance: number | null = null;
 
-  traverseNodes(node.tree, node.id, (id) => {
+  traverseNodes(node.tree, node.id, 1, (id) => {
     const pos = GridItem.query(node.tree, id);
     if (pos === null) {
       return;

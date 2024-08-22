@@ -1,5 +1,5 @@
 import { type NavigationHandler } from "../handler.js";
-import { handlerInfo } from "../introspection.js";
+import { describeHandler } from "../introspection.js";
 
 /**
  * @category Handler
@@ -7,7 +7,7 @@ import { handlerInfo } from "../introspection.js";
 function createSelectHandler(onSelect: () => void) {
   const selectHandler: NavigationHandler = (_, action, next) => {
     if (import.meta.env.DEV) {
-      handlerInfo(action, { name: "core:select" });
+      describeHandler(action, { name: "core:select" });
     }
 
     if (action.kind === "select") {

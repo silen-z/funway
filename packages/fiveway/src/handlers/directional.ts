@@ -2,10 +2,10 @@ import type { NavigationNode } from "../node.js";
 import { type NodeId, directChildId } from "../id.js";
 import type { NavigationAction, NavigationDirection } from "../navigation.js";
 import { type HandlerNext } from "../handler.js";
-import { type HandlerChain, chainedHandler } from "./chain.js";
+import { type HandlerChain, chainedHandler } from "./chained.js";
 import { parentHandler } from "./default.js";
 import { focusHandler } from "./focus.js";
-import { handlerInfo } from "../introspection.js";
+import { describeHandler } from "../introspection.js";
 
 /**
  * @category Handler
@@ -16,7 +16,7 @@ export function verticalMovementHandler(
   next: HandlerNext
 ) {
   if (import.meta.env.DEV) {
-    handlerInfo(action, { name: "core:vertical-movement" });
+    describeHandler(action, { name: "core:vertical-movement" });
   }
 
   if (action.kind !== "move") {
@@ -74,7 +74,7 @@ export function horizontalMovementHandler(
   next: HandlerNext
 ) {
   if (import.meta.env.DEV) {
-    handlerInfo(action, { name: "core:horizontal-movement" });
+    describeHandler(action, { name: "core:horizontal-movement" });
   }
 
   if (action.kind !== "move") {

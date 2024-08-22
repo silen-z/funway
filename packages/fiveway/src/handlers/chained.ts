@@ -1,7 +1,7 @@
-import { type NavigationHandler, type HandlerNext } from "../handler.js";
+import type { NavigationHandler, HandlerNext } from "../handler.js";
 import type { NodeId } from "../id.js";
 import type { NavigationAction } from "../navigation.js";
-import { type NavigationNode } from "../node.js";
+import type { NavigationNode } from "../node.js";
 import type { Metadata, MetadataValue } from "../metadata.js";
 import { selectHandler } from "./select.js";
 import { defaultHandlerInfo } from "../introspection.js";

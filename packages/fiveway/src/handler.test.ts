@@ -1,53 +1,28 @@
-import { describe, expect, test } from "vitest";
+import { expect, test, vi } from "vitest";
 import { insertNode, createNavigationTree } from "./tree.js";
 import { createNode } from "./node.js";
-import { NodeId } from "./id.js";
-import { NavigationHandler, runHandler } from "./handler.js";
-import { chainedHandler } from "./handlers/chain.js";
+import { NavigationHandler } from "./handler.js";
 
-describe("handlers", () => {
-  test("chainHandlers", () => {
-    const logs: string[] = [];
+test("runHandler", () => {
+  const tree = createNavigationTree();
 
-    const logHandler =
-      (msg: string, pass?: NodeId): NavigationHandler =>
-      (n, a, next) => {
-        if (a.kind === "select") {
-          logs.push(n.id + ":" + msg);
-          if (pass) {
-            return next(pass);
-          }
-        }
-        return next();
-      };
+  const handler = vi.fn(() => null);
+  insertNode(tree, createNode({ id: "one", parent: "#", handler }));
 
-    const testTree = createNavigationTree();
+  expect(handler).toHaveBeenCalledWith(
+    expect.objectContaining({ id: "#/one" }),
+    expect.objectContaining({ kind: "focus" }),
+    expect.any(Function)
+  );
+});
 
-    insertNode(
-      testTree,
-      createNode({
-        id: "node1",
-        parent: "#",
-        handler: chainedHandler(logHandler("4")).prepend(logHandler("3")),
-      })
-    );
+test("runHandler: pass action to non-existent node", () => {
+  const tree = createNavigationTree();
 
-    const testNode2 = insertNode(
-      testTree,
-      createNode({
-        id: "node2",
-        parent: "#",
-        handler: chainedHandler(logHandler("2", "#/node1")).prepend(
-          logHandler("1")
-        ),
-      })
-    );
-
-    const result = runHandler(testTree, testNode2.id, {
-      kind: "select",
-    });
-
-    expect(result).toBeNull();
-    expect(logs).toEqual(["#/node2:1", "#/node2:2", "#/node1:3", "#/node1:4"]);
-  });
+  const handler: NavigationHandler = (n, a, next) => {
+    const nextId = next("#/non-existent");
+    expect(nextId).toBeNull();
+    return nextId;
+  };
+  insertNode(tree, createNode({ id: "one", parent: "#", handler }));
 });

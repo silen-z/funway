@@ -1,7 +1,7 @@
 import type { NavigationDirection } from "../navigation.js";
 import { type NavigationHandler } from "../handler.js";
 import { isParent } from "../id.js";
-import { handlerInfo } from "../introspection.js";
+import { describeHandler } from "../introspection.js";
 
 export type FocusDirection = "front" | "back";
 
@@ -22,7 +22,7 @@ function createFocusHandler(config: FocusHandlerConfig = {}) {
 
   const focusHandler: NavigationHandler = (node, action, next) => {
     if (import.meta.env.DEV) {
-      handlerInfo(action, { name: "core:focus", skipEmpty });
+      describeHandler(action, { name: "core:focus", skipEmpty });
     }
 
     if (action.kind !== "focus") {
@@ -75,7 +75,7 @@ function createFocusHandler(config: FocusHandlerConfig = {}) {
 
 export const captureHandler: NavigationHandler = (node, action, next) => {
   if (import.meta.env.DEV) {
-    handlerInfo(action, { name: "core:capture" });
+    describeHandler(action, { name: "core:capture" });
   }
 
   const id = next();
@@ -89,7 +89,7 @@ export const captureHandler: NavigationHandler = (node, action, next) => {
 function createInitialHandler(id: string) {
   const initialHandler: NavigationHandler = (node, action, next) => {
     if (import.meta.env.DEV) {
-      handlerInfo(action, { name: "core:initial", initial: id });
+      describeHandler(action, { name: "core:initial", initial: id });
     }
 
     if (action.kind !== "focus") {

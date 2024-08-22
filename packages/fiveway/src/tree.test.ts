@@ -1,65 +1,285 @@
-import { expect, test } from "vitest";
-import { insertNode, createNavigationTree } from "./tree.js";
-import { createNode, updateNode } from "./node.js";
+import { expect, test, vi } from "vitest";
+import {
+  createNavigationTree,
+  focusNode,
+  getNode,
+  insertNode,
+  removeNode,
+  selectNode,
+  traverseNodes,
+} from "./tree.ts";
+import { createNode } from "./node.ts";
+import { defaultHandler } from "./handlers/default.ts";
 
-test("updateNode correctly sorts children", () => {
+test("insertNode", () => {
+  const tree = createNavigationTree();
+  const node = createNode({
+    id: "node",
+    parent: "#",
+  });
+
+  insertNode(tree, node);
+
+  expect(getNode(tree, "#/node")).not.toBeNull();
+});
+
+test("insertNode: allow inserting children first", () => {
   const tree = createNavigationTree();
 
-  const container = insertNode(
+  const container = createNode({
+    id: "container",
+    parent: "#",
+  });
+
+  const item = createNode({
+    id: "item",
+    parent: container.id,
+  });
+
+  insertNode(tree, item);
+  insertNode(tree, container);
+
+  expect(container.children.length).toBe(1);
+  expect(container.children).toContainEqual({
+    id: item.id,
+    order: null,
+    active: true,
+  });
+});
+
+test("insertNode: throw on insert root", () => {
+  const tree = createNavigationTree();
+  const root = getNode(tree, "#");
+  expect(() => insertNode(tree, root)).toThrow();
+});
+
+test("insertNode: remember children position", () => {
+  const tree = createNavigationTree();
+  const root = getNode(tree, "#");
+
+  const node1 = createNode({
+    id: "node1",
+    parent: "#",
+  });
+
+  const node2 = createNode({
+    id: "node2",
+    parent: "#",
+  });
+
+  const node3 = createNode({
+    id: "node3",
+    parent: "#",
+  });
+
+  insertNode(tree, node1);
+  insertNode(tree, node2);
+  insertNode(tree, node3);
+
+  expect(root.children).toEqual([
+    { id: node1.id, active: true, order: null },
+    { id: node2.id, active: true, order: null },
+    { id: node3.id, active: true, order: null },
+  ]);
+
+  removeNode(tree, node2.id);
+
+  expect(root.children).toEqual([
+    { id: node1.id, active: true, order: null },
+    { id: node2.id, active: false, order: null },
+    { id: node3.id, active: true, order: null },
+  ]);
+
+  insertNode(tree, node2);
+
+  expect(root.children).toEqual([
+    { id: node1.id, active: true, order: null },
+    { id: node2.id, active: true, order: null },
+    { id: node3.id, active: true, order: null },
+  ]);
+});
+
+test("removeNode", () => {
+  const tree = createNavigationTree();
+
+  const container = createNode({
+    id: "container",
+    parent: "#",
+  });
+
+  const item = createNode({
+    id: "item",
+    parent: container.id,
+  });
+
+  insertNode(tree, container);
+  insertNode(tree, item);
+
+  expect(() => getNode(tree, item.id)).not.toThrow();
+
+  removeNode(tree, container.id);
+
+  expect(() => getNode(tree, container.id)).toThrow();
+  expect(() => getNode(tree, item.id)).toThrow();
+
+  expect(() => removeNode(tree, container.id)).not.toThrow();
+
+  removeNode(tree, item.id);
+});
+
+test("removeNode: remembered children", () => {
+  const tree = createNavigationTree();
+  const root = getNode(tree, "#");
+
+  const orderedItem = createNode({
+    id: "orderedItem",
+    parent: "#",
+    order: 1,
+  });
+
+  const unorderedItem = createNode({
+    id: "unorderedItem",
+    parent: "#",
+  });
+
+  insertNode(tree, orderedItem);
+  insertNode(tree, unorderedItem);
+
+  expect(root.children).toEqual([
+    { id: unorderedItem.id, active: true, order: null },
+    { id: orderedItem.id, active: true, order: 1 },
+  ]);
+
+  removeNode(tree, orderedItem.id);
+  removeNode(tree, unorderedItem.id);
+
+  expect(root.children).toEqual([
+    { id: unorderedItem.id, active: false, order: null },
+  ]);
+});
+
+test("focusNode", () => {
+  const tree = createNavigationTree();
+
+  const node1 = createNode({
+    id: "node1",
+    parent: "#",
+  });
+
+  const node2 = createNode({
+    id: "node2",
+    parent: "#",
+  });
+
+  insertNode(tree, node1);
+  insertNode(tree, node2);
+
+  expect(tree.focusedId).toBe(node1.id);
+
+  focusNode(tree, node2.id);
+
+  expect(tree.focusedId).toBe(node2.id);
+
+  const success = focusNode(tree, "#/non-existent");
+  expect(success).toBe(false);
+  expect(tree.focusedId).toBe(node2.id);
+});
+
+test("selectNode", () => {
+  const tree = createNavigationTree();
+
+  const parkingNode = createNode({
+    id: "parkingNode",
+    parent: "#",
+  });
+
+  const onSelect = vi.fn();
+
+  const targetNode = createNode({
+    id: "node",
+    parent: "#",
+    handler: defaultHandler.onSelect(onSelect),
+  });
+
+  insertNode(tree, parkingNode);
+  insertNode(tree, targetNode);
+
+  expect(tree.focusedId).toBe(parkingNode.id);
+
+  selectNode(tree, targetNode.id);
+
+  expect(onSelect).toBeCalledTimes(1);
+  expect(tree.focusedId).toBe(targetNode.id);
+});
+
+test("traverseNodes", () => {
+  const tree = createNavigationTree();
+
+  const container1 = insertNode(
     tree,
     createNode({
-      id: "container",
+      id: "container1",
       parent: "#",
     })
   );
 
-  insertNode(
+  const item1 = insertNode(
     tree,
     createNode({
-      id: "node1",
-      parent: container.id,
+      id: "item1",
+      parent: container1.id,
     })
   );
 
-  const node2 = insertNode(
+  const item2 = insertNode(
     tree,
     createNode({
-      id: "node2",
-      parent: container.id,
+      id: "item2",
+      parent: container1.id,
     })
   );
 
-  insertNode(
+  const container2 = insertNode(
     tree,
     createNode({
-      id: "node3",
-      parent: container.id,
+      id: "container2",
+      parent: "#",
     })
   );
 
-  expect(container.children.map((c) => c.id)).toStrictEqual([
-    "#/container/node1",
-    "#/container/node2",
-    "#/container/node3",
-  ]);
+  const item3 = insertNode(
+    tree,
+    createNode({
+      id: "item3",
+      parent: container2.id,
+    })
+  );
 
-  updateNode(node2, {
-    order: 1,
+  const item4 = insertNode(
+    tree,
+    createNode({
+      id: "item4",
+      parent: container2.id,
+    })
+  );
+
+  const result: string[] = [];
+  traverseNodes(tree, "#", null, (id) => {
+    result.push(id);
   });
 
-  expect(container.children.map((c) => c.id)).toStrictEqual([
-    "#/container/node1",
-    "#/container/node3",
-    "#/container/node2",
-  ]);
+  expect(result).toContain(container1.id);
+  expect(result).toContain(container2.id);
+  expect(result).toContain(item1.id);
+  expect(result).toContain(item2.id);
+  expect(result).toContain(item3.id);
+  expect(result).toContain(item4.id);
 
-  updateNode(node2, {
-    order: -1,
+  const shallowResult: string[] = [];
+  traverseNodes(tree, "#", 1, (id) => {
+    shallowResult.push(id);
   });
 
-  expect(container.children.map((c) => c.id)).toStrictEqual([
-    "#/container/node2",
-    "#/container/node1",
-    "#/container/node3",
-  ]);
+  expect(shallowResult).toContain(container1.id);
+  expect(shallowResult).toContain(container2.id);
 });

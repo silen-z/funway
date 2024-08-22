@@ -1,18 +1,22 @@
 import { type NavigationHandler } from "../handler.js";
-import { type HandlerChain, chainedHandler } from "./chain.js";
+import { type HandlerChain, chainedHandler } from "./chained.js";
 import { focusHandler } from "./focus.js";
-import { handlerInfo } from "../introspection.js";
+import { describeHandler } from "../introspection.js";
 
 /**
  * @category Handler
  */
 export const parentHandler: NavigationHandler = (node, action, next) => {
   if (import.meta.env.DEV) {
-    handlerInfo(action, { name: "core:parent" });
+    describeHandler(action, { name: "core:parent" });
   }
 
-  if (node.parent !== null && action.kind !== "query") {
-    return next(node.parent, action);
+  if (action.kind === "query") {
+    return null;
+  }
+
+  if (node.parent !== null) {
+    return next(node.parent);
   }
 
   return next();
