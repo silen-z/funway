@@ -15,8 +15,6 @@
     "solid-js": "^1.8.11"
   },
   "devDependencies": {
-    "eslint": "^8.45.0",
-    "eslint-plugin-solid": "^0.13.1",
     "typescript": "^5.4.3"
   }
 }

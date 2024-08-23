@@ -4,7 +4,7 @@ import {
   directChildId,
   gridHandler,
   defaultHandler,
-  GridItem,
+  gridItemHandler,
 } from "@fiveway/core";
 import { useNavigationNode, useOnFocus, NavigationNode } from "@fiveway/react";
 import css from "./Showcase.module.css";
@@ -206,7 +206,7 @@ export function VirtualGrid() {
                 id={item.id}
                 order={item.order}
                 handler={defaultHandler
-                  .meta(GridItem, gridPosition)
+                  .prepend(gridItemHandler(gridPosition))
                   .onSelect(() => {
                     nav.focus("#");
                   })}

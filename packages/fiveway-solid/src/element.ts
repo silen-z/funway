@@ -7,7 +7,6 @@ import {
   type HandlerChain,
   type NavigationAction,
   type NavigationTree,
-  type Metadata,
 } from "@fiveway/core";
 import { defaultEventMapping, NodeElement } from "@fiveway/core/dom";
 
@@ -19,9 +18,12 @@ export function createElementHandler() {
   const [element, setElement] = createSignal<HTMLElement | null>(null);
   const position = () => element()?.getBoundingClientRect() ?? null;
 
+  // handlers doen't need to be reactive
   const handler = chainedHandler()
-    .meta(NodeElement, element)
-    .meta(NodePosition, position) as ElementHandler;
+    // eslint-disable-next-line solid/reactivity
+    .prepend(NodeElement.providerHandler(element))
+    // eslint-disable-next-line solid/reactivity
+    .prepend(NodePosition.providerHandler(position)) as ElementHandler;
 
   handler.register = setElement;
 

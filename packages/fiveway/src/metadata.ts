@@ -4,13 +4,17 @@ import { describeHandler } from "./introspection.js";
 import type { NavigationAction } from "./navigation.js";
 import type { NavigationTree } from "./tree.js";
 
-export type Metadata<T> = {
+type MetaValue = object | string | number | undefined | null;
+
+type MetadataProvider<T> = T | (() => T | null) | null;
+
+export type Metadata<T extends MetaValue = MetaValue> = {
   key: string;
-  providerHandler: (v: () => T | null) => NavigationHandler;
+  providerHandler: (v: MetadataProvider<T>) => NavigationHandler;
   query: (tree: NavigationTree, id: NodeId) => T | null;
 };
 
-export function defineMetadata<T>(key: string): Metadata<T> {
+export function defineMetadata<T extends MetaValue>(key: string): Metadata<T> {
   return {
     key,
     providerHandler: (value) => {
@@ -20,7 +24,7 @@ export function defineMetadata<T>(key: string): Metadata<T> {
         }
 
         if (action.kind === "query" && action.key === key) {
-          action.value = value();
+          action.value = typeof value === "function" ? value() : value;
           return null;
         }
 
@@ -30,13 +34,9 @@ export function defineMetadata<T>(key: string): Metadata<T> {
       return metadataProvider;
     },
     query: (tree: NavigationTree, id: NodeId) => {
-      let query: NavigationAction = { kind: "query", key, value: null };
+      const query: NavigationAction = { kind: "query", key, value: null };
       runHandler(tree, id, query);
       return query.value as T | null;
     },
   };
 }
-
-export type MetadataValue<Q extends Metadata<any>> = Q extends Metadata<infer V>
-  ? V | null
-  : never;

@@ -9,21 +9,21 @@ export type DefaultNavigationAction =
   | { kind: "focus"; direction: NavigationDirection | "initial" | null }
   | { kind: "query"; key: string; value: unknown | null };
 
-export interface Register {
-  // action: DefaultNavigationAction;
-}
-
-// How to register custom action
+// This interface provides a way to extend the default actions:
+//
 // declare module "@fiveway/core" {
 //   interface Register {
-//     action: DefaultNavigationAction | { kind: "custom" };
+//     action: DefaultNavigationAction | { kind: "my-custom-action" };
 //   }
 // }
+//
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+export interface Register {}
 
 export type NavigationAction = Register extends {
-  action: infer Action;
+  action: infer ExtendedAction;
 }
-  ? Action
+  ? ExtendedAction
   : DefaultNavigationAction;
 
 export function handleAction(tree: NavigationTree, action: NavigationAction) {

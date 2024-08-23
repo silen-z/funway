@@ -21,8 +21,8 @@ export function useElementHandler() {
     const position = () => elementRef.current?.getBoundingClientRect() ?? null;
 
     const handler = chainedHandler()
-      .meta(NodeElement, () => elementRef.current)
-      .meta(NodePosition, position) as ElementHandler;
+      .prepend(NodeElement.providerHandler(() => elementRef.current))
+      .prepend(NodePosition.providerHandler(position)) as ElementHandler;
 
     handler.register = (element) => {
       elementRef.current = element;
