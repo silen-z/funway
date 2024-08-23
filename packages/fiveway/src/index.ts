@@ -21,3 +21,4 @@ export * from "./handlers/spatial.js";
 
 export * from "./navigation.js";
 export * from "./metadata.js";
+export * from "./introspection.js";

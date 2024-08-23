@@ -23,9 +23,18 @@
   top: 0;
   height: 100vh;
   width: 300px;
+  box-sizing: border-box;
+
+  display: flex;
+  flex-direction: column;
+
   background: white;
   box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.15);
   overflow-y: auto;
+
+  font-family: monospace;
+  font-size: 12px;
+  white-space: nowrap;
 }
 
 .sidebar[data-side="right"] {
@@ -50,6 +59,11 @@
   white-space: nowrap;
 }
 
+.sidebarToolbar[data-variant="alt"] {
+  color: black;
+  background: #86efac;
+}
+
 .title {
   flex-grow: 1;
   display: flex;
@@ -60,8 +74,24 @@
 .content {
   display: flex;
   flex-direction: column;
+  flex-grow: 1;
   gap: 16px;
   padding: 16px;
+}
+
+.tree {
+  flex-grow: 1;
+}
+
+.inspectedNode {
+  flex-grow: 1;
+}
+
+.inspectedName {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 16px;
+  padding: 8px;
 }
 
 .nodeContainer {
@@ -82,11 +112,6 @@
   display: flex;
   gap: 8px;
   align-items: center;
-
-  font-family: monospace;
-  font-size: 12px;
-  white-space: nowrap;
-  cursor: pointer;
 }
 
 .node:hover .nodeLabel {
@@ -114,6 +139,7 @@
   align-items: center;
   gap: 2px;
   background: #eee;
+  border: none;
   border-radius: 9999px;
   font-size: 10px;
   line-height: 10px;
@@ -126,4 +152,31 @@
 
 .nodeTagError {
   background: #f87171;
+}
+
+.handlerInfo {
+  padding: 8px 16px;
+  display: flex;
+  gap: 16px;
+  flex-direction: column;
+}
+
+.handlerName {
+  color: #333;
+  font-weight: 700;
+}
+
+.handlerProps {
+  padding: 0 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.infoKey {
+  color: #555;
+}
+
+.infoValue {
+  color: black;
 }
