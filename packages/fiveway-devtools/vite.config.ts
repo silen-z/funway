@@ -2,6 +2,7 @@ import { defineConfig } from "vite";
 import { resolve } from "path";
 import solid from "vite-plugin-solid";
 import cssInjectedByJsPlugin from "vite-plugin-css-injected-by-js";
+import dts from "vite-plugin-dts";
 
 export default defineConfig({
   build: {
@@ -15,5 +16,5 @@ export default defineConfig({
     },
   },
 
-  plugins: [solid({ hot: false, dev: false }), cssInjectedByJsPlugin()],
+  plugins: [solid({ hot: false }), cssInjectedByJsPlugin(), dts()],
 });
