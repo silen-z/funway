@@ -10,8 +10,12 @@
     "test:coverage": "vitest run --coverage"
   },
   "devDependencies": {
+    "@eslint/js": "^9.9.0",
     "@vitest/coverage-v8": "^2.0.5",
+    "eslint": "^9.9.0",
+    "eslint-plugin-solid": "^0.14.2",
     "typedoc": "^0.26.6",
+    "typescript-eslint": "^8.2.0",
     "vitest": "^2.0.5"
   }
 }

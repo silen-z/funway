@@ -112,3 +112,5 @@ export const gridHandler: HandlerChain = chainedHandler()
   .prepend(parentHandler)
   .prepend(gridMovement)
   .prepend(focusHandler({ skipEmpty: true }));
+
+export const gridItemHandler = GridItem.providerHandler;

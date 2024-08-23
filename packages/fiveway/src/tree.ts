@@ -13,7 +13,7 @@ export type NavigationTree = {
 };
 
 export function createNavigationTree(): NavigationTree {
-  let tree = {
+  const tree = {
     focusedId: "#",
     nodes: new Map(),
     listeners: new Map(),

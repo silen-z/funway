@@ -2,17 +2,12 @@ import type { NavigationHandler, HandlerNext } from "../handler.js";
 import type { NodeId } from "../id.js";
 import type { NavigationAction } from "../navigation.js";
 import type { NavigationNode } from "../node.js";
-import type { Metadata, MetadataValue } from "../metadata.js";
 import { selectHandler } from "./select.js";
 import { defaultHandlerInfo } from "../introspection.js";
 
 export type HandlerChain = NavigationHandler & {
   prepend(another: NavigationHandler): HandlerChain;
   onSelect(fn: () => void): HandlerChain;
-  meta<M extends Metadata<any>>(
-    meta: M,
-    value: MetadataValue<M> | (() => MetadataValue<M>)
-  ): HandlerChain;
 
   // TODO consider other helper handlers
   // in thats case it would be good to consider reusing functions
@@ -81,17 +76,6 @@ function createChainedHandler(
 
   chainedHandler.onSelect = (fn: () => void) => {
     return createChainedHandler({ handler: selectHandler(fn), next: handler });
-  };
-
-  chainedHandler.meta = <M extends Metadata<any>>(
-    meta: M,
-    value: MetadataValue<M> | (() => MetadataValue<M>)
-  ) => {
-    const fn = typeof value !== "function" ? () => value : value;
-    return createChainedHandler({
-      handler: meta.providerHandler(fn),
-      next: handler,
-    });
   };
 
   return chainedHandler;

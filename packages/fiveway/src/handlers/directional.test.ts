@@ -57,19 +57,10 @@ test("verticalHandler: wrong direction", () => {
 
   const item1 = insertNode(
     tree,
-    createNode({
-      id: "item1",
-      parent: container.id,
-    })
+    createNode({ id: "item1", parent: container.id })
   );
 
-  const item2 = insertNode(
-    tree,
-    createNode({
-      id: "item2",
-      parent: container.id,
-    })
-  );
+  insertNode(tree, createNode({ id: "item2", parent: container.id }));
 
   expect(tree.focusedId).toBe(item1.id);
 
@@ -245,19 +236,10 @@ test("horizontalHandler: wrong direction", () => {
 
   const item1 = insertNode(
     tree,
-    createNode({
-      id: "item1",
-      parent: container.id,
-    })
+    createNode({ id: "item1", parent: container.id })
   );
 
-  const item2 = insertNode(
-    tree,
-    createNode({
-      id: "item2",
-      parent: container.id,
-    })
-  );
+  insertNode(tree, createNode({ id: "item2", parent: container.id }));
 
   expect(tree.focusedId).toBe(item1.id);
 
