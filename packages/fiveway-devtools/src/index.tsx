@@ -21,15 +21,21 @@ import css from "./styles.module.css";
 import { Icon } from "@iconify-icon/solid";
 
 export function enableDevtools(tree: NavigationTree) {
-  let devtoolElement = document.querySelector("#fiveway-devtools");
-  if (devtoolElement == null) {
-    devtoolElement = document.createElement("div");
+  const devtoolElement =
+    document.querySelector("#fiveway-devtools") ??
+    document.createElement("div");
+
+  const dispose = render(() => <DevtoolPanel tree={tree} />, devtoolElement);
+
+  if (devtoolElement.id === "") {
     devtoolElement.id = "fiveway-devtools";
     document.body.insertAdjacentElement("beforeend", devtoolElement);
   }
 
-  devtoolElement.innerHTML = "";
-  render(() => <DevtoolPanel tree={tree} />, devtoolElement);
+  return () => {
+    dispose();
+    document.querySelector("#fiveway-devtools")?.remove();
+  };
 }
 
 function DevtoolPanel(props: { tree: NavigationTree }) {

@@ -2,7 +2,7 @@
 import { render } from "solid-js/web";
 import { createNavigationTree } from "@fiveway/core";
 import { NavigationProvider, useActionHandler } from "@fiveway/solid";
-// import { enableDevtools } from "@fiveway/devtools";
+import { enableDevtools } from "@fiveway/devtools";
 import { Showcase } from "./Showcase";
 
 const root = document.getElementById("root");
@@ -14,10 +14,10 @@ if (import.meta.env.DEV && !(root instanceof HTMLElement)) {
 const fiveway = createNavigationTree();
 
 Object.defineProperties(window, {
-  NAVTREE: { value: fiveway },
+  FIVEWAY: { configurable: true, value: fiveway },
 });
 
-// enableDevtools(fiveway);
+enableDevtools(fiveway);
 
 function App() {
   useActionHandler(fiveway);

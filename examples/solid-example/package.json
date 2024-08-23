@@ -3,21 +3,20 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "start": "vite",
     "dev": "vite",
-    "build": "vite build",
-    "serve": "vite preview"
-  },
-  "devDependencies": {
-    "solid-devtools": "^0.29.2",
-    "typescript": "^5.4.3",
-    "vite": "^5.0.11",
-    "vite-plugin-solid": "^2.8.2"
+    "build": "tsc && vite build",
+    "preview": "vite preview"
   },
   "dependencies": {
     "@fiveway/core": "workspace:^",
     "@fiveway/devtools": "workspace:^",
     "@fiveway/solid": "workspace:^",
     "solid-js": "^1.8.11"
+  },
+  "devDependencies": {
+    "solid-devtools": "^0.29.2",
+    "typescript": "^5.4.3",
+    "vite": "^5.0.11",
+    "vite-plugin-solid": "^2.8.2"
   }
 }
