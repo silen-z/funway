@@ -5,7 +5,7 @@ import { createNode } from "../node.ts";
 import { createNavigationTree, insertNode } from "../tree.ts";
 import { chainedHandler } from "./chained.ts";
 import { defaultHandler } from "./default.ts";
-import { defineMetadata } from "../metadata";
+import { defineMetadata } from "../metadata.ts";
 
 test("chainedHandler", () => {
   const logs: string[] = [];
@@ -62,7 +62,7 @@ test("chainedHandler: meta", () => {
     createNode({
       id: "node",
       parent: "#",
-      handler: defaultHandler.meta(meta, "test-value"),
+      handler: defaultHandler.prepend(meta.providerHandler("test-value")),
     })
   );
 
@@ -71,7 +71,7 @@ test("chainedHandler: meta", () => {
     createNode({
       id: "node2",
       parent: "#",
-      handler: defaultHandler.meta(meta, () => "test-value"),
+      handler: defaultHandler.prepend(meta.providerHandler(() => "test-value")),
     })
   );
 

@@ -1,5 +1,5 @@
 import { expect, test } from "vitest";
-import { gridHandler, GridItem } from "./grid.ts";
+import { gridHandler, gridItemHandler } from "./grid.ts";
 import { handleAction } from "../navigation.ts";
 import { createNode } from "../node.ts";
 import { createNavigationTree, insertNode, removeNode } from "../tree.ts";
@@ -24,7 +24,7 @@ test("gridHandler", () => {
         createNode({
           id: `item-${row}-${col}`,
           parent: container.id,
-          handler: defaultHandler.meta(GridItem, { row, col }),
+          handler: defaultHandler.prepend(gridItemHandler({ row, col })),
         })
       );
     }

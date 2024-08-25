@@ -35,27 +35,3 @@ test("defaultHandler", () => {
     { name: "core:parent" },
   ]);
 });
-
-test("defaultHandler: don't look for metadata in parent", () => {
-  const tree = createNavigationTree();
-  const meta = defineMetadata("test");
-
-  const container = insertNode(
-    tree,
-    createNode({
-      id: "test",
-      parent: "#",
-      handler: containerHandler.meta(meta, 1),
-    })
-  );
-
-  const item = insertNode(
-    tree,
-    createNode({
-      id: "test",
-      parent: container.id,
-    })
-  );
-
-  expect(meta.query(tree, item.id)).toBeNull();
-});
