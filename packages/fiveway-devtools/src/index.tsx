@@ -1,18 +1,18 @@
 import {
+  type Setter,
   createEffect,
   createMemo,
   createSignal,
   For,
   onCleanup,
-  Setter,
   Show,
 } from "solid-js";
 import { render } from "solid-js/web";
 import {
-  HandlerInfo,
-  NavigationNode,
-  NavigationTree,
-  NodeId,
+  type HandlerInfo,
+  type NavigationNode,
+  type NavigationTree,
+  type NodeId,
   getHandlerInfo,
   isParent,
   registerListener,

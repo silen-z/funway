@@ -1,8 +1,7 @@
-import { spatialHandler, captureHandler, defaultHandler } from "@fiveway/core";
-import { useNavigationNode } from "@fiveway/react";
-import { CSSProperties } from "react";
+import { type CSSProperties } from "react";
+import { defaultHandler, spatialHandler, captureHandler } from "@fiveway/core";
+import { useNavigationNode, useElementHandler } from "@fiveway/react";
 import css from "./Showcase.module.css";
-import { useElementHandler } from "@fiveway/react";
 
 export function SpatialShowcase() {
   const nav = useNavigationNode({

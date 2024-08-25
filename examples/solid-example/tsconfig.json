@@ -1,21 +1,20 @@
 {
+  "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "strict": true,
-    "target": "ESNext",
-    "module": "ESNext",
-    "moduleResolution": "node",
-    "allowSyntheticDefaultImports": true,
-    "esModuleInterop": true,
+    "rootDir": "src",
+    "outDir": "dist",
+    "composite": false,
+    "noEmit": true,
     "jsx": "preserve",
     "jsxImportSource": "solid-js",
-    "types": ["vite/client"],
-    "noEmit": true,
-    "isolatedModules": true,
-
-    "paths": {
-      "@fiveway/core": ["../../packages/fiveway/src"],
-      "@fiveway/core/dom": ["../../packages/fiveway/src/dom"],
-      "@fiveway/solid": ["../../packages/fiveway-solid/src"]
-    }
-  }
+    "module": "Preserve",
+    "moduleResolution": "Bundler",
+    "allowImportingTsExtensions": true,
+    "types": ["vite/client"]
+  },
+  "include": ["./src/**/*"],
+  "references": [
+    { "path": "../../packages/fiveway-solid" },
+    { "path": "../../packages/fiveway" }
+  ]
 }

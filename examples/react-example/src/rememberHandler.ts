@@ -3,9 +3,6 @@ import {
   type NodeId,
   type NavigationHandler,
   directChildId,
-  NavigationNode,
-  NavigationAction,
-  HandlerNext,
 } from "@fiveway/core";
 
 export type RememberHandler = NavigationHandler & {
@@ -13,15 +10,11 @@ export type RememberHandler = NavigationHandler & {
   clearMemory: () => void;
 };
 
-export function useRememberHandler(): RememberHandler {
+export function useRememberHandler() {
   const [lastFocused, setLastFocused] = useState<NodeId | null>(null);
 
   return useMemo(() => {
-    const handler = (
-      node: NavigationNode,
-      action: NavigationAction,
-      next: HandlerNext
-    ) => {
+    const handler: RememberHandler = (node, action, next) => {
       if (action.kind === "focus" && lastFocused !== null) {
         try {
           return next(lastFocused, action);

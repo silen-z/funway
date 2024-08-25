@@ -1,4 +1,4 @@
-import { useState, CSSProperties, WheelEvent } from "react";
+import { type CSSProperties, type WheelEvent, useState } from "react";
 import {
   verticalHandler,
   directChildId,
@@ -47,7 +47,7 @@ function mapRange<T, U>(
     index <= end && index < array.length;
     index++
   ) {
-    mapped.push(mapFn(array[index]));
+    mapped.push(mapFn(array[index]!));
   }
 
   return mapped;
@@ -60,7 +60,7 @@ export function VirtualList() {
   const nav = useNavigationNode({
     id: "virtual-list",
     handler: verticalHandler.prepend((node, action, next) => {
-      if (action.kind === "focus") {
+      if (action.kind === "focus" && items[listPosition] != null) {
         try {
           return next(`${node.id}/${items[listPosition].id}`);
         } catch {
@@ -97,7 +97,7 @@ export function VirtualList() {
     );
 
     setListPosition(nextPosition);
-    if (nav.isFocused()) {
+    if (nav.isFocused() && items[nextPosition] != null) {
       nav.focus(items[nextPosition].id);
     }
   };
@@ -142,9 +142,9 @@ export function VirtualGrid() {
   const nav = useNavigationNode({
     id: "virtual-grid",
     handler: gridHandler.prepend((node, action, next) => {
-      if (action.kind === "focus") {
+      const rowStart = listPosition - (listPosition % cols);
+      if (action.kind === "focus" && items[rowStart] != null) {
         try {
-          const rowStart = listPosition - (listPosition % cols);
           return next(`${node.id}/${items[rowStart].id}`);
         } catch {
           return next();
@@ -180,8 +180,7 @@ export function VirtualGrid() {
     }
 
     setListPosition(nextPosition);
-    if (nav.isFocused()) {
-      // const rowStart = nextPosition - (nextPosition % cols);
+    if (nav.isFocused() && items[nextPosition] != null) {
       nav.focus(items[nextPosition].id);
     }
   };

@@ -3,7 +3,7 @@ import { render } from "solid-js/web";
 import { createNavigationTree } from "@fiveway/core";
 import { NavigationProvider, useActionHandler } from "@fiveway/solid";
 import { enableDevtools } from "@fiveway/devtools";
-import { Showcase } from "./Showcase";
+import { Showcase } from "./Showcase.ts";
 
 const root = document.getElementById("root");
 
