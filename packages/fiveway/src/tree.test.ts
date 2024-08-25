@@ -7,7 +7,7 @@ import {
   traverseNodes,
 } from "./tree.ts";
 import { createNode } from "./node.ts";
-import { defaultHandler, itemHandler } from "./handlers/default.ts";
+import { itemHandler } from "./handlers/default.ts";
 import { selectNode } from "./handlers/select.ts";
 
 test("insertNode", () => {

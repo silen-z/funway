@@ -1,10 +1,5 @@
 import { type CSSProperties } from "react";
-import {
-  defaultHandler,
-  spatialHandler,
-  captureHandler,
-  itemHandler,
-} from "@fiveway/core";
+import { spatialHandler, captureHandler, itemHandler } from "@fiveway/core";
 import { useNavigationNode, useElementHandler } from "@fiveway/react";
 import css from "./Showcase.module.css";
 

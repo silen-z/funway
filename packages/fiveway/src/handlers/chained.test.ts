@@ -1,6 +1,5 @@
 import { test, expect } from "vitest";
 import { NavigationHandler, runHandler } from "../navigation.ts";
-import { NodeId } from "../id.ts";
 import { createNode } from "../node.ts";
 import { createNavigationTree, insertNode } from "../tree.ts";
 import { chainedHandler } from "./chained.ts";
@@ -8,48 +7,47 @@ import { defaultHandler } from "./default.ts";
 import { defineMetadata } from "../metadata.ts";
 
 test("chainedHandler", () => {
+  const tree = createNavigationTree();
   const logs: string[] = [];
 
   const logHandler =
-    (msg: string, pass?: NodeId): NavigationHandler =>
+    (msg: string): NavigationHandler =>
     (n, a, next) => {
-      if (a.kind === "select") {
+      if (a.kind === "query" && a.key === "log") {
         logs.push(n.id + ":" + msg);
-        if (pass) {
-          return next(pass);
-        }
       }
       return next();
     };
 
-  const testTree = createNavigationTree();
+  const subChain = chainedHandler()
+    .prepend(logHandler("4"))
+    .prepend(logHandler("3"))
+    .prepend(logHandler("2"));
 
-  insertNode(
-    testTree,
-    createNode({
-      id: "node1",
-      parent: "#",
-      handler: chainedHandler(logHandler("4")).prepend(logHandler("3")),
-    })
+  const handler = chainedHandler()
+    .prepend(logHandler("5"))
+    .prepend(subChain)
+    .prepend(logHandler("1"));
+
+  const node = insertNode(
+    tree,
+    createNode({ id: "node1", parent: "#", handler: handler })
   );
 
-  const testNode2 = insertNode(
-    testTree,
-    createNode({
-      id: "node2",
-      parent: "#",
-      handler: chainedHandler(logHandler("2", "#/node1")).prepend(
-        logHandler("1")
-      ),
-    })
-  );
-
-  const result = runHandler(testTree, testNode2.id, {
-    kind: "select",
+  const result = runHandler(tree, node.id, {
+    kind: "query",
+    key: "log",
+    value: null,
   });
 
   expect(result).toBeNull();
-  expect(logs).toEqual(["#/node2:1", "#/node2:2", "#/node1:3", "#/node1:4"]);
+  expect(logs).toEqual([
+    "#/node1:1",
+    "#/node1:2",
+    "#/node1:3",
+    "#/node1:4",
+    "#/node1:5",
+  ]);
 });
 
 test("chainedHandler: meta", () => {

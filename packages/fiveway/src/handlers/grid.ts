@@ -4,7 +4,7 @@ import type { NavigationHandler, NavigationDirection } from "../navigation.js";
 import { parentHandler } from "./default.js";
 import { focusHandler } from "./focus.js";
 import { type Metadata, defineMetadata } from "../metadata.js";
-import { type HandlerChain, chainedHandler } from "./chained.js";
+import { type ChainedHandler, chainedHandler } from "./chained.js";
 import { describeHandler } from "../introspection.js";
 
 export type GridItem = {
@@ -107,9 +107,10 @@ export const gridMovement: NavigationHandler = (node, action, next) => {
 /**
  * @category Handler
  */
-export const gridHandler: HandlerChain = chainedHandler()
-  .prepend(parentHandler)
-  .prepend(gridMovement)
-  .prepend(focusHandler({ skipEmpty: true }));
+export const gridHandler: ChainedHandler = chainedHandler([
+  focusHandler({ skipEmpty: true }),
+  gridMovement,
+  parentHandler,
+]);
 
 export const gridItemHandler = GridItem.providerHandler;

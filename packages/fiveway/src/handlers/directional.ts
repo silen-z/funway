@@ -5,7 +5,7 @@ import type {
   NavigationDirection,
   HandlerNext,
 } from "../navigation.js";
-import { type HandlerChain, chainedHandler } from "./chained.js";
+import { type ChainedHandler, chainedHandler } from "./chained.js";
 import { parentHandler } from "./default.js";
 import { focusHandler } from "./focus.js";
 import { describeHandler } from "../introspection.js";
@@ -58,15 +58,11 @@ function verticalFocusDirection(dir: NavigationDirection | "initial" | null) {
 /**
  * @category Handler
  */
-export const verticalHandler: HandlerChain = chainedHandler()
-  .prepend(parentHandler)
-  .prepend(verticalMovementHandler)
-  .prepend(
-    focusHandler({
-      skipEmpty: true,
-      direction: verticalFocusDirection,
-    })
-  );
+export const verticalHandler: ChainedHandler = chainedHandler([
+  focusHandler({ skipEmpty: true, direction: verticalFocusDirection }),
+  verticalMovementHandler,
+  parentHandler,
+]);
 
 /**
  * @category Handler
@@ -116,15 +112,11 @@ function horizontalFocusDirection(dir: NavigationDirection | "initial" | null) {
 /**
  * @category Handler
  */
-export const horizontalHandler: HandlerChain = chainedHandler()
-  .prepend(parentHandler)
-  .prepend(horizontalMovementHandler)
-  .prepend(
-    focusHandler({
-      skipEmpty: true,
-      direction: horizontalFocusDirection,
-    })
-  );
+export const horizontalHandler: ChainedHandler = chainedHandler([
+  focusHandler({ skipEmpty: true, direction: horizontalFocusDirection }),
+  horizontalMovementHandler,
+  parentHandler,
+]);
 
 function findNextChild(
   node: NavigationNode,

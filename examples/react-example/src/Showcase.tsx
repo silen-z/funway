@@ -1,7 +1,6 @@
 import { useState } from "react";
 import {
   containerHandler,
-  defaultHandler,
   gridHandler,
   gridItemHandler,
   horizontalHandler,
