@@ -22,7 +22,6 @@ import {
   scopedId,
   selectNode,
   updateNode,
-  type NavigationNode,
 } from "@fiveway/core";
 import { useNavigationContext, NavigationContext } from "./context.jsx";
 import { createLazyMemo } from "@solid-primitives/memo";

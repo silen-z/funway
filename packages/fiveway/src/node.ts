@@ -4,8 +4,8 @@ import type { NavigationHandler } from "./navigation.js";
 import { defaultHandler } from "./handlers/default.js";
 import { binarySearch } from "./array.js";
 
-export type DisconnectedNode = {
-  tree?: NavigationTree;
+export type CreatedNavigationNode = {
+  tree: NavigationTree | null;
   id: NodeId;
   connected: boolean;
   parent: NodeId | null;
@@ -14,9 +14,8 @@ export type DisconnectedNode = {
   children: NodeChild[];
 };
 
-export type NavigationNode = DisconnectedNode & {
+export type NavigationNode = CreatedNavigationNode & {
   tree: NavigationTree;
-  connected: true;
 };
 
 export type NodeChild = { id: NodeId; order: number | null; active: boolean };
@@ -28,12 +27,13 @@ export type NodeConfig = {
   handler?: NavigationHandler;
 };
 
-export function createNode(options: NodeConfig): DisconnectedNode {
+export function createNode(options: NodeConfig): CreatedNavigationNode {
   const globalId = createGlobalId(options.parent, options.id);
 
   return {
     id: globalId,
     connected: false,
+    tree: null,
     parent: options.parent,
     order: options.order ?? null,
     handler: options.handler ?? defaultHandler,
@@ -47,7 +47,7 @@ export type ContainerConfig = NodeConfig & {
 };
 
 export function updateNode(
-  node: DisconnectedNode,
+  node: CreatedNavigationNode,
   options: Omit<NodeConfig, "id" | "parent">
 ) {
   if (options.handler != null) {
@@ -59,7 +59,7 @@ export function updateNode(
   }
 }
 
-function updateNodeOrder(node: DisconnectedNode, order: number) {
+function updateNodeOrder(node: CreatedNavigationNode, order: number) {
   if (node.order === order || node.parent === null) {
     return;
   }
@@ -70,7 +70,7 @@ function updateNodeOrder(node: DisconnectedNode, order: number) {
     return;
   }
 
-  // update children inside parent
+  // doesn't matter if connected or not
   const parentNode = node.tree.nodes.get(node.parent);
   if (parentNode == null) {
     return;
@@ -82,6 +82,7 @@ function updateNodeOrder(node: DisconnectedNode, order: number) {
     (child) => order < (child.order ?? 0)
   );
 
+  // TODO check childIndex
   if (newIndex === -1 || newIndex === childIndex) {
     return;
   }

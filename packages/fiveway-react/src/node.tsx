@@ -1,11 +1,14 @@
-import type {
-  NodeId,
-  NavigationHandler,
-  FocusOptions,
-  DisconnectedNode,
-} from "@fiveway/core";
 import { type ReactNode, useRef, useEffect, useCallback } from "react";
-import { updateNode, insertNode, removeNode, createNode } from "@fiveway/core";
+import {
+  type NodeId,
+  type NavigationHandler,
+  type FocusOptions,
+  type CreatedNavigationNode,
+  updateNode,
+  insertNode,
+  removeNode,
+  createNode,
+} from "@fiveway/core";
 import { NavigationContext, useNavigationContext } from "./context.js";
 import { useFocus, useSelect } from "./hooks.js";
 import { useLazyIsFocused } from "./internal.js";
@@ -25,7 +28,7 @@ export type NodeHandle = {
   Context: React.FunctionComponent<{ children: ReactNode }>;
 };
 
-const NULL_NODE = {} as DisconnectedNode;
+const NULL_NODE = {} as CreatedNavigationNode;
 
 export function useNavigationNode(options: NodeOptions): NodeHandle {
   const { tree, parentNode } = useNavigationContext();

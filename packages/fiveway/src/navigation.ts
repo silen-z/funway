@@ -1,6 +1,6 @@
 import type { NodeId } from "./id.js";
 import type { NavigationNode } from "./node.js";
-import { type NavigationTree, getNode, focusNode } from "./tree.js";
+import { type NavigationTree, focusNode } from "./tree.js";
 
 export type NavigationDirection = "up" | "down" | "left" | "right";
 
@@ -27,10 +27,10 @@ export type NavigationAction = Register extends {
   ? ExtendedAction
   : DefaultNavigationAction;
 
-export type HandlerNext = {
-  (): NodeId | null;
-  (id: NodeId, action?: NavigationAction): NodeId | null;
-};
+export type HandlerNext = (
+  id?: NodeId,
+  action?: NavigationAction
+) => NodeId | null;
 
 /**
  * @category Handler
@@ -43,25 +43,23 @@ export type NavigationHandler = (
 
 export function runHandler(
   tree: NavigationTree,
-  id: NodeId,
+  nodeId: NodeId,
   action: NavigationAction
 ): NodeId | null {
-  const nextHandler = (id?: NodeId, anotherAction?: NavigationAction) => {
-    if (id != null) {
-      try {
-        getNode(tree, id);
-      } catch {
-        return null;
-      }
-
-      return runHandler(tree, id, anotherAction ?? action);
+  const next: HandlerNext = (id, newAction) => {
+    if (id == null) {
+      return null;
     }
 
-    return null;
+    return runHandler(tree, id, newAction ?? action);
   };
 
-  const node = getNode(tree, id);
-  return node.handler(node, action, nextHandler);
+  const node = tree.nodes.get(nodeId);
+  if (node == null || !node.connected) {
+    return null;
+  }
+
+  return node.handler(node, action, next);
 }
 
 export function handleAction(tree: NavigationTree, action: NavigationAction) {
