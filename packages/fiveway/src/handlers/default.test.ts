@@ -25,12 +25,12 @@ test("defaultHandler", () => {
   );
 
   expect(getHandlerInfo(tree, container.id)).toEqual([
-    { name: "core:focus", skipEmpty: true },
+    { name: "core:focus", skipEmpty: true, direction: "default" },
     { name: "core:parent" },
   ]);
 
   expect(getHandlerInfo(tree, item.id)).toEqual([
-    { name: "core:focus", skipEmpty: false },
+    { name: "core:focus", skipEmpty: false, direction: "default" },
     { name: "core:parent" },
   ]);
 });

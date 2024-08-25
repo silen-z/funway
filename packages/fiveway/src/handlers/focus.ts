@@ -21,7 +21,11 @@ function createFocusHandler(config: FocusHandlerConfig = {}) {
 
   const focusHandler: NavigationHandler = (node, action, next) => {
     if (import.meta.env.DEV) {
-      describeHandler(action, { name: "core:focus", skipEmpty });
+      describeHandler(action, {
+        name: "core:focus",
+        skipEmpty,
+        direction: config.direction != null ? "custom" : "default",
+      });
     }
 
     if (action.kind !== "focus") {

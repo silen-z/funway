@@ -13,7 +13,7 @@
 }
 
 .section[data-is-focused="true"] {
-  border-color: red;
+  border-color: #fb4570;
 }
 
 @keyframes rotating {
@@ -41,7 +41,7 @@
 }
 
 .item[data-is-focused="true"] {
-  background: red;
+  background: #86efac;
 }
 
 .grid {
