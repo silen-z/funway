@@ -8,7 +8,7 @@ export default defineConfig({
   build: {
     minify: false,
     lib: {
-      entry: resolve(__dirname, "src/index.tsx"),
+      entry: resolve(__dirname, "src/devtools.tsx"),
       formats: ["es"],
     },
     rollupOptions: {
@@ -16,5 +16,9 @@ export default defineConfig({
     },
   },
 
-  plugins: [solid({ hot: false }), cssInjectedByJsPlugin(), dts()],
+  plugins: [
+    solid({ hot: false }),
+    cssInjectedByJsPlugin(),
+    dts({ rollupTypes: true }),
+  ],
 });
