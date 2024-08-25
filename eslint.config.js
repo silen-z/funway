@@ -7,7 +7,10 @@ export default [
   ...ts.configs.recommended,
   { ignores: ["**/dist/**/*", "packages/fiveway-extension/**/*"] },
   {
-    files: ["packages/fiveway-solid/src/**/*"],
+    files: [
+      "packages/fiveway-solid/src/**/*",
+      "examples/solid-example/src/**/*",
+    ],
     ...solid,
-  }
+  },
 ];

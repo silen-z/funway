@@ -1,4 +1,4 @@
-import { createSignal, type JSX } from "solid-js";
+import { createSignal, untrack, type JSX } from "solid-js";
 import {
   gridHandler,
   horizontalHandler,
@@ -63,7 +63,9 @@ export function Showcase() {
 function ListShowcase(props: { type: "vertical" | "horizontal" }) {
   const nav = createNavigationNode({
     id: "list",
-    handler: props.type === "vertical" ? verticalHandler : horizontalHandler,
+    handler: untrack(() =>
+      props.type === "vertical" ? verticalHandler : horizontalHandler
+    ),
   });
 
   return (
@@ -171,7 +173,7 @@ function SpatialItem(props: {
 }) {
   const elementHandler = createElementHandler();
   const nav = createNavigationNode({
-    id: props.navId,
+    id: untrack(() => props.navId),
     handler: defaultHandler
       .prepend(elementHandler)
       .prepend((n, a, next) => (props.focusable ? next() : null)),

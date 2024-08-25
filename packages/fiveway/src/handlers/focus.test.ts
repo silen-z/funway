@@ -5,10 +5,10 @@ import {
   insertNode,
   isFocused,
   removeNode,
-} from "../tree";
-import { createNode } from "../node";
-import { containerHandler, defaultHandler } from "./default";
-import { captureHandler, initialHandler } from "./focus";
+} from "../tree.ts";
+import { createNode } from "../node.ts";
+import { containerHandler, defaultHandler } from "./default.ts";
+import { captureHandler, initialHandler } from "./focus.ts";
 import { verticalHandler } from "./directional.ts";
 import { handleAction } from "../navigation.ts";
 

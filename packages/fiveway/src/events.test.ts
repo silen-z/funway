@@ -1,7 +1,12 @@
 import { expect, test, vi } from "vitest";
 import { registerListener } from "./events";
-import { createNavigationTree, focusNode, insertNode, isFocused } from "./tree";
-import { createNode } from "./node";
+import {
+  createNavigationTree,
+  focusNode,
+  insertNode,
+  isFocused,
+} from "./tree.ts";
+import { createNode } from "./node.ts";
 
 test("listeners", () => {
   const tree = createNavigationTree();

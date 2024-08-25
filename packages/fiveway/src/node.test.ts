@@ -1,8 +1,8 @@
 import { expect, test } from "vitest";
-import { createNavigationTree, insertNode } from "./tree";
-import { createNode, updateNode } from "./node";
-import { NavigationHandler } from "./handler";
-import { defaultHandler } from "./handlers/default";
+import { createNavigationTree, insertNode } from "./tree.ts";
+import { createNode, updateNode } from "./node.ts";
+import { NavigationHandler } from "./handler.ts";
+import { defaultHandler } from "./handlers/default.ts";
 
 test("createNode", () => {
   const node = createNode({
