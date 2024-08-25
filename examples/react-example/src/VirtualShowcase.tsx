@@ -3,7 +3,6 @@ import {
   verticalHandler,
   directChildId,
   gridHandler,
-  defaultHandler,
   gridItemHandler,
   itemHandler,
 } from "@fiveway/core";

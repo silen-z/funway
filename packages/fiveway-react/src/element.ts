@@ -2,7 +2,7 @@ import { useRef, useMemo, useEffect } from "react";
 import {
   type NavigationTree,
   type NavigationAction,
-  type HandlerChain,
+  type ChainedHandler,
   handleAction,
   chainedHandler,
   registerListener,
@@ -10,7 +10,7 @@ import {
 } from "@fiveway/core";
 import { defaultEventMapping, NodeElement } from "@fiveway/core/dom";
 
-export type ElementHandler = HandlerChain & {
+export type ElementHandler = ChainedHandler & {
   register: (e: HTMLElement | null) => void;
 };
 
@@ -18,11 +18,12 @@ export function useElementHandler() {
   const elementRef = useRef<HTMLElement | null>(null);
 
   return useMemo(() => {
-    const position = () => elementRef.current?.getBoundingClientRect() ?? null;
-
-    const handler = chainedHandler()
-      .prepend(NodeElement.providerHandler(() => elementRef.current))
-      .prepend(NodePosition.providerHandler(position)) as ElementHandler;
+    const handler = chainedHandler([
+      NodeElement.providerHandler(() => elementRef.current),
+      NodePosition.providerHandler(() => {
+        return elementRef.current?.getBoundingClientRect() ?? null;
+      }),
+    ]) as ElementHandler;
 
     handler.register = (element) => {
       elementRef.current = element;

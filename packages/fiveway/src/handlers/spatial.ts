@@ -1,6 +1,6 @@
 import type { NodeId } from "../id.js";
 import type { NavigationHandler, NavigationDirection } from "../navigation.js";
-import { type HandlerChain, chainedHandler } from "./chained.js";
+import { type ChainedHandler, chainedHandler } from "./chained.js";
 import { traverseNodes } from "../tree.js";
 import { parentHandler } from "./default.js";
 import { focusHandler } from "./focus.js";
@@ -59,10 +59,11 @@ export const spatialMovement: NavigationHandler = (node, action, next) => {
 /**
  * @category Handler
  */
-export const spatialHandler: HandlerChain = chainedHandler()
-  .prepend(parentHandler)
-  .prepend(spatialMovement)
-  .prepend(focusHandler({ skipEmpty: true }));
+export const spatialHandler: ChainedHandler = chainedHandler([
+  focusHandler({ skipEmpty: true }),
+  spatialMovement,
+  parentHandler,
+]);
 
 type DirectionFilter = (current: DOMRect, potential: DOMRect) => boolean;
 
