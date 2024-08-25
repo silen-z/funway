@@ -1,5 +1,5 @@
 import { expect, test, vi } from "vitest";
-import { registerListener } from "./events";
+import { registerListener } from "./events.ts";
 import {
   createNavigationTree,
   focusNode,

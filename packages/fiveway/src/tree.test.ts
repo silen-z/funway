@@ -5,11 +5,11 @@ import {
   getNode,
   insertNode,
   removeNode,
-  selectNode,
   traverseNodes,
 } from "./tree.ts";
 import { createNode } from "./node.ts";
 import { defaultHandler } from "./handlers/default.ts";
+import { selectNode } from "./handlers/select.ts";
 
 test("insertNode", () => {
   const tree = createNavigationTree();

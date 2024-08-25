@@ -1,4 +1,4 @@
-import { type NavigationAction } from "./navigation.js";
+import type { NavigationAction } from "./navigation.js";
 import { defineMetadata, type Metadata } from "./metadata.js";
 
 const eventKeyToAction: Record<string, NavigationAction> = {

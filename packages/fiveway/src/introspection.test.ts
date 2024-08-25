@@ -2,7 +2,7 @@ import { expect, test } from "vitest";
 import { describeHandler, getHandlerInfo } from "./introspection.ts";
 import { createNavigationTree, insertNode } from "./tree.ts";
 import { createNode } from "./node.ts";
-import { NavigationHandler } from "./handler.ts";
+import { type NavigationHandler } from "./navigation.ts";
 import { defaultHandler } from "./handlers/default.ts";
 
 test("handlerInfo", () => {

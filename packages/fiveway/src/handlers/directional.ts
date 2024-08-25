@@ -1,7 +1,10 @@
 import type { NavigationNode } from "../node.js";
 import { type NodeId, directChildId } from "../id.js";
-import type { NavigationAction, NavigationDirection } from "../navigation.js";
-import { type HandlerNext } from "../handler.js";
+import type {
+  NavigationAction,
+  NavigationDirection,
+  HandlerNext,
+} from "../navigation.js";
 import { type HandlerChain, chainedHandler } from "./chained.js";
 import { parentHandler } from "./default.js";
 import { focusHandler } from "./focus.js";

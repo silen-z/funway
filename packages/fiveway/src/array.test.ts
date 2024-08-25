@@ -1,5 +1,5 @@
 import { expect, test } from "vitest";
-import { swapRemove, binarySearch } from "./array.js";
+import { swapRemove, binarySearch } from "./array.ts";
 
 test("swapRemove", () => {
   const arr = [1, 2, 3, 4];

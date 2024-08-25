@@ -1,10 +1,9 @@
 import { type NodeId, convergingPaths, idsToRoot, isParent } from "./id.js";
 import type { DisconnectedNode, NavigationNode } from "./node.js";
 import { type ListenerTree, callListeners } from "./events.js";
-import { runHandler } from "./handler.js";
+import { type NavigationDirection, runHandler } from "./navigation.js";
 import { focusHandler } from "./handlers/focus.js";
 import { binarySearch } from "./array.js";
-import type { NavigationDirection } from "./navigation.js";
 
 export type NavigationTree = {
   nodes: Map<NodeId, NavigationNode>;
@@ -178,18 +177,6 @@ export function focusNode(
   });
 
   return true;
-}
-
-export function selectNode(
-  tree: NavigationTree,
-  nodeId: NodeId,
-  focus: boolean = true
-) {
-  if (focus) {
-    focusNode(tree, nodeId);
-  }
-
-  runHandler(tree, nodeId, { kind: "select" });
 }
 
 export function getNode(tree: NavigationTree, nodeId: NodeId): NavigationNode {

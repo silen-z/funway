@@ -1,7 +1,6 @@
 import { type NodeId, directChildId } from "../id.js";
 import { traverseNodes } from "../tree.js";
-import type { NavigationDirection } from "../navigation.js";
-import { type NavigationHandler } from "../handler.js";
+import type { NavigationHandler, NavigationDirection } from "../navigation.js";
 import { parentHandler } from "./default.js";
 import { focusHandler } from "./focus.js";
 import { type Metadata, defineMetadata } from "../metadata.js";

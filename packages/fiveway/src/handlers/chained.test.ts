@@ -1,5 +1,5 @@
 import { test, expect } from "vitest";
-import { NavigationHandler, runHandler } from "../handler.ts";
+import { NavigationHandler, runHandler } from "../navigation.ts";
 import { NodeId } from "../id.ts";
 import { createNode } from "../node.ts";
 import { createNavigationTree, insertNode } from "../tree.ts";

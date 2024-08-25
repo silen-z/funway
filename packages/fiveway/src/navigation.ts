@@ -1,5 +1,6 @@
-import { type NavigationTree, focusNode } from "./tree.js";
-import { runHandler } from "./handler.js";
+import type { NodeId } from "./id.js";
+import type { NavigationNode } from "./node.js";
+import { type NavigationTree, getNode, focusNode } from "./tree.js";
 
 export type NavigationDirection = "up" | "down" | "left" | "right";
 
@@ -25,6 +26,43 @@ export type NavigationAction = Register extends {
 }
   ? ExtendedAction
   : DefaultNavigationAction;
+
+export type HandlerNext = {
+  (): NodeId | null;
+  (id: NodeId, action?: NavigationAction): NodeId | null;
+};
+
+/**
+ * @category Handler
+ */
+export type NavigationHandler = (
+  node: NavigationNode,
+  action: NavigationAction,
+  next: HandlerNext
+) => NodeId | null;
+
+export function runHandler(
+  tree: NavigationTree,
+  id: NodeId,
+  action: NavigationAction
+): NodeId | null {
+  const nextHandler = (id?: NodeId, anotherAction?: NavigationAction) => {
+    if (id != null) {
+      try {
+        getNode(tree, id);
+      } catch {
+        return null;
+      }
+
+      return runHandler(tree, id, anotherAction ?? action);
+    }
+
+    return null;
+  };
+
+  const node = getNode(tree, id);
+  return node.handler(node, action, nextHandler);
+}
 
 export function handleAction(tree: NavigationTree, action: NavigationAction) {
   const targetId = runHandler(tree, tree.focusedId, action);

@@ -1,6 +1,9 @@
-import type { NavigationHandler, HandlerNext } from "../handler.js";
+import type {
+  NavigationAction,
+  NavigationHandler,
+  HandlerNext,
+} from "../navigation.js";
 import type { NodeId } from "../id.js";
-import type { NavigationAction } from "../navigation.js";
 import type { NavigationNode } from "../node.js";
 import { selectHandler } from "./select.js";
 import { defaultHandlerInfo } from "../introspection.js";

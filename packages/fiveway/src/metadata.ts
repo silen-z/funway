@@ -1,7 +1,10 @@
-import { type NavigationHandler, runHandler } from "./handler.js";
+import {
+  type NavigationHandler,
+  type NavigationAction,
+  runHandler,
+} from "./navigation.js";
 import type { NodeId } from "./id.js";
 import { describeHandler } from "./introspection.js";
-import type { NavigationAction } from "./navigation.js";
 import type { NavigationTree } from "./tree.js";
 
 type MetaValue = object | string | number | undefined | null;

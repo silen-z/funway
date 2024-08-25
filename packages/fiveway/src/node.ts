@@ -1,6 +1,6 @@
 import { createGlobalId, type NodeId } from "./id.js";
 import { type NavigationTree } from "./tree.js";
-import type { NavigationHandler } from "./handler.js";
+import type { NavigationHandler } from "./navigation.js";
 import { defaultHandler } from "./handlers/default.js";
 import { binarySearch } from "./array.js";
 

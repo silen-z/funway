@@ -1,6 +1,9 @@
-import { runHandler, type NavigationHandler } from "./handler.js";
+import {
+  type NavigationAction,
+  type NavigationHandler,
+  runHandler,
+} from "./navigation.js";
 import type { NodeId } from "./id.js";
-import type { NavigationAction } from "./navigation.js";
 import type { NavigationNode } from "./node.js";
 import type { NavigationTree } from "./tree.js";
 

@@ -1,4 +1,4 @@
-import { type NavigationHandler } from "../handler.js";
+import { type NavigationHandler } from "../navigation.js";
 import { type HandlerChain, chainedHandler } from "./chained.js";
 import { focusHandler } from "./focus.js";
 import { describeHandler } from "../introspection.js";

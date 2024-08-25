@@ -1,5 +1,4 @@
-import type { NavigationDirection } from "../navigation.js";
-import { type NavigationHandler } from "../handler.js";
+import type { NavigationDirection, NavigationHandler } from "../navigation.js";
 import { isParent } from "../id.js";
 import { describeHandler } from "../introspection.js";
 

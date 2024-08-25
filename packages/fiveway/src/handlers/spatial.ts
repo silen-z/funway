@@ -1,6 +1,5 @@
 import type { NodeId } from "../id.js";
-import { type NavigationHandler } from "../handler.js";
-import type { NavigationDirection } from "../navigation.js";
+import type { NavigationHandler, NavigationDirection } from "../navigation.js";
 import { type HandlerChain, chainedHandler } from "./chained.js";
 import { traverseNodes } from "../tree.js";
 import { parentHandler } from "./default.js";
