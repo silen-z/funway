@@ -6,6 +6,7 @@ import {
   gridItemHandler,
   horizontalHandler,
   initialHandler,
+  itemHandler,
   verticalHandler,
 } from "@fiveway/core";
 import { NavigationNode, useNavigationNode } from "@fiveway/react";
@@ -138,7 +139,7 @@ function ConditionalShowcase() {
         <nav.Context>
           <NavigationNode
             id="toggle"
-            handler={defaultHandler.onSelect(() => {
+            handler={itemHandler(() => {
               setOn((on) => !on);
               if (!isOn) {
                 nav.focus("content");
@@ -156,7 +157,7 @@ function ConditionalShowcase() {
             {isOn && (
               <NavigationNode
                 id="parking"
-                handler={defaultHandler.onSelect(() => {
+                handler={itemHandler(() => {
                   setOn(false);
                   nav.focus();
                 })}

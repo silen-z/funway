@@ -1,5 +1,10 @@
 import { type CSSProperties } from "react";
-import { defaultHandler, spatialHandler, captureHandler } from "@fiveway/core";
+import {
+  defaultHandler,
+  spatialHandler,
+  captureHandler,
+  itemHandler,
+} from "@fiveway/core";
 import { useNavigationNode, useElementHandler } from "@fiveway/react";
 import css from "./Showcase.module.css";
 
@@ -37,9 +42,9 @@ function SpatialItem(props: { navId: string; style: CSSProperties }) {
   const elementHandler = useElementHandler();
   const nav = useNavigationNode({
     id: props.navId,
-    handler: defaultHandler
-      .prepend(elementHandler)
-      .onSelect(() => nav.focus("#")),
+    handler: itemHandler(() => {
+      nav.focus("#");
+    }).prepend(elementHandler),
   });
 
   return (

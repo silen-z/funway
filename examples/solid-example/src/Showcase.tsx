@@ -8,6 +8,7 @@ import {
   initialHandler,
   containerHandler,
   gridItemHandler,
+  itemHandler,
 } from "@fiveway/core";
 import {
   NavigationNode,
@@ -117,9 +118,9 @@ function SpatialShowcase() {
       <nav.Context>
         <NavigationNode
           id="toggle"
-          handler={defaultHandler
-            .prepend(toggleHandler)
-            .onSelect(() => setFocusable((on) => !on))}
+          handler={itemHandler(() => {
+            setFocusable((on) => !on);
+          }).prepend(toggleHandler)}
         >
           {(node) => (
             <li

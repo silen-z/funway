@@ -66,12 +66,7 @@ function updateNodeOrder(node: CreatedNavigationNode, order: number) {
 
   node.order = order;
 
-  if (node.tree == null) {
-    return;
-  }
-
-  // doesn't matter if connected or not
-  const parentNode = node.tree.nodes.get(node.parent);
+  const parentNode = node.tree?.nodes.get(node.parent);
   if (parentNode == null) {
     return;
   }
@@ -82,12 +77,15 @@ function updateNodeOrder(node: CreatedNavigationNode, order: number) {
     (child) => order < (child.order ?? 0)
   );
 
-  // TODO check childIndex
   if (newIndex === -1 || newIndex === childIndex) {
     return;
   }
 
-  parentNode.children[childIndex!]!.order = order;
-  const removed = parentNode.children.splice(childIndex, 1);
+  let removed: NodeChild[] = [];
+  if (childIndex !== -1) {
+    parentNode.children[childIndex!]!.order = order;
+    removed = parentNode.children.splice(childIndex, 1);
+  }
+
   parentNode.children.splice(newIndex, 0, ...removed);
 }
