@@ -2,7 +2,6 @@ import { expect, test, vi } from "vitest";
 import {
   createNavigationTree,
   focusNode,
-  getNode,
   insertNode,
   removeNode,
   traverseNodes,
@@ -20,7 +19,8 @@ test("insertNode", () => {
 
   insertNode(tree, node);
 
-  expect(getNode(tree, "#/node")).not.toBeNull();
+  expect(tree.nodes.get("#/node")).toBeDefined();
+  expect(tree.nodes.get("#/node")?.connected).toBe(true);
 });
 
 test("insertNode: allow inserting children first", () => {
@@ -49,13 +49,15 @@ test("insertNode: allow inserting children first", () => {
 
 test("insertNode: throw on insert root", () => {
   const tree = createNavigationTree();
-  const root = getNode(tree, "#");
-  expect(() => insertNode(tree, root)).toThrow();
+  const root = tree.nodes.get("#");
+
+  expect(root).toBeDefined();
+  expect(() => insertNode(tree, root!)).toThrow();
 });
 
 test("insertNode: remember children position", () => {
   const tree = createNavigationTree();
-  const root = getNode(tree, "#");
+  const root = tree.nodes.get("#")!;
 
   const node1 = createNode({
     id: "node1",
@@ -115,12 +117,13 @@ test("removeNode", () => {
   insertNode(tree, container);
   insertNode(tree, item);
 
-  expect(() => getNode(tree, item.id)).not.toThrow();
+  expect(tree.nodes.get(item.id)).toBeDefined();
+  expect(tree.nodes.get(item.id)?.connected).toBe(true);
 
   removeNode(tree, container.id);
 
-  expect(() => getNode(tree, container.id)).toThrow();
-  expect(() => getNode(tree, item.id)).toThrow();
+  expect(tree.nodes.get(container.id)).toBeUndefined();
+  expect(tree.nodes.get(item.id)?.connected).toBe(false);
 
   expect(() => removeNode(tree, container.id)).not.toThrow();
 
@@ -129,7 +132,7 @@ test("removeNode", () => {
 
 test("removeNode: remembered children", () => {
   const tree = createNavigationTree();
-  const root = getNode(tree, "#");
+  const root = tree.nodes.get("#")!;
 
   const orderedItem = createNode({
     id: "orderedItem",
