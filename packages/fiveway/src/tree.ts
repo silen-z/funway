@@ -76,9 +76,8 @@ function connectNode(tree: NavigationTree, id: NodeId) {
   insertChildInOrder(parentNode, node);
   node.connected = true;
 
-  
   callListeners(tree, "#", "structurechange");
-  
+
   if (tree.focusedId === "#" || isFocused(tree, node.parent)) {
     focusNode(tree, node.parent, { direction: "initial" });
   }
@@ -247,7 +246,7 @@ export function traverseNodes(
 
 function insertChildInOrder(
   parentNode: NavigationNode,
-  childNode: CreatedNavigationNode
+  childNode: NavigationNode
 ) {
   const oldIndex = parentNode.children.findIndex(
     (child) => child.id === childNode.id

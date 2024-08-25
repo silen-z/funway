@@ -7,7 +7,7 @@ import {
   traverseNodes,
 } from "./tree.ts";
 import { createNode } from "./node.ts";
-import { defaultHandler } from "./handlers/default.ts";
+import { defaultHandler, itemHandler } from "./handlers/default.ts";
 import { selectNode } from "./handlers/select.ts";
 
 test("insertNode", () => {
@@ -201,7 +201,7 @@ test("selectNode", () => {
   const targetNode = createNode({
     id: "node",
     parent: "#",
-    handler: defaultHandler.onSelect(onSelect),
+    handler: itemHandler(onSelect),
   });
 
   insertNode(tree, parkingNode);

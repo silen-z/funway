@@ -1,27 +1,9 @@
-import type {
-  NavigationAction,
-  NavigationHandler,
-  HandlerNext,
-} from "../navigation.js";
+import type { NavigationAction, NavigationHandler } from "../navigation.js";
 import type { NodeId } from "../id.js";
-import type { NavigationNode } from "../node.js";
-import { selectHandler } from "./select.js";
 import { defaultHandlerInfo } from "../introspection.js";
 
 export type HandlerChain = NavigationHandler & {
   prepend(another: NavigationHandler): HandlerChain;
-  onSelect(fn: () => void): HandlerChain;
-
-  // TODO consider other helper handlers
-  // in thats case it would be good to consider reusing functions
-  // to prevent every chainedHandler from creating many of them
-  //
-  // onLeft(fn: () => void): HandlerChain;
-  // onRight(fn: () => void): HandlerChain;
-  // onUp(fn: () => void): HandlerChain;
-  // onDown(fn: () => void): HandlerChain;
-  // onBack(fn: () => void): HandlerChain;
-  // onMove(fn: (d: NavigationDirection) => void): HandlerChain;
 };
 
 type ChainLink = {
@@ -44,11 +26,7 @@ function createChainedHandler(
     handler = { handler, next: null };
   }
 
-  const chainedHandler = (
-    node: NavigationNode,
-    action: NavigationAction,
-    next: HandlerNext
-  ): NodeId | null => {
+  const chainedHandler: HandlerChain = (node, action, next) => {
     const linkHandler = (
       link: ChainLink | null,
       id?: NodeId,
@@ -73,12 +51,8 @@ function createChainedHandler(
   };
 
   // TODO connecting chains
-  chainedHandler.prepend = (prepended: NavigationHandler) => {
+  chainedHandler.prepend = (prepended) => {
     return createChainedHandler({ handler: prepended, next: handler });
-  };
-
-  chainedHandler.onSelect = (fn: () => void) => {
-    return createChainedHandler({ handler: selectHandler(fn), next: handler });
   };
 
   return chainedHandler;
