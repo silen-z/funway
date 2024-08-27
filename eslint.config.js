@@ -5,7 +5,9 @@ import solid from "eslint-plugin-solid/dist/configs/typescript.js";
 export default [
   js.configs.recommended,
   ...ts.configs.recommended,
-  { ignores: ["**/dist/**/*", "packages/fiveway-extension/**/*"] },
+  {
+    ignores: ["**/dist/**/*", "docs/**", "packages/fiveway-extension/**/*"],
+  },
   {
     files: [
       "packages/fiveway-solid/src/**/*",
