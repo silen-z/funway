@@ -1,4 +1,8 @@
-import type { NavigationDirection, NavigationHandler } from "../navigation.js";
+import type {
+  NavigationAction,
+  NavigationDirection,
+  NavigationHandler,
+} from "../navigation.js";
 import { isParent } from "../id.js";
 import { describeHandler } from "../introspection.js";
 
@@ -30,6 +34,14 @@ function createFocusHandler(config: FocusHandlerConfig = {}) {
 
     if (action.kind !== "focus") {
       return next();
+    }
+
+    if (
+      action.direction === "initial" &&
+      node.parent !== null &&
+      isParent(node.parent, node.tree.focusedId)
+    ) {
+      return null;
     }
 
     if (!node.children.some((c) => c.active)) {
@@ -76,18 +88,7 @@ function createFocusHandler(config: FocusHandlerConfig = {}) {
   return focusHandler;
 }
 
-export const captureHandler: NavigationHandler = (node, action, next) => {
-  if (import.meta.env.DEV) {
-    describeHandler(action, { name: "core:capture" });
-  }
-
-  const id = next();
-  if (id === null || !isParent(node.id, id)) {
-    return null;
-  }
-
-  return id;
-};
+const regularFocus: NavigationAction = { kind: "focus", direction: null };
 
 function createInitialHandler(id: string) {
   const initialHandler: NavigationHandler = (node, action, next) => {
@@ -107,8 +108,13 @@ function createInitialHandler(id: string) {
       const initialId = `${node.id}/${id}`;
       const child = node.children.find((c) => c.active && c.id === initialId);
       if (child != null) {
-        return next(child.id) ?? next();
+        const childId = next(child.id, regularFocus);
+        if (childId !== null) {
+          return childId;
+        }
       }
+
+      return next(node.id, regularFocus);
     }
 
     return next();
@@ -116,6 +122,19 @@ function createInitialHandler(id: string) {
 
   return initialHandler;
 }
+
+export const captureHandler: NavigationHandler = (node, action, next) => {
+  if (import.meta.env.DEV) {
+    describeHandler(action, { name: "core:capture" });
+  }
+
+  const id = next();
+  if (id === null || !isParent(node.id, id)) {
+    return null;
+  }
+
+  return id;
+};
 
 export {
   createFocusHandler as focusHandler,

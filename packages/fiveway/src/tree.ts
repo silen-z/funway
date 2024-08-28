@@ -117,19 +117,6 @@ export function removeNode(tree: NavigationTree, nodeId: NodeId) {
       orphans.splice(index, 1);
     }
   }
-
-  callListeners(tree, "#", "structurechange");
-
-  if (isFocused(tree, nodeId)) {
-    idsToRoot(node.parent!, (id) => {
-      const focused = focusNode(tree, id, { direction: "initial" });
-
-      // if we managed to focus a node we can stop searching
-      if (focused) {
-        return false;
-      }
-    });
-  }
 }
 
 function disconnectNode(tree: NavigationTree, nodeId: NodeId) {
@@ -138,8 +125,12 @@ function disconnectNode(tree: NavigationTree, nodeId: NodeId) {
     return;
   }
 
+  if (node.parent == null) {
+    throw new Error("trying to disconnect invalid node");
+  }
+
   // its fine if parent is already diconnected/removed
-  const parentNode = tree.nodes.get(node.parent!);
+  const parentNode = tree.nodes.get(node.parent);
   if (parentNode != null) {
     // tombstone id of removed node in parent
     const parentChildIndex = parentNode.children.findIndex(
@@ -169,6 +160,21 @@ function disconnectNode(tree: NavigationTree, nodeId: NodeId) {
   }
 
   node.connected = false;
+
+  if (isFocused(tree, node.id)) {
+    tree.focusedId = node.parent;
+
+    idsToRoot(node.parent, (id) => {
+      const focused = focusNode(tree, id, { direction: "initial" });
+
+      // if we managed to focus a node we can stop searching
+      if (focused) {
+        return false;
+      }
+    });
+  }
+
+  callListeners(tree, "#", "structurechange");
 }
 
 export type FocusOptions = {

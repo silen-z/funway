@@ -12,6 +12,7 @@ import { NavigationNode, useNavigationNode } from "@fiveway/react";
 import css from "./Showcase.module.css";
 import { VirtualList, VirtualGrid } from "./VirtualShowcase.tsx";
 import { SpatialShowcase } from "./SpatialShowcase.tsx";
+import { flushSync } from "react-dom";
 
 export function Showcase() {
   const nav = useNavigationNode({
@@ -139,7 +140,9 @@ function ConditionalShowcase() {
           <NavigationNode
             id="toggle"
             handler={itemHandler(() => {
-              setOn((on) => !on);
+              flushSync(() => {
+                setOn((on) => !on);
+              });
               if (!isOn) {
                 nav.focus("content");
               }
@@ -152,7 +155,7 @@ function ConditionalShowcase() {
             )}
           </NavigationNode>
 
-          <NavigationNode id="content">
+          <NavigationNode id="content" handler={containerHandler}>
             {isOn && (
               <NavigationNode
                 id="parking"

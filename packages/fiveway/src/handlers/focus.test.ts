@@ -41,6 +41,41 @@ test("focusHandler: skip empty containers", () => {
   expect(isFocused(tree, container.id)).toBe(false);
 });
 
+test("focusHandler: keep focus", () => {
+  const tree = createNavigationTree();
+
+  const container = insertNode(
+    tree,
+    createNode({
+      id: "container",
+      parent: "#",
+      handler: containerHandler,
+    })
+  );
+
+  const item1 = insertNode(
+    tree,
+    createNode({
+      id: "item1",
+      parent: container.id,
+      handler: defaultHandler,
+      order: 2,
+    })
+  );
+
+  insertNode(
+    tree,
+    createNode({
+      id: "item2",
+      parent: container.id,
+      handler: defaultHandler,
+      order: 1,
+    })
+  );
+
+  expect(tree.focusedId).toBe(item1.id);
+});
+
 test("initialHandler: skip empty containers", () => {
   const tree = createNavigationTree();
 
