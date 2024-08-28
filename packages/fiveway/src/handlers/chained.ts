@@ -34,7 +34,7 @@ function createChainedHandler(
       id?: NodeId,
       newAction?: NavigationAction
     ): NodeId | null => {
-      if (id != null) {
+      if (id != null && id !== node.id) {
         return next(id, newAction ?? action);
       }
 
@@ -46,7 +46,11 @@ function createChainedHandler(
         defaultHandlerInfo(link.handler, node, action);
       }
 
-      return link.handler(node, action, runLink.bind(null, link.next));
+      return link.handler(
+        node,
+        newAction ?? action,
+        runLink.bind(null, link.next)
+      );
     };
 
     return runLink(chain);

@@ -1,5 +1,5 @@
 import type { NavigationHandler } from "../navigation.js";
-import { chainedHandler } from "./chained.js";
+import { chainedHandler, type ChainedHandler } from "./chained.js";
 import { focusHandler } from "./focus.js";
 import { describeHandler } from "../introspection.js";
 import { selectHandler } from "./select.js";
@@ -26,12 +26,15 @@ export const parentHandler: NavigationHandler = (node, action, next) => {
 /**
  * @category Handler
  */
-export const defaultHandler = chainedHandler([focusHandler(), parentHandler]);
+export const defaultHandler: ChainedHandler = chainedHandler([
+  focusHandler(),
+  parentHandler,
+]);
 
 /**
  * @category Handler
  */
-export const containerHandler = chainedHandler([
+export const containerHandler: ChainedHandler = chainedHandler([
   focusHandler({ skipEmpty: true }),
   parentHandler,
 ]);
@@ -39,7 +42,7 @@ export const containerHandler = chainedHandler([
 /**
  * @category Handler
  */
-export const itemHandler = (onSelect?: () => void) => {
+export const itemHandler = (onSelect?: () => void): ChainedHandler => {
   if (onSelect == null) {
     return defaultHandler;
   }
