@@ -55,17 +55,13 @@ export function useActionHandler(
 
 export function useSyncFocus(tree: NavigationTree) {
   createEffect(() => {
-    const cleanup = registerListener(tree, {
-      node: "#",
-      type: "focuschange",
-      fn: () => {
-        const el = NodeElement.query(tree, tree.focusedId);
-        if (el !== null) {
-          el.focus();
-        } else if (document.activeElement instanceof HTMLElement) {
-          document.activeElement.blur();
-        }
-      },
+    const cleanup = registerListener(tree, "#", "focuschange", () => {
+      const el = NodeElement.query(tree, tree.focusedId);
+      if (el !== null) {
+        el.focus();
+      } else if (document.activeElement instanceof HTMLElement) {
+        document.activeElement.blur();
+      }
     });
 
     onCleanup(cleanup);

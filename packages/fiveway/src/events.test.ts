@@ -16,18 +16,20 @@ test("listeners", () => {
   expect(isFocused(tree, "#/one")).toBe(true);
 
   const listener1 = vi.fn();
-  const cleanupListener1 = registerListener(tree, {
-    type: "focuschange",
-    node: "#",
-    fn: listener1,
-  });
+  const cleanupListener1 = registerListener(
+    tree,
+    "#",
+    "focuschange",
+    listener1
+  );
 
   const listener2 = vi.fn();
-  const cleanupListener2 = registerListener(tree, {
-    type: "focuschange",
-    node: "#",
-    fn: listener2,
-  });
+  const cleanupListener2 = registerListener(
+    tree,
+    "#",
+    "focuschange",
+    listener2
+  );
 
   focusNode(tree, "#/two");
 
@@ -52,11 +54,7 @@ test("listeners", () => {
 
 test("listeners: cleaning listener twice", () => {
   const tree = createNavigationTree();
-  const cleanup = registerListener(tree, {
-    type: "focuschange",
-    node: "#",
-    fn: () => {},
-  });
+  const cleanup = registerListener(tree, "#", "focuschange", () => {});
 
   cleanup();
   expect(() => {

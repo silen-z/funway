@@ -2,24 +2,48 @@ import { swapRemove } from "./array.js";
 import type { NodeId } from "./id.js";
 import type { NavigationTree } from "./tree.js";
 
+interface EventMap {
+  focuschange: FocusChangeEvent;
+  structurechange: StructureChangeEvent;
+}
+
+export type FocusChangeEvent = {
+  type: "focuschange";
+  focused: NodeId;
+  previous: NodeId;
+};
+export type StructureChangeEvent = {
+  type: "structurechange";
+  operation: "insert" | "removal";
+  id: NodeId;
+};
+
+export type TreeEvent = StructureChangeEvent | FocusChangeEvent;
+
 export type Listener = {
-  node: NodeId;
-  type: "focuschange" | "structurechange";
-  fn: () => void;
+  type: TreeEvent["type"];
+  fn: (event: TreeEvent) => void;
 };
 
 export type ListenerTree = Map<NodeId, Listener[]>;
 
-export function registerListener(tree: NavigationTree, listener: Listener) {
-  if (!tree.listeners.has(listener.node)) {
-    tree.listeners.set(listener.node, []);
+export function registerListener<T extends keyof EventMap>(
+  tree: NavigationTree,
+  id: NodeId,
+  type: T,
+  fn: <E extends EventMap[T]>(event: E) => void
+) {
+  const listener = { type, fn } as Listener;
+
+  if (!tree.listeners.has(id)) {
+    tree.listeners.set(id, []);
   }
 
-  const listeners = tree.listeners.get(listener.node)!;
+  const listeners = tree.listeners.get(id)!;
   listeners.push(listener);
 
   return () => {
-    const listeners = tree.listeners.get(listener.node);
+    const listeners = tree.listeners.get(id);
     if (listeners == null) {
       return;
     }
@@ -30,7 +54,7 @@ export function registerListener(tree: NavigationTree, listener: Listener) {
     }
 
     if (listeners.length === 1) {
-      tree.listeners.delete(listener.node);
+      tree.listeners.delete(id);
     } else {
       swapRemove(listeners, index);
     }
@@ -40,7 +64,7 @@ export function registerListener(tree: NavigationTree, listener: Listener) {
 export function callListeners(
   tree: NavigationTree,
   nodeId: NodeId,
-  event: string
+  event: TreeEvent
 ) {
   const listeners = tree.listeners.get(nodeId);
   if (listeners == null) {
@@ -48,8 +72,8 @@ export function callListeners(
   }
 
   for (const listener of listeners) {
-    if (listener.type === event) {
-      listener.fn();
+    if (listener.type === event.type) {
+      listener.fn(event);
     }
   }
 }

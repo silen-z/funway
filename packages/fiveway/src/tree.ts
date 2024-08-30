@@ -1,6 +1,6 @@
 import { type NodeId, convergingPaths, idsToRoot, isParent } from "./id.js";
 import type { CreatedNavigationNode, NavigationNode } from "./node.js";
-import { type ListenerTree, callListeners } from "./events.js";
+import { type ListenerTree, type TreeEvent, callListeners } from "./events.js";
 import { type NavigationDirection, runHandler } from "./navigation.js";
 import { focusHandler } from "./handlers/focus.js";
 import { binarySearch } from "./array.js";
@@ -45,41 +45,35 @@ export function insertNode(tree: NavigationTree, node: CreatedNavigationNode) {
   node.tree = tree;
   tree.nodes.set(node.id, node as NavigationNode);
 
-  // if its parent is not connected yet so we are done for now
-  if (!tree.nodes.has(node.parent)) {
-    if (!tree.orphans.has(node.parent)) {
-      tree.orphans.set(node.parent, []);
-    }
-
-    const orphans = tree.orphans.get(node.parent)!;
-    orphans.push(node.id);
-
-    return node;
+  const parentNode = tree.nodes.get(node.parent);
+  if (parentNode != null && parentNode.connected) {
+    connectNode(tree, parentNode, node as NavigationNode);
+  } else {
+    markOrphan(tree, node.parent, node.id);
   }
-
-  connectNode(tree, node.id);
 
   return node;
 }
 
-function connectNode(tree: NavigationTree, id: NodeId) {
-  const node = tree.nodes.get(id);
-  if (node == null || node.parent == null) {
-    throw new Error(`trying to connect invalid node: ${id}`);
-  }
-
-  const parentNode = tree.nodes.get(node.parent);
-  if (parentNode == null || !parentNode.connected) {
-    throw new Error(`trying to connect with invalid parent: ${node.parent}`);
-  }
-
+function connectNode(
+  tree: NavigationTree,
+  parentNode: NavigationNode,
+  node: NavigationNode
+) {
   insertChildInOrder(parentNode, node);
   node.connected = true;
 
-  callListeners(tree, "#", "structurechange");
+  const event: TreeEvent = {
+    type: "structurechange",
+    operation: "insert",
+    id: node.id,
+  };
+  idsToRoot(node.id, (id) => {
+    callListeners(tree, id, event);
+  });
 
-  if (tree.focusedId === "#" || isFocused(tree, node.parent)) {
-    focusNode(tree, node.parent, { direction: "initial" });
+  if (tree.focusedId === "#" || isFocused(tree, parentNode.id)) {
+    focusNode(tree, parentNode.id, { direction: "initial" });
   }
 
   const orphans = tree.orphans.get(node.id);
@@ -87,8 +81,8 @@ function connectNode(tree: NavigationTree, id: NodeId) {
     return;
   }
 
-  for (const orphan of orphans) {
-    connectNode(tree, orphan);
+  for (const orphanId of orphans) {
+    connectNode(tree, node, tree.nodes.get(orphanId)!);
   }
 
   tree.orphans.delete(node.id);
@@ -109,14 +103,7 @@ export function removeNode(tree: NavigationTree, nodeId: NodeId) {
   }
 
   tree.nodes.delete(nodeId);
-
-  const orphans = tree.orphans.get(node.parent!);
-  if (orphans != null) {
-    const index = orphans.indexOf(nodeId);
-    if (index !== -1) {
-      orphans.splice(index, 1);
-    }
-  }
+  clearOrphan(tree, node.parent!, nodeId);
 }
 
 function disconnectNode(tree: NavigationTree, nodeId: NodeId) {
@@ -129,37 +116,32 @@ function disconnectNode(tree: NavigationTree, nodeId: NodeId) {
     throw new Error("trying to disconnect invalid node");
   }
 
-  // its fine if parent is already diconnected/removed
-  const parentNode = tree.nodes.get(node.parent);
-  if (parentNode != null) {
-    // tombstone id of removed node in parent
-    const parentChildIndex = parentNode.children.findIndex(
-      (child) => child.id === nodeId
-    );
-    if (parentChildIndex === -1) {
-      console.error("encountered broken tree");
-    }
-
-    // remember the position if its not explicitly set
-    if (node.order === null) {
-      parentNode.children[parentChildIndex]!.active = false;
-    } else {
-      parentNode.children.splice(parentChildIndex, 1);
-    }
-  }
-
+  // disconnect children first
   for (const child of node.children) {
-    if (!tree.orphans.has(node.id)) {
-      tree.orphans.set(node.id, []);
+    if (!child.active) {
+      continue;
     }
-
-    const orphans = tree.orphans.get(node.id)!;
-    orphans.push(child.id);
 
     disconnectNode(tree, child.id);
+    markOrphan(tree, node.id, child.id);
+  }
+
+  // its fine if parent is already disconnected/removed
+  const parentNode = tree.nodes.get(node.parent);
+  if (parentNode != null) {
+    removeChildFromParent(parentNode, node);
   }
 
   node.connected = false;
+
+  const event: TreeEvent = {
+    type: "structurechange",
+    operation: "removal",
+    id: node.id,
+  };
+  idsToRoot(node.parent, (id) => {
+    callListeners(tree, id, event);
+  });
 
   if (isFocused(tree, node.id)) {
     tree.focusedId = node.parent;
@@ -173,8 +155,6 @@ function disconnectNode(tree: NavigationTree, nodeId: NodeId) {
       }
     });
   }
-
-  callListeners(tree, "#", "structurechange");
 }
 
 export type FocusOptions = {
@@ -196,19 +176,25 @@ export function focusNode(
     direction: options.direction ?? null,
   });
 
-  if (tree.focusedId === resolvedId) {
-    return true;
-  }
-
   if (resolvedId === null) {
     return false;
+  }
+
+  if (tree.focusedId === resolvedId) {
+    return true;
   }
 
   const lastFocused = tree.focusedId;
   tree.focusedId = resolvedId;
 
+  const event: TreeEvent = {
+    type: "focuschange",
+    focused: tree.focusedId,
+    previous: lastFocused,
+  };
+
   convergingPaths(lastFocused, tree.focusedId, (id) => {
-    callListeners(tree, id, "focuschange");
+    callListeners(tree, id, event);
   });
 
   return true;
@@ -265,7 +251,7 @@ function insertChildInOrder(
       return;
     }
 
-    // otherwise remove the tobstone so it can be inserted again at correct index
+    // otherwise remove the tombstone so it can be inserted again at correct index
     parentNode.children.splice(oldIndex, 1);
   }
 
@@ -279,4 +265,43 @@ function insertChildInOrder(
     id: childNode.id,
     order: childNode.order,
   });
+}
+
+function removeChildFromParent(
+  parentNode: NavigationNode,
+  childNode: NavigationNode
+) {
+  // tombstone id of removed node in parent
+  const parentChildIndex = parentNode.children.findIndex(
+    (child) => child.id === childNode.id
+  );
+  if (parentChildIndex === -1) {
+    console.error("encountered broken tree");
+  }
+
+  // remember the position if its not explicitly set
+  if (childNode.order === null) {
+    parentNode.children[parentChildIndex]!.active = false;
+  } else {
+    parentNode.children.splice(parentChildIndex, 1);
+  }
+}
+
+function markOrphan(tree: NavigationTree, parent: NodeId, child: NodeId) {
+  if (!tree.orphans.has(parent)) {
+    tree.orphans.set(parent, []);
+  }
+
+  const orphans = tree.orphans.get(parent)!;
+  orphans.push(child);
+}
+
+function clearOrphan(tree: NavigationTree, parent: NodeId, child: NodeId) {
+  const orphans = tree.orphans.get(parent);
+  if (orphans != null) {
+    const index = orphans.indexOf(child);
+    if (index !== -1) {
+      orphans.splice(index, 1);
+    }
+  }
 }

@@ -17,12 +17,7 @@ export function useLazyIsFocused(tree: NavigationTree, nodeId: NodeId) {
   const [subscribed, setSubscribed] = useState(false);
 
   const subscribe = useCallback(
-    (callback: () => void) =>
-      registerListener(tree, {
-        type: "focuschange",
-        node: nodeId,
-        fn: callback,
-      }),
+    (cb: () => void) => registerListener(tree, nodeId, "focuschange", cb),
     [tree, nodeId]
   );
 
