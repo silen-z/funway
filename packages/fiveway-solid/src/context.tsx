@@ -1,14 +1,5 @@
+import { createContext, useContext, type JSX } from "solid-js";
 import {
-  createContext,
-  createEffect,
-  createSignal,
-  onCleanup,
-  useContext,
-  type Accessor,
-  type JSX,
-} from "solid-js";
-import {
-  registerListener,
   type NavigationAction,
   type NavigationTree,
   type NodeId,
@@ -17,7 +8,6 @@ import {
 export type NavigationContext = {
   tree: NavigationTree;
   parentNode: NodeId;
-  focusedId: Accessor<NodeId>;
 };
 
 export const NavigationContext = createContext<NavigationContext | null>(null);
@@ -33,20 +23,8 @@ export function NavigationProvider(props: NavigationProviderProps) {
   // eslint-disable-next-line solid/reactivity
   const tree = props.tree;
 
-  const [focusedId, setFocusedId] = createSignal(tree.focusedId);
-
-  createEffect(() => {
-    const cleanup = registerListener(tree, {
-      type: "focuschange",
-      node: "#",
-      fn: () => setFocusedId(tree.focusedId),
-    });
-
-    onCleanup(cleanup);
-  });
-
   return (
-    <NavigationContext.Provider value={{ tree, parentNode: "#", focusedId }}>
+    <NavigationContext.Provider value={{ tree, parentNode: "#" }}>
       {props.children}
     </NavigationContext.Provider>
   );

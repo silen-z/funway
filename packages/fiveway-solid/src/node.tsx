@@ -5,7 +5,6 @@ import {
   type ParentProps,
   children,
   createEffect,
-  on,
   onCleanup,
   splitProps,
   untrack,
@@ -17,14 +16,14 @@ import {
   insertNode,
   createNode,
   focusNode,
-  isFocused,
   removeNode,
   scopedId,
   selectNode,
   updateNode,
 } from "@fiveway/core";
 import { useNavigationContext, NavigationContext } from "./context.jsx";
-import { createLazyMemo } from "@solid-primitives/memo";
+
+import { useIsFocused } from "./hooks.jsx";
 
 export type NodeOptions = {
   id: NodeId;
@@ -42,7 +41,7 @@ export type NodeHandle = {
 };
 
 export function createNavigationNode(options: NodeOptions): NodeHandle {
-  const { tree, parentNode, focusedId } = useNavigationContext();
+  const { tree, parentNode } = useNavigationContext();
 
   const node = createNode({
     id: options.id,
@@ -65,7 +64,7 @@ export function createNavigationNode(options: NodeOptions): NodeHandle {
 
   return {
     id: node.id,
-    isFocused: createLazyMemo(on(focusedId, () => isFocused(tree, node.id))),
+    isFocused: useIsFocused(node.id),
     focus: (nodeId?: NodeId, options?: FocusOptions) => {
       return focusNode(
         tree,

@@ -7,6 +7,7 @@ import {
   chainedHandler,
   registerListener,
   NodePosition,
+  type FocusChangeEvent,
 } from "@fiveway/core";
 import { defaultEventMapping, NodeElement } from "@fiveway/core/dom";
 
@@ -58,17 +59,13 @@ export function useActionHandler(
 
 export function useSyncFocus(tree: NavigationTree) {
   useEffect(() => {
-    const handler = () => {
-      const el = NodeElement.query(tree, tree.focusedId);
+    const handler = (e: FocusChangeEvent) => {
+      const el = NodeElement.query(tree, e.focused);
       if (el != null) {
         el.focus();
       }
     };
 
-    return registerListener(tree, {
-      type: "focuschange",
-      node: "#",
-      fn: handler,
-    });
+    return registerListener(tree, "#", "focuschange", handler);
   }, [tree]);
 }

@@ -14,21 +14,30 @@ export function useIsFocused(nodeId: NodeId): Accessor<boolean> {
   const { tree, parentNode } = useNavigationContext();
   const globalId = scopedId(parentNode, nodeId);
 
-  const [isNodeFocused, setFocused] = createSignal(isFocused(tree, globalId));
+  const [isNodeFocused, setFocused] = createSignal(false);
+  const [subscription, setSubscription] = createSignal<(() => void) | null>(
+    null
+  );
 
-  createEffect(() => {
-    const cleanup = registerListener(tree, {
-      type: "focuschange",
-      node: globalId,
-      fn: () => setFocused(isFocused(tree, globalId)),
-    });
-
-    onCleanup(() => {
-      cleanup();
-    });
+  onCleanup(() => {
+    subscription()?.();
   });
 
-  return isNodeFocused;
+  const getIsFocused = () => {
+    if (subscription() === null) {
+      const cleanup = registerListener(tree, globalId, "focuschange", () =>
+        setFocused(isFocused(tree, globalId))
+      );
+
+      setSubscription(() => cleanup);
+
+      return isFocused(tree, globalId);
+    }
+
+    return isNodeFocused();
+  };
+
+  return getIsFocused;
 }
 
 export function useOnFocus(
@@ -39,18 +48,12 @@ export function useOnFocus(
   const globalId = scopedId(parentNode, nodeId);
 
   createEffect(() => {
-    const cleanup = registerListener(tree, {
-      type: "focuschange",
-      node: globalId,
-      fn: () => {
-        const id = isFocused(tree, globalId) ? tree.focusedId : null;
-        handler(id);
-      },
+    const cleanup = registerListener(tree, globalId, "focuschange", () => {
+      const id = isFocused(tree, globalId) ? tree.focusedId : null;
+      handler(id);
     });
 
-    onCleanup(() => {
-      cleanup();
-    });
+    onCleanup(cleanup);
   });
 }
 
@@ -62,18 +65,12 @@ export function useFocusedId(scope: NodeId) {
   );
 
   createEffect(() => {
-    const cleanup = registerListener(tree, {
-      type: "focuschange",
-      node: globalId,
-      fn: () => {
-        const id = isFocused(tree, globalId) ? tree.focusedId : null;
-        setFocusedId(id);
-      },
+    const cleanup = registerListener(tree, globalId, "focuschange", () => {
+      const id = isFocused(tree, globalId) ? tree.focusedId : null;
+      setFocusedId(id);
     });
 
-    onCleanup(() => {
-      cleanup();
-    });
+    onCleanup(cleanup);
   });
 
   return focusedId;

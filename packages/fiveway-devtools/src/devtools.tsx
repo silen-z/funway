@@ -238,12 +238,10 @@ function useNode(tree: NavigationTree, id: () => NodeId) {
     setNode(tree.nodes.get(watchedId));
 
     const cleanup = onCleanup(
-      registerListener(tree, {
-        node: "#",
-        type: "structurechange",
-        fn: () => {
+      registerListener(tree, watchedId, "structurechange", (e) => {
+        if (e.id === watchedId || isParent(watchedId, e.id)) {
           setNode(tree.nodes.get(watchedId));
-        },
+        }
       })
     );
 
@@ -263,12 +261,8 @@ function useFocusedId(tree: NavigationTree, listenOn: NodeId = "#") {
   const [nodeId, setNodeId] = createSignal(tree.focusedId);
 
   createEffect(() => {
-    const cleanup = registerListener(tree, {
-      node: listenOn,
-      type: "focuschange",
-      fn: () => {
-        setNodeId(tree.focusedId);
-      },
+    const cleanup = registerListener(tree, listenOn, "focuschange", () => {
+      setNodeId(tree.focusedId);
     });
     onCleanup(cleanup);
   });

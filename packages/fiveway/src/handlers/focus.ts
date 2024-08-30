@@ -1,8 +1,4 @@
-import type {
-  NavigationAction,
-  NavigationDirection,
-  NavigationHandler,
-} from "../navigation.js";
+import type { NavigationDirection, NavigationHandler } from "../navigation.js";
 import { isParent } from "../id.js";
 import { describeHandler } from "../introspection.js";
 
@@ -36,10 +32,12 @@ function createFocusHandler(config: FocusHandlerConfig = {}) {
       return next();
     }
 
+    // if this is a refocus due to children changing
+    // skip if some child is already focused
     if (
       action.direction === "initial" &&
       node.parent !== null &&
-      isParent(node.parent, node.tree.focusedId)
+      isParent(node.id, node.tree.focusedId)
     ) {
       return null;
     }
@@ -88,8 +86,6 @@ function createFocusHandler(config: FocusHandlerConfig = {}) {
   return focusHandler;
 }
 
-const regularFocus: NavigationAction = { kind: "focus", direction: null };
-
 function createInitialHandler(id: string) {
   const initialHandler: NavigationHandler = (node, action, next) => {
     if (import.meta.env.DEV) {
@@ -100,24 +96,25 @@ function createInitialHandler(id: string) {
       return next();
     }
 
-    if (action.direction === "initial" || action.direction === null) {
-      if (!node.children.some((c) => c.active)) {
-        return next();
-      }
-
-      const initialId = `${node.id}/${id}`;
-      const child = node.children.find((c) => c.active && c.id === initialId);
-      if (child != null) {
-        const childId = next(child.id, regularFocus);
-        if (childId !== null) {
-          return childId;
-        }
-      }
-
-      return next(node.id, regularFocus);
+    // don't handle directional focus
+    if (action.direction !== "initial" && action.direction !== null) {
+      return next();
     }
 
-    return next();
+    if (!node.children.some((c) => c.active)) {
+      return next();
+    }
+
+    const initialId = `${node.id}/${id}`;
+    const child = node.children.find((c) => c.active && c.id === initialId);
+    if (child != null) {
+      const childId = next(child.id);
+      if (childId !== null) {
+        return childId;
+      }
+    }
+
+    return next(node.id);
   };
 
   return initialHandler;

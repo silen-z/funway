@@ -23,28 +23,31 @@ test("insertNode", () => {
   expect(tree.nodes.get("#/node")?.connected).toBe(true);
 });
 
-test("insertNode: allow inserting children first", () => {
+test("insertNode: allow inserting nodes in any order", () => {
   const tree = createNavigationTree();
 
-  const container = createNode({
-    id: "container",
+  const level1 = createNode({
+    id: "level1",
     parent: "#",
   });
 
-  const item = createNode({
-    id: "item",
-    parent: container.id,
+  const level2 = createNode({
+    id: "level2",
+    parent: level1.id,
+  });
+  const level3 = createNode({
+    id: "level3",
+    parent: level2.id,
   });
 
-  insertNode(tree, item);
-  insertNode(tree, container);
+  insertNode(tree, level3);
+  insertNode(tree, level1);
+  insertNode(tree, level2);
 
-  expect(container.children.length).toBe(1);
-  expect(container.children).toContainEqual({
-    id: item.id,
-    order: null,
-    active: true,
-  });
+  expect(level1.connected).toBe(true);
+  expect(level2.connected).toBe(true);
+  expect(level3.connected).toBe(true);
+  expect(tree.orphans.size).toBe(0);
 });
 
 test("insertNode: throw on insert root", () => {
