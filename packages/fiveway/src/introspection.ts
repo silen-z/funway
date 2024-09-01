@@ -21,7 +21,7 @@ export function describeHandler(action: NavigationAction, info: HandlerInfo) {
 
 export function getHandlerInfo(
   tree: NavigationTree,
-  id: NodeId
+  id: NodeId,
 ): HandlerInfo[] {
   const value = [] as HandlerInfo[];
   runHandler(tree, id, {
@@ -36,7 +36,7 @@ export function getHandlerInfo(
 export function defaultHandlerInfo(
   handler: NavigationHandler,
   node: NavigationNode,
-  action: NavigationAction
+  action: NavigationAction,
 ) {
   if (action.kind !== "query" || action.key !== "core:handler-info") {
     return;

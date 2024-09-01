@@ -15,7 +15,7 @@ test("selectHandler", () => {
       id: "test",
       parent: "#",
       handler: defaultHandler.prepend(selectHandler(onSelect)),
-    })
+    }),
   );
 
   expect(tree.focusedId).toBe(node.id);

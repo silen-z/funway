@@ -12,7 +12,7 @@ test("runHandler", () => {
   expect(handler).toHaveBeenCalledWith(
     expect.objectContaining({ id: "#/one" }),
     expect.objectContaining({ kind: "focus" }),
-    expect.any(Function)
+    expect.any(Function),
   );
 });
 

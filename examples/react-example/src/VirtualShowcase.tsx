@@ -17,7 +17,7 @@ function offsetWindow(
   length: number,
   index: number,
   offsetStart: number,
-  offsetEnd = offsetStart
+  offsetEnd = offsetStart,
 ): [number, number] {
   let start = index - offsetStart;
 
@@ -39,7 +39,7 @@ function offsetWindow(
 function mapRange<T, U>(
   array: T[],
   [start, end]: [number, number],
-  mapFn: (e: T) => U
+  mapFn: (e: T) => U,
 ) {
   const mapped = [];
   for (
@@ -93,7 +93,7 @@ export function VirtualList() {
 
     const nextPosition = Math.min(
       Math.max(0, listPosition + step),
-      items.length - 1
+      items.length - 1,
     );
 
     setListPosition(nextPosition);

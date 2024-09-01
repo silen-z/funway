@@ -16,7 +16,7 @@ export function useIsFocused(nodeId: NodeId) {
 
   const subscribe = useCallback(
     (cb: () => void) => registerListener(tree, globalId, "focuschange", cb),
-    [tree, globalId]
+    [tree, globalId],
   );
 
   return useSyncExternalStore(subscribe, () => isFocused(tree, globalId));
@@ -24,7 +24,7 @@ export function useIsFocused(nodeId: NodeId) {
 
 export function useOnFocus(
   nodeId: NodeId,
-  handler: (id: NodeId | null) => void
+  handler: (id: NodeId | null) => void,
 ) {
   const { tree, parentNode } = useNavigationContext();
   const globalId = scopedId(parentNode, nodeId);
@@ -46,16 +46,16 @@ export function useFocusedId(scope: NodeId) {
 
   const subscribe = useCallback(
     (cb: () => void) => registerListener(tree, globalId, "focuschange", cb),
-    [tree, globalId]
+    [tree, globalId],
   );
 
   return useSyncExternalStore(subscribe, () =>
-    isFocused(tree, globalId) ? tree.focusedId : null
+    isFocused(tree, globalId) ? tree.focusedId : null,
   );
 }
 
 export function useFocus(
-  scope?: NodeId
+  scope?: NodeId,
 ): (nodeId: NodeId, options?: FocusOptions) => boolean {
   const { tree, parentNode } = useNavigationContext();
   scope ??= parentNode;
@@ -64,7 +64,7 @@ export function useFocus(
     (nodeId: NodeId, options?: FocusOptions) => {
       return focusNode(tree, scopedId(scope, nodeId), options);
     },
-    [tree, scope]
+    [tree, scope],
   );
 }
 
@@ -76,6 +76,6 @@ export function useSelect(scope?: NodeId) {
     (nodeId: NodeId, focus?: boolean) => {
       selectNode(tree, scopedId(scope, nodeId), focus);
     },
-    [tree, scope]
+    [tree, scope],
   );
 }

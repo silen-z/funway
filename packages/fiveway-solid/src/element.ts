@@ -34,7 +34,7 @@ export function createElementHandler() {
 export function useActionHandler(
   tree: NavigationTree,
   target: EventTarget = window,
-  eventToAction: (e: Event) => NavigationAction | null = defaultEventMapping
+  eventToAction: (e: Event) => NavigationAction | null = defaultEventMapping,
 ) {
   createEffect(() => {
     const handler = (e: Event) => {

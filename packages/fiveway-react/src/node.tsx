@@ -68,7 +68,7 @@ export function useNavigationNode(options: NodeOptions): NodeHandle {
         </NavigationContext.Provider>
       );
     },
-    [tree, nodeId]
+    [tree, nodeId],
   );
 
   Context.displayName = "NodeContext";

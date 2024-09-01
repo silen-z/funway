@@ -20,7 +20,7 @@ type ChainLink = {
  * @returns handler that will pipe navigation actions through via the next function
  */
 function createChainedHandler(
-  chain: ChainLink | NavigationHandler | NavigationHandler[] | null = null
+  chain: ChainLink | NavigationHandler | NavigationHandler[] | null = null,
 ): ChainedHandler {
   if (typeof chain === "function") {
     chain = { handler: chain, next: null };
@@ -32,7 +32,7 @@ function createChainedHandler(
     const runLink = (
       link: ChainLink | null,
       id?: NodeId,
-      newAction?: NavigationAction
+      newAction?: NavigationAction,
     ): NodeId | null => {
       if (id != null && id !== node.id) {
         return next(id, newAction ?? action);
@@ -49,7 +49,7 @@ function createChainedHandler(
       return link.handler(
         node,
         newAction ?? action,
-        runLink.bind(null, link.next)
+        runLink.bind(null, link.next),
       );
     };
 
@@ -76,7 +76,7 @@ function createChainedHandler(
 }
 
 function createChain(
-  handlers: (NavigationHandler | ChainedHandler)[]
+  handlers: (NavigationHandler | ChainedHandler)[],
 ): ChainLink | null {
   if (handlers.length === 0) {
     return null;

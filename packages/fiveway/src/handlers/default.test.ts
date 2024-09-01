@@ -13,7 +13,7 @@ test("defaultHandler", () => {
       id: "test",
       parent: "#",
       handler: containerHandler,
-    })
+    }),
   );
 
   const item = insertNode(
@@ -21,7 +21,7 @@ test("defaultHandler", () => {
     createNode({
       id: "test",
       parent: container.id,
-    })
+    }),
   );
 
   expect(getHandlerInfo(tree, container.id)).toEqual([

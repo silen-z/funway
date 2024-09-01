@@ -18,7 +18,7 @@ test("defaultKeyMapping", () => {
       id: "container",
       parent: "#",
       handler: verticalHandler,
-    })
+    }),
   );
 
   const item1 = insertNode(
@@ -27,7 +27,7 @@ test("defaultKeyMapping", () => {
       id: "item1",
       parent: container.id,
       handler: defaultHandler,
-    })
+    }),
   );
 
   const item2 = insertNode(
@@ -36,13 +36,13 @@ test("defaultKeyMapping", () => {
       id: "item2",
       parent: container.id,
       handler: defaultHandler,
-    })
+    }),
   );
 
   expect(tree.focusedId).toBe(item1.id);
 
   const action = defaultEventMapping(
-    new KeyboardEvent("keydown", { key: "ArrowDown" })
+    new KeyboardEvent("keydown", { key: "ArrowDown" }),
   );
   expect(action).not.toBeNull();
   handleAction(tree, action!);

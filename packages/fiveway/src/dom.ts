@@ -19,4 +19,5 @@ export function defaultEventMapping(e: Event): NavigationAction | null {
   return null;
 }
 
-export const NodeElement: Metadata<HTMLElement> = defineMetadata("core:node-element");
+export const NodeElement: Metadata<HTMLElement> =
+  defineMetadata("core:node-element");

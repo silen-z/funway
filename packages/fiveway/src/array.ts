@@ -4,7 +4,7 @@
  */
 export function swapRemove(array: unknown[], idx: number) {
   if (idx >= array.length) {
-    return
+    return;
   }
 
   array[idx] = array[array.length - 1];

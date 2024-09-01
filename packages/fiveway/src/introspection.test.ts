@@ -17,7 +17,7 @@ test("handlerInfo", () => {
         describeHandler(action, { name: "test" });
         return next();
       },
-    })
+    }),
   );
 
   expect(getHandlerInfo(tree, "#/test")).toEqual([{ name: "test" }]);
@@ -36,10 +36,10 @@ test("defaultHandlerInfo", () => {
       id: "test",
       parent: "#",
       handler: defaultHandler.prepend(handlerWithoutInfo),
-    })
+    }),
   );
 
   expect(getHandlerInfo(tree, "#/test")).toEqual(
-    expect.arrayContaining([{ name: "handlerWithoutInfo" }])
+    expect.arrayContaining([{ name: "handlerWithoutInfo" }]),
   );
 });

@@ -16,7 +16,7 @@ import { describeHandler } from "../introspection.js";
 export function verticalMovementHandler(
   node: NavigationNode,
   action: NavigationAction,
-  next: HandlerNext
+  next: HandlerNext,
 ) {
   if (import.meta.env.DEV) {
     describeHandler(action, { name: "core:vertical-movement" });
@@ -28,7 +28,7 @@ export function verticalMovementHandler(
 
   if (action.direction === "up") {
     const previousId = findPreviousChild(node, (id) =>
-      next(id, { kind: "focus", direction: "up" })
+      next(id, { kind: "focus", direction: "up" }),
     );
 
     return previousId ?? next();
@@ -36,7 +36,7 @@ export function verticalMovementHandler(
 
   if (action.direction === "down") {
     const nextId = findNextChild(node, (id) =>
-      next(id, { kind: "focus", direction: "down" })
+      next(id, { kind: "focus", direction: "down" }),
     );
 
     return nextId ?? next();
@@ -70,7 +70,7 @@ export const verticalHandler: ChainedHandler = chainedHandler([
 export function horizontalMovementHandler(
   node: NavigationNode,
   action: NavigationAction,
-  next: HandlerNext
+  next: HandlerNext,
 ) {
   if (import.meta.env.DEV) {
     describeHandler(action, { name: "core:horizontal-movement" });
@@ -82,7 +82,7 @@ export function horizontalMovementHandler(
 
   if (action.direction === "left") {
     const previousId = findPreviousChild(node, (id) =>
-      next(id, { kind: "focus", direction: "left" })
+      next(id, { kind: "focus", direction: "left" }),
     );
 
     return previousId ?? next();
@@ -90,7 +90,7 @@ export function horizontalMovementHandler(
 
   if (action.direction === "right") {
     const nextId = findNextChild(node, (id) =>
-      next(id, { kind: "focus", direction: "right" })
+      next(id, { kind: "focus", direction: "right" }),
     );
 
     return nextId ?? next();
@@ -120,7 +120,7 @@ export const horizontalHandler: ChainedHandler = chainedHandler([
 
 function findNextChild(
   node: NavigationNode,
-  check: (id: NodeId) => NodeId | null
+  check: (id: NodeId) => NodeId | null,
 ) {
   const currentChildId = directChildId(node.id, node.tree.focusedId);
   if (currentChildId === null) {
@@ -146,7 +146,7 @@ function findNextChild(
 
 function findPreviousChild(
   node: NavigationNode,
-  check: (id: NodeId) => NodeId | null
+  check: (id: NodeId) => NodeId | null,
 ) {
   const currentChildId = directChildId(node.id, node.tree.focusedId);
   if (currentChildId === null) {

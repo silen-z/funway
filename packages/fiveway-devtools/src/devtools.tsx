@@ -110,7 +110,7 @@ function Sidebar() {
 
   const detailedNode = useNode(
     devtools.tree,
-    () => devtools.state.inspectedNode ?? focusedId()
+    () => devtools.state.inspectedNode ?? focusedId(),
   );
 
   return (
@@ -169,10 +169,10 @@ function VisualizeNode(props: { node: NavigationNode }) {
   const [isNodeOpen, setOpen] = createSignal(false);
 
   const isOpen = createMemo(
-    () => isNodeOpen() || isNodeFocused() || devtools.state.expandAll
+    () => isNodeOpen() || isNodeFocused() || devtools.state.expandAll,
   );
   const hasChildren = createMemo(() =>
-    props.node.children.some((c) => c.active)
+    props.node.children.some((c) => c.active),
   );
 
   const isRoot = () => props.node.id === "#";
@@ -229,7 +229,7 @@ function VisualizeNode(props: { node: NavigationNode }) {
 function useNode(tree: NavigationTree, id: () => NodeId) {
   const [node, setNode] = createSignal<NavigationNode | undefined>(
     tree.nodes.get(id()),
-    { equals: () => false }
+    { equals: () => false },
   );
 
   createEffect(() => {
@@ -242,7 +242,7 @@ function useNode(tree: NavigationTree, id: () => NodeId) {
         if (e.id === watchedId || isParent(watchedId, e.id)) {
           setNode(tree.nodes.get(watchedId));
         }
-      })
+      }),
     );
 
     onCleanup(cleanup);

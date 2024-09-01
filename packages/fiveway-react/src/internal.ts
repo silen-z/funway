@@ -18,12 +18,12 @@ export function useLazyIsFocused(tree: NavigationTree, nodeId: NodeId) {
 
   const subscribe = useCallback(
     (cb: () => void) => registerListener(tree, nodeId, "focuschange", cb),
-    [tree, nodeId]
+    [tree, nodeId],
   );
 
   const subscribedValue = useSyncExternalStore(
     subscribed ? subscribe : noopSubscribe,
-    () => isFocused(tree, nodeId)
+    () => isFocused(tree, nodeId),
   );
 
   return () => {

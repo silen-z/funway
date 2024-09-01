@@ -28,10 +28,10 @@ test("isParent", () => {
 
 test("directChildId", () => {
   expect(directChildId("#/container", "#/container/item/nested")).toBe(
-    "#/container/item"
+    "#/container/item",
   );
   expect(directChildId("#/container", "#/container/item")).toBe(
-    "#/container/item"
+    "#/container/item",
   );
   expect(directChildId("#/container", "#/another/item/nested")).toBeNull();
 });
@@ -66,12 +66,12 @@ test("idsToRoot", () => {
   convergingPaths(
     "#/shared/another-shared/item1",
     "#/shared/another-shared/container/item2",
-    callback
+    callback,
   );
 
   expect(callback).toHaveBeenCalledTimes(6);
   expect(callback).toHaveBeenCalledWith(
-    "#/shared/another-shared/container/item2"
+    "#/shared/another-shared/container/item2",
   );
   expect(callback).toHaveBeenCalledWith("#/shared/another-shared/container");
   expect(callback).toHaveBeenCalledWith("#/shared/another-shared/item1");

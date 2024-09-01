@@ -226,7 +226,7 @@ test("traverseNodes", () => {
     createNode({
       id: "container1",
       parent: "#",
-    })
+    }),
   );
 
   const item1 = insertNode(
@@ -234,7 +234,7 @@ test("traverseNodes", () => {
     createNode({
       id: "item1",
       parent: container1.id,
-    })
+    }),
   );
 
   const item2 = insertNode(
@@ -242,7 +242,7 @@ test("traverseNodes", () => {
     createNode({
       id: "item2",
       parent: container1.id,
-    })
+    }),
   );
 
   const container2 = insertNode(
@@ -250,7 +250,7 @@ test("traverseNodes", () => {
     createNode({
       id: "container2",
       parent: "#",
-    })
+    }),
   );
 
   const item3 = insertNode(
@@ -258,7 +258,7 @@ test("traverseNodes", () => {
     createNode({
       id: "item3",
       parent: container2.id,
-    })
+    }),
   );
 
   const item4 = insertNode(
@@ -266,7 +266,7 @@ test("traverseNodes", () => {
     createNode({
       id: "item4",
       parent: container2.id,
-    })
+    }),
   );
 
   const result: string[] = [];

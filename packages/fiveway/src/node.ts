@@ -48,7 +48,7 @@ export type ContainerConfig = NodeConfig & {
 
 export function updateNode(
   node: CreatedNavigationNode,
-  options: Omit<NodeConfig, "id" | "parent">
+  options: Omit<NodeConfig, "id" | "parent">,
 ) {
   if (options.handler != null) {
     node.handler = options.handler;
@@ -74,7 +74,7 @@ function updateNodeOrder(node: CreatedNavigationNode, order: number) {
   const childIndex = parentNode.children.findIndex((i) => i.id === node.id);
   const newIndex = binarySearch(
     parentNode.children,
-    (child) => order < (child.order ?? 0)
+    (child) => order < (child.order ?? 0),
   );
 
   if (newIndex === -1 || newIndex === childIndex) {

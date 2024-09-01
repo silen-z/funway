@@ -14,7 +14,7 @@ test("gridHandler", () => {
       id: "grid",
       parent: "#",
       handler: gridHandler,
-    })
+    }),
   );
 
   for (let row = 1; row <= 3; row++) {
@@ -25,7 +25,7 @@ test("gridHandler", () => {
           id: `item-${row}-${col}`,
           parent: container.id,
           handler: defaultHandler.prepend(gridItemHandler({ row, col })),
-        })
+        }),
       );
     }
   }
