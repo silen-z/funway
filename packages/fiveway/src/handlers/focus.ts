@@ -7,7 +7,7 @@ export type FocusDirection = "front" | "back";
 export type FocusHandlerConfig = {
   skipEmpty?: boolean;
   direction?: (
-    d: NavigationDirection | "initial" | null
+    d: NavigationDirection | "initial" | null,
   ) => FocusDirection | undefined;
 };
 

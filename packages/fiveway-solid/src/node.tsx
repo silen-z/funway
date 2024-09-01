@@ -69,7 +69,7 @@ export function createNavigationNode(options: NodeOptions): NodeHandle {
       return focusNode(
         tree,
         nodeId != null ? scopedId(parentNode, nodeId) : node.id,
-        options
+        options,
       );
     },
     select: (nodeId?: NodeId) => {

@@ -31,7 +31,7 @@ test("chainedHandler", () => {
 
   const node = insertNode(
     tree,
-    createNode({ id: "node1", parent: "#", handler: handler })
+    createNode({ id: "node1", parent: "#", handler: handler }),
   );
 
   const result = runHandler(tree, node.id, {
@@ -61,7 +61,7 @@ test("chainedHandler: meta", () => {
       id: "node",
       parent: "#",
       handler: defaultHandler.prepend(meta.providerHandler("test-value")),
-    })
+    }),
   );
 
   const node2 = insertNode(
@@ -70,7 +70,7 @@ test("chainedHandler: meta", () => {
       id: "node2",
       parent: "#",
       handler: defaultHandler.prepend(meta.providerHandler(() => "test-value")),
-    })
+    }),
   );
 
   expect(meta.query(tree, node.id)).toBe("test-value");

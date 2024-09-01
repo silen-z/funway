@@ -20,7 +20,7 @@ test("focusHandler: items are focusable focus", () => {
     createNode({
       id: "item",
       parent: "#",
-    })
+    }),
   );
 
   expect(isFocused(tree, item.id)).toBe(true);
@@ -35,7 +35,7 @@ test("focusHandler: skip empty containers", () => {
       id: "container",
       parent: "#",
       handler: containerHandler,
-    })
+    }),
   );
 
   expect(isFocused(tree, container.id)).toBe(false);
@@ -50,7 +50,7 @@ test("focusHandler: keep focus", () => {
       id: "container",
       parent: "#",
       handler: containerHandler,
-    })
+    }),
   );
 
   const item1 = insertNode(
@@ -60,7 +60,7 @@ test("focusHandler: keep focus", () => {
       parent: container.id,
       handler: defaultHandler,
       order: 2,
-    })
+    }),
   );
 
   insertNode(
@@ -70,7 +70,7 @@ test("focusHandler: keep focus", () => {
       parent: container.id,
       handler: defaultHandler,
       order: 1,
-    })
+    }),
   );
 
   expect(tree.focusedId).toBe(item1.id);
@@ -85,7 +85,7 @@ test("initialHandler: skip empty containers", () => {
       id: "container",
       parent: "#",
       handler: verticalHandler.prepend(initialHandler("item2")),
-    })
+    }),
   );
 
   const item1 = insertNode(
@@ -94,7 +94,7 @@ test("initialHandler: skip empty containers", () => {
       id: "item1",
       parent: container.id,
       handler: defaultHandler,
-    })
+    }),
   );
 
   expect(tree.focusedId).toBe(item1.id);
@@ -105,7 +105,7 @@ test("initialHandler: skip empty containers", () => {
       id: "item2",
       parent: container.id,
       handler: defaultHandler,
-    })
+    }),
   );
 
   expect(tree.focusedId).toBe(item2.id);
@@ -116,7 +116,7 @@ test("initialHandler: skip empty containers", () => {
       id: "item3",
       parent: container.id,
       handler: defaultHandler,
-    })
+    }),
   );
 
   expect(tree.focusedId).toBe(item2.id);
@@ -144,7 +144,7 @@ test("captureHandler", () => {
       id: "topContainer",
       parent: "#",
       handler: verticalHandler,
-    })
+    }),
   );
 
   const containedList = createNode({
@@ -162,7 +162,7 @@ test("captureHandler", () => {
 
   const outside = insertNode(
     tree,
-    createNode({ id: "outside", order: 2, parent: topContainer.id })
+    createNode({ id: "outside", order: 2, parent: topContainer.id }),
   );
 
   expect(tree.focusedId).toBe(item1.id);

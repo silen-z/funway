@@ -58,7 +58,7 @@ export function insertNode(tree: NavigationTree, node: CreatedNavigationNode) {
 function connectNode(
   tree: NavigationTree,
   parentNode: NavigationNode,
-  node: NavigationNode
+  node: NavigationNode,
 ) {
   insertChildInOrder(parentNode, node);
   node.connected = true;
@@ -164,7 +164,7 @@ export type FocusOptions = {
 export function focusNode(
   tree: NavigationTree,
   targetId: NodeId,
-  options: FocusOptions = {}
+  options: FocusOptions = {},
 ) {
   const node = tree.nodes.get(targetId);
   if (node == null || !node.connected) {
@@ -212,7 +212,7 @@ export function traverseNodes(
   tree: NavigationTree,
   nodeId: NodeId,
   depth: number | null,
-  callback: (id: NodeId) => void
+  callback: (id: NodeId) => void,
 ) {
   if (depth === 0) {
     return;
@@ -230,7 +230,7 @@ export function traverseNodes(
         tree,
         child.id,
         depth !== null ? depth - 1 : null,
-        callback
+        callback,
       );
     }
   }
@@ -238,10 +238,10 @@ export function traverseNodes(
 
 function insertChildInOrder(
   parentNode: NavigationNode,
-  childNode: NavigationNode
+  childNode: NavigationNode,
 ) {
   const oldIndex = parentNode.children.findIndex(
-    (child) => child.id === childNode.id
+    (child) => child.id === childNode.id,
   );
 
   if (oldIndex !== -1) {
@@ -257,7 +257,7 @@ function insertChildInOrder(
 
   const newIndex = binarySearch(
     parentNode.children,
-    (child) => (childNode.order ?? 0) < (child.order ?? 0)
+    (child) => (childNode.order ?? 0) < (child.order ?? 0),
   );
 
   parentNode.children.splice(newIndex, 0, {
@@ -269,11 +269,11 @@ function insertChildInOrder(
 
 function removeChildFromParent(
   parentNode: NavigationNode,
-  childNode: NavigationNode
+  childNode: NavigationNode,
 ) {
   // tombstone id of removed node in parent
   const parentChildIndex = parentNode.children.findIndex(
-    (child) => child.id === childNode.id
+    (child) => child.id === childNode.id,
   );
   if (parentChildIndex === -1) {
     console.error("encountered broken tree");

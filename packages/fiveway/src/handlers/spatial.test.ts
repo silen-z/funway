@@ -14,7 +14,7 @@ test("spatialHandler", () => {
       id: "spatial",
       parent: "#",
       handler: spatialHandler,
-    })
+    }),
   );
 
   for (let row = 1; row <= 2; row++) {
@@ -41,7 +41,7 @@ test("spatialHandler", () => {
           id: `item-${row}-${col}`,
           parent: container.id,
           handler: defaultHandler.prepend(position),
-        })
+        }),
       );
     }
   }

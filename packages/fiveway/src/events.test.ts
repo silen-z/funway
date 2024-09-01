@@ -20,7 +20,7 @@ test("listeners", () => {
     tree,
     "#",
     "focuschange",
-    listener1
+    listener1,
   );
 
   const listener2 = vi.fn();
@@ -28,7 +28,7 @@ test("listeners", () => {
     tree,
     "#",
     "focuschange",
-    listener2
+    listener2,
   );
 
   focusNode(tree, "#/two");

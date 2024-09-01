@@ -16,7 +16,7 @@ export function useIsFocused(nodeId: NodeId): Accessor<boolean> {
 
   const [isNodeFocused, setFocused] = createSignal(false);
   const [subscription, setSubscription] = createSignal<(() => void) | null>(
-    null
+    null,
   );
 
   onCleanup(() => {
@@ -26,7 +26,7 @@ export function useIsFocused(nodeId: NodeId): Accessor<boolean> {
   const getIsFocused = () => {
     if (subscription() === null) {
       const cleanup = registerListener(tree, globalId, "focuschange", () =>
-        setFocused(isFocused(tree, globalId))
+        setFocused(isFocused(tree, globalId)),
       );
 
       setSubscription(() => cleanup);
@@ -42,7 +42,7 @@ export function useIsFocused(nodeId: NodeId): Accessor<boolean> {
 
 export function useOnFocus(
   nodeId: NodeId,
-  handler: (id: NodeId | null) => void
+  handler: (id: NodeId | null) => void,
 ) {
   const { tree, parentNode } = useNavigationContext();
   const globalId = scopedId(parentNode, nodeId);
@@ -61,7 +61,7 @@ export function useFocusedId(scope: NodeId) {
   const { tree, parentNode } = useNavigationContext();
   const globalId = scopedId(parentNode, scope);
   const [focusedId, setFocusedId] = createSignal(
-    isFocused(tree, globalId) ? tree.focusedId : null
+    isFocused(tree, globalId) ? tree.focusedId : null,
   );
 
   createEffect(() => {

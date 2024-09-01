@@ -32,7 +32,7 @@ export function Showcase() {
           <NavigationNode
             id="verticalList"
             handler={containerHandler.prepend(
-              gridItemHandler({ row: 1, col: 1 })
+              gridItemHandler({ row: 1, col: 1 }),
             )}
           >
             <ListShowcase type="vertical" />
@@ -41,7 +41,7 @@ export function Showcase() {
           <NavigationNode
             id="horizontalList"
             handler={containerHandler.prepend(
-              gridItemHandler({ row: 1, col: 2 })
+              gridItemHandler({ row: 1, col: 2 }),
             )}
           >
             <ListShowcase type="horizontal" />
@@ -50,7 +50,7 @@ export function Showcase() {
           <NavigationNode
             id="spatial"
             handler={containerHandler.prepend(
-              gridItemHandler({ row: 1, col: 3 })
+              gridItemHandler({ row: 1, col: 3 }),
             )}
           >
             <SpatialShowcase />
@@ -65,7 +65,7 @@ function ListShowcase(props: { type: "vertical" | "horizontal" }) {
   const nav = createNavigationNode({
     id: "list",
     handler: untrack(() =>
-      props.type === "vertical" ? verticalHandler : horizontalHandler
+      props.type === "vertical" ? verticalHandler : horizontalHandler,
     ),
   });
 

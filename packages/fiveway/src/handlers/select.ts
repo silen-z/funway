@@ -26,7 +26,7 @@ function createSelectHandler(onSelect: () => void) {
 export function selectNode(
   tree: NavigationTree,
   nodeId: NodeId,
-  focus: boolean = true
+  focus: boolean = true,
 ) {
   if (focus) {
     focusNode(tree, nodeId);

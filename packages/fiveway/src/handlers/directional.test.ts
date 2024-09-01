@@ -13,7 +13,7 @@ test("verticalHandler", () => {
       id: "container",
       parent: "#",
       handler: verticalHandler,
-    })
+    }),
   );
 
   const item1 = insertNode(
@@ -21,7 +21,7 @@ test("verticalHandler", () => {
     createNode({
       id: "item1",
       parent: container.id,
-    })
+    }),
   );
 
   const item2 = insertNode(
@@ -29,7 +29,7 @@ test("verticalHandler", () => {
     createNode({
       id: "item2",
       parent: container.id,
-    })
+    }),
   );
 
   expect(tree.focusedId).toBe(item1.id);
@@ -52,12 +52,12 @@ test("verticalHandler: wrong direction", () => {
       id: "container",
       parent: "#",
       handler: verticalHandler,
-    })
+    }),
   );
 
   const item1 = insertNode(
     tree,
-    createNode({ id: "item1", parent: container.id })
+    createNode({ id: "item1", parent: container.id }),
   );
 
   insertNode(tree, createNode({ id: "item2", parent: container.id }));
@@ -86,7 +86,7 @@ test("verticalHandler: skip removed", () => {
       id: "container",
       parent: "#",
       handler: verticalHandler,
-    })
+    }),
   );
 
   const item1 = insertNode(
@@ -94,7 +94,7 @@ test("verticalHandler: skip removed", () => {
     createNode({
       id: "item1",
       parent: container.id,
-    })
+    }),
   );
 
   const item2 = insertNode(
@@ -102,7 +102,7 @@ test("verticalHandler: skip removed", () => {
     createNode({
       id: "item2",
       parent: container.id,
-    })
+    }),
   );
 
   const item3 = insertNode(
@@ -110,7 +110,7 @@ test("verticalHandler: skip removed", () => {
     createNode({
       id: "item3",
       parent: container.id,
-    })
+    }),
   );
 
   removeNode(tree, item2.id);
@@ -135,7 +135,7 @@ test("verticalHandler: focus direction", () => {
       id: "container",
       parent: "#",
       handler: verticalHandler,
-    })
+    }),
   );
 
   const list = insertNode(
@@ -144,7 +144,7 @@ test("verticalHandler: focus direction", () => {
       id: "list",
       parent: container.id,
       handler: verticalHandler,
-    })
+    }),
   );
 
   const item1 = insertNode(
@@ -152,7 +152,7 @@ test("verticalHandler: focus direction", () => {
     createNode({
       id: "item1",
       parent: list.id,
-    })
+    }),
   );
 
   const item2 = insertNode(
@@ -160,7 +160,7 @@ test("verticalHandler: focus direction", () => {
     createNode({
       id: "item2",
       parent: list.id,
-    })
+    }),
   );
 
   const outside = insertNode(
@@ -168,7 +168,7 @@ test("verticalHandler: focus direction", () => {
     createNode({
       id: "outside",
       parent: container.id,
-    })
+    }),
   );
 
   expect(tree.focusedId).toBe(item1.id);
@@ -192,7 +192,7 @@ test("horizontalHandler", () => {
       id: "container",
       parent: "#",
       handler: horizontalHandler,
-    })
+    }),
   );
 
   const item1 = insertNode(
@@ -200,7 +200,7 @@ test("horizontalHandler", () => {
     createNode({
       id: "item1",
       parent: container.id,
-    })
+    }),
   );
 
   const item2 = insertNode(
@@ -208,7 +208,7 @@ test("horizontalHandler", () => {
     createNode({
       id: "item2",
       parent: container.id,
-    })
+    }),
   );
 
   expect(tree.focusedId).toBe(item1.id);
@@ -231,12 +231,12 @@ test("horizontalHandler: wrong direction", () => {
       id: "container",
       parent: "#",
       handler: horizontalHandler,
-    })
+    }),
   );
 
   const item1 = insertNode(
     tree,
-    createNode({ id: "item1", parent: container.id })
+    createNode({ id: "item1", parent: container.id }),
   );
 
   insertNode(tree, createNode({ id: "item2", parent: container.id }));
@@ -265,7 +265,7 @@ test("horizontalHandler: focus direction", () => {
       id: "container",
       parent: "#",
       handler: horizontalHandler,
-    })
+    }),
   );
 
   const list = insertNode(
@@ -274,7 +274,7 @@ test("horizontalHandler: focus direction", () => {
       id: "list",
       parent: container.id,
       handler: horizontalHandler,
-    })
+    }),
   );
 
   const item1 = insertNode(
@@ -282,7 +282,7 @@ test("horizontalHandler: focus direction", () => {
     createNode({
       id: "item1",
       parent: list.id,
-    })
+    }),
   );
 
   const item2 = insertNode(
@@ -290,7 +290,7 @@ test("horizontalHandler: focus direction", () => {
     createNode({
       id: "item2",
       parent: list.id,
-    })
+    }),
   );
 
   const outside = insertNode(
@@ -298,7 +298,7 @@ test("horizontalHandler: focus direction", () => {
     createNode({
       id: "outside",
       parent: container.id,
-    })
+    }),
   );
 
   expect(tree.focusedId).toBe(item1.id);
@@ -322,7 +322,7 @@ test("horizontal: skip removed", () => {
       id: "container",
       parent: "#",
       handler: horizontalHandler,
-    })
+    }),
   );
 
   const item1 = insertNode(
@@ -330,7 +330,7 @@ test("horizontal: skip removed", () => {
     createNode({
       id: "item1",
       parent: container.id,
-    })
+    }),
   );
 
   const item2 = insertNode(
@@ -338,7 +338,7 @@ test("horizontal: skip removed", () => {
     createNode({
       id: "item2",
       parent: container.id,
-    })
+    }),
   );
 
   const item3 = insertNode(
@@ -346,7 +346,7 @@ test("horizontal: skip removed", () => {
     createNode({
       id: "item3",
       parent: container.id,
-    })
+    }),
   );
 
   removeNode(tree, item2.id);

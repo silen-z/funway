@@ -12,7 +12,7 @@ export function NodeDetail(props: { node: NavigationNode; inspect: boolean }) {
   const devtools = useDevtoolContext();
 
   const nodeHandlers = createMemo(() =>
-    getHandlerInfo(devtools.tree, props.node.id)
+    getHandlerInfo(devtools.tree, props.node.id),
   );
 
   const modeIcon = props.inspect

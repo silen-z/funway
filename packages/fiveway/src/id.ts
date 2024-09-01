@@ -51,7 +51,7 @@ export function idsToRoot(nodeId: NodeId, cb: (id: NodeId) => boolean | void) {
 export function convergingPaths(
   node1: NodeId,
   node2: NodeId,
-  cb: (id: NodeId) => void
+  cb: (id: NodeId) => void,
 ) {
   if (node1 !== node2) {
     idsToRoot(node2, (id) => {

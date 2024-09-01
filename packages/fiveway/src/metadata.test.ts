@@ -14,7 +14,7 @@ test("don't look for metadata in parent", () => {
       id: "test",
       parent: "#",
       handler: containerHandler.prepend(meta.providerHandler(1)),
-    })
+    }),
   );
 
   const item = insertNode(
@@ -22,7 +22,7 @@ test("don't look for metadata in parent", () => {
     createNode({
       id: "test",
       parent: container.id,
-    })
+    }),
   );
 
   expect(meta.query(tree, item.id)).toBeNull();

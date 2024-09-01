@@ -29,7 +29,7 @@ export function Showcase() {
           <NavigationNode
             id="verticalList"
             handler={containerHandler.prepend(
-              gridItemHandler({ row: 1, col: 1 })
+              gridItemHandler({ row: 1, col: 1 }),
             )}
           >
             <ListShowcase type="vertical" />
@@ -38,7 +38,7 @@ export function Showcase() {
           <NavigationNode
             id="horizontalList"
             handler={containerHandler.prepend(
-              gridItemHandler({ row: 1, col: 2 })
+              gridItemHandler({ row: 1, col: 2 }),
             )}
           >
             <ListShowcase type="horizontal" />
@@ -47,7 +47,7 @@ export function Showcase() {
           <NavigationNode
             id="virtual"
             handler={containerHandler.prepend(
-              gridItemHandler({ row: 1, col: 3 })
+              gridItemHandler({ row: 1, col: 3 }),
             )}
           >
             <VirtualList />
@@ -56,7 +56,7 @@ export function Showcase() {
           <NavigationNode
             id="virtual-grid"
             handler={containerHandler.prepend(
-              gridItemHandler({ row: 1, col: 4 })
+              gridItemHandler({ row: 1, col: 4 }),
             )}
           >
             <VirtualGrid />
@@ -65,7 +65,7 @@ export function Showcase() {
           <NavigationNode
             id="spatial"
             handler={containerHandler.prepend(
-              gridItemHandler({ row: 2, col: 1 })
+              gridItemHandler({ row: 2, col: 1 }),
             )}
           >
             <SpatialShowcase />
@@ -74,7 +74,7 @@ export function Showcase() {
           <NavigationNode
             id="conditional"
             handler={containerHandler.prepend(
-              gridItemHandler({ row: 2, col: 2 })
+              gridItemHandler({ row: 2, col: 2 }),
             )}
           >
             <ConditionalShowcase />

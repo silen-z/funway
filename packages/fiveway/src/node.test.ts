@@ -26,7 +26,7 @@ test("updateNode: handler", () => {
       id: "test",
       parent: "#",
       handler: handler1,
-    })
+    }),
   );
 
   expect(node.handler).toBe(handler1);
@@ -44,7 +44,7 @@ test("updateNode: order", () => {
     createNode({
       id: "container",
       parent: "#",
-    })
+    }),
   );
 
   insertNode(
@@ -52,7 +52,7 @@ test("updateNode: order", () => {
     createNode({
       id: "node1",
       parent: container.id,
-    })
+    }),
   );
 
   const node2 = insertNode(
@@ -60,7 +60,7 @@ test("updateNode: order", () => {
     createNode({
       id: "node2",
       parent: container.id,
-    })
+    }),
   );
 
   insertNode(
@@ -68,7 +68,7 @@ test("updateNode: order", () => {
     createNode({
       id: "node3",
       parent: container.id,
-    })
+    }),
   );
 
   expect(container.children.map((c) => c.id)).toStrictEqual([
@@ -117,7 +117,7 @@ test("updateNode: order when parent is not connected", () => {
     createNode({
       id: "test",
       parent: "#/parent",
-    })
+    }),
   );
 
   updateNode(node, { order: 1 });

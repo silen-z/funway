@@ -29,7 +29,7 @@ export type NavigationAction = Register extends {
 
 export type HandlerNext = (
   id?: NodeId,
-  action?: NavigationAction
+  action?: NavigationAction,
 ) => NodeId | null;
 
 /**
@@ -38,13 +38,13 @@ export type HandlerNext = (
 export type NavigationHandler = (
   node: NavigationNode,
   action: NavigationAction,
-  next: HandlerNext
+  next: HandlerNext,
 ) => NodeId | null;
 
 export function runHandler(
   tree: NavigationTree,
   nodeId: NodeId,
-  action: NavigationAction
+  action: NavigationAction,
 ): NodeId | null {
   const next: HandlerNext = (id, newAction) => {
     if (id == null) {

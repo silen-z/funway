@@ -31,7 +31,7 @@ export function registerListener<T extends keyof EventMap>(
   tree: NavigationTree,
   id: NodeId,
   type: T,
-  fn: <E extends EventMap[T]>(event: E) => void
+  fn: <E extends EventMap[T]>(event: E) => void,
 ) {
   const listener = { type, fn } as Listener;
 
@@ -64,7 +64,7 @@ export function registerListener<T extends keyof EventMap>(
 export function callListeners(
   tree: NavigationTree,
   nodeId: NodeId,
-  event: TreeEvent
+  event: TreeEvent,
 ) {
   const listeners = tree.listeners.get(nodeId);
   if (listeners == null) {
