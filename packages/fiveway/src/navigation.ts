@@ -1,5 +1,5 @@
 import type { NodeId } from "./id.js";
-import type { NavigationNode } from "./node.js";
+import type { NavtreeNode } from "./node.js";
 import { type NavigationTree, focusNode } from "./tree.js";
 
 export type NavigationDirection = "up" | "down" | "left" | "right";
@@ -36,7 +36,7 @@ export type HandlerNext = (
  * @category Handler
  */
 export type NavigationHandler = (
-  node: NavigationNode,
+  node: NavtreeNode,
   action: NavigationAction,
   next: HandlerNext,
 ) => NodeId | null;

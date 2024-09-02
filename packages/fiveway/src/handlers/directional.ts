@@ -1,4 +1,4 @@
-import type { NavigationNode } from "../node.js";
+import type { NavtreeNode } from "../node.js";
 import { type NodeId, directChildId } from "../id.js";
 import type {
   NavigationAction,
@@ -14,7 +14,7 @@ import { describeHandler } from "../introspection.js";
  * @category Handler
  */
 export function verticalMovementHandler(
-  node: NavigationNode,
+  node: NavtreeNode,
   action: NavigationAction,
   next: HandlerNext,
 ) {
@@ -68,7 +68,7 @@ export const verticalHandler: ChainedHandler = chainedHandler([
  * @category Handler
  */
 export function horizontalMovementHandler(
-  node: NavigationNode,
+  node: NavtreeNode,
   action: NavigationAction,
   next: HandlerNext,
 ) {
@@ -119,7 +119,7 @@ export const horizontalHandler: ChainedHandler = chainedHandler([
 ]);
 
 function findNextChild(
-  node: NavigationNode,
+  node: NavtreeNode,
   check: (id: NodeId) => NodeId | null,
 ) {
   const currentChildId = directChildId(node.id, node.tree.focusedId);
@@ -145,7 +145,7 @@ function findNextChild(
 }
 
 function findPreviousChild(
-  node: NavigationNode,
+  node: NavtreeNode,
   check: (id: NodeId) => NodeId | null,
 ) {
   const currentChildId = directChildId(node.id, node.tree.focusedId);

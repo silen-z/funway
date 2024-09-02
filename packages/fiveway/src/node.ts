@@ -4,7 +4,7 @@ import type { NavigationHandler } from "./navigation.js";
 import { defaultHandler } from "./handlers/default.js";
 import { binarySearch } from "./array.js";
 
-export type CreatedNavigationNode = {
+export type CreatedNavtreeNode = {
   tree: NavigationTree | null;
   id: NodeId;
   connected: boolean;
@@ -14,7 +14,7 @@ export type CreatedNavigationNode = {
   children: NodeChild[];
 };
 
-export type NavigationNode = CreatedNavigationNode & {
+export type NavtreeNode = CreatedNavtreeNode & {
   tree: NavigationTree;
 };
 
@@ -27,7 +27,7 @@ export type NodeConfig = {
   handler?: NavigationHandler;
 };
 
-export function createNode(options: NodeConfig): CreatedNavigationNode {
+export function createNode(options: NodeConfig): CreatedNavtreeNode {
   const globalId = createGlobalId(options.parent, options.id);
 
   return {
@@ -47,7 +47,7 @@ export type ContainerConfig = NodeConfig & {
 };
 
 export function updateNode(
-  node: CreatedNavigationNode,
+  node: CreatedNavtreeNode,
   options: Omit<NodeConfig, "id" | "parent">,
 ) {
   if (options.handler != null) {
@@ -59,7 +59,7 @@ export function updateNode(
   }
 }
 
-function updateNodeOrder(node: CreatedNavigationNode, order: number) {
+function updateNodeOrder(node: CreatedNavtreeNode, order: number) {
   if (node.order === order || node.parent === null) {
     return;
   }

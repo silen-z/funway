@@ -4,7 +4,7 @@ import {
   runHandler,
 } from "./navigation.js";
 import type { NodeId } from "./id.js";
-import type { NavigationNode } from "./node.js";
+import type { NavtreeNode } from "./node.js";
 import type { NavigationTree } from "./tree.js";
 
 export type HandlerInfo = Record<string, string | { toString(): string }>;
@@ -35,7 +35,7 @@ export function getHandlerInfo(
 
 export function defaultHandlerInfo(
   handler: NavigationHandler,
-  node: NavigationNode,
+  node: NavtreeNode,
   action: NavigationAction,
 ) {
   if (action.kind !== "query" || action.key !== "core:handler-info") {
