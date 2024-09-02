@@ -5,6 +5,7 @@ import {
   gridHandler,
   gridItemHandler,
   itemHandler,
+  isParent,
 } from "@fiveway/core";
 import { useNavigationNode, useOnFocus, NavigationNode } from "@fiveway/react";
 import css from "./Showcase.module.css";
@@ -61,6 +62,15 @@ export function VirtualList() {
     id: "virtual-list",
     handler: verticalHandler.prepend((node, action, next) => {
       if (action.kind === "focus" && items[listPosition] != null) {
+        // if this is a refocus due to children changing
+        // skip if some child is already focused
+        if (
+          action.direction === "initial" &&
+          isParent(node.id, node.tree.focusedId)
+        ) {
+          return null;
+        }
+
         try {
           return next(`${node.id}/${items[listPosition].id}`);
         } catch {
@@ -141,9 +151,18 @@ export function VirtualGrid() {
 
   const nav = useNavigationNode({
     id: "virtual-grid",
-    handler: gridHandler.prepend((node, action, next) => {
+    handler: gridHandler().prepend((node, action, next) => {
       const rowStart = listPosition - (listPosition % cols);
       if (action.kind === "focus" && items[rowStart] != null) {
+        // if this is a refocus due to children changing
+        // skip if some child is already focused
+        if (
+          action.direction === "initial" &&
+          isParent(node.id, node.tree.focusedId)
+        ) {
+          return null;
+        }
+
         try {
           return next(`${node.id}/${items[rowStart].id}`);
         } catch {

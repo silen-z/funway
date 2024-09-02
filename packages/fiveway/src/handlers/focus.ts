@@ -36,7 +36,6 @@ function createFocusHandler(config: FocusHandlerConfig = {}) {
     // skip if some child is already focused
     if (
       action.direction === "initial" &&
-      node.parent !== null &&
       isParent(node.id, node.tree.focusedId)
     ) {
       return null;

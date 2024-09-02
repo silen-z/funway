@@ -13,7 +13,7 @@ test("gridHandler", () => {
     createNode({
       id: "grid",
       parent: "#",
-      handler: gridHandler,
+      handler: gridHandler(),
     }),
   );
 
@@ -40,7 +40,7 @@ test("gridHandler", () => {
 
   handleAction(tree, { kind: "move", direction: "down" });
 
-  expect(tree.focusedId).toBe("#/grid/item-3-2");
+  expect(tree.focusedId).toBe("#/grid/item-2-1");
 
   handleAction(tree, { kind: "move", direction: "right" });
 
