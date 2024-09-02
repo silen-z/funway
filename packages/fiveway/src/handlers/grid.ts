@@ -70,9 +70,7 @@ const defaultDistanceRight = (current: GridItem, potential: GridItem) => {
   return colDistance + Math.abs(rowDistance);
 };
 
-const defaultDistance: GridHandlerConfig["distance"] = (
-  direction: NavigationDirection,
-) => {
+const defaultDistance: DistanceFunction = (direction: NavigationDirection) => {
   switch (direction) {
     case "up":
       return defaultDistanceUp;
@@ -88,18 +86,19 @@ const defaultDistance: GridHandlerConfig["distance"] = (
   }
 };
 
+type DistanceFunction = (
+  direction: NavigationDirection,
+) => (a: GridItem, b: GridItem) => number | null;
+
 type GridHandlerConfig = {
-  distance?: (
-    direction: NavigationDirection,
-  ) => (a: GridItem, b: GridItem) => number | null;
+  distance?: DistanceFunction;
 };
 
 /**
  * @category Handler
  */
-export const gridMovement =
-  (config: GridHandlerConfig = {}): NavigationHandler =>
-  (node, action, next) => {
+function createGridMovement(config: GridHandlerConfig = {}) {
+  const gridMovement: NavigationHandler = (node, action, next) => {
     if (import.meta.env.DEV) {
       describeHandler(action, { name: "core:grid" });
     }
@@ -154,13 +153,18 @@ export const gridMovement =
     return next();
   };
 
+  return gridMovement;
+}
+
 /**
  * @category Handler
  */
+export { createGridMovement as gridMovement };
+
 export const gridHandler = (config: GridHandlerConfig = {}): ChainedHandler =>
   chainedHandler([
     focusHandler({ skipEmpty: true }),
-    gridMovement(config),
+    createGridMovement(config),
     parentHandler,
   ]);
 
