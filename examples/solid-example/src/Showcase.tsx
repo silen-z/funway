@@ -20,7 +20,7 @@ import css from "./Showcase.module.css";
 export function Showcase() {
   const nav = createNavigationNode({
     id: "showcase",
-    handler: gridHandler.prepend(initialHandler("horizontalList")),
+    handler: gridHandler().prepend(initialHandler("horizontalList")),
   });
 
   return (

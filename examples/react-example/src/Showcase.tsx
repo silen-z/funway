@@ -17,7 +17,7 @@ import { flushSync } from "react-dom";
 export function Showcase() {
   const nav = useNavigationNode({
     id: "showcase",
-    handler: gridHandler.prepend(initialHandler("horizontalList")),
+    handler: gridHandler().prepend(initialHandler("horizontalList")),
   });
 
   return (
