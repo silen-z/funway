@@ -4,28 +4,21 @@ import { type NavigationTree, focusNode } from "./tree.js";
 
 export type NavigationDirection = "up" | "down" | "left" | "right";
 
-export type DefaultNavigationAction =
-  | { kind: "select" }
-  | { kind: "move"; direction: NavigationDirection | "back" }
-  | { kind: "focus"; direction: NavigationDirection | "initial" | null }
-  | { kind: "query"; key: string; value: unknown | null };
-
 // This interface provides a way to extend the default actions:
 //
 // declare module "@fiveway/core" {
-//   interface Register {
-//     action: DefaultNavigationAction | { kind: "my-custom-action" };
+//   interface NavigationActions {
+//     custom: { kind: "my-custom-action", customValue: string };
 //   }
 // }
-//
-// eslint-disable-next-line @typescript-eslint/no-empty-object-type
-export interface Register {}
-
-export type NavigationAction = Register extends {
-  action: infer ExtendedAction;
+export interface NavigationActions {
+  select: { kind: "select" };
+  move: { kind: "move"; direction: NavigationDirection | "back" };
+  focus: { kind: "focus"; direction: NavigationDirection | "initial" | null };
+  query: { kind: "query"; key: string; value: unknown | null };
 }
-  ? ExtendedAction
-  : DefaultNavigationAction;
+
+export type NavigationAction = NavigationActions[keyof NavigationActions];
 
 export type HandlerNext = (
   id?: NodeId,
