@@ -3,7 +3,7 @@ import {
   type NodeId,
   type NavigationHandler,
   type FocusOptions,
-  type CreatedNavigationNode,
+  type CreatedNavtreeNode,
   updateNode,
   insertNode,
   removeNode,
@@ -28,7 +28,7 @@ export type NodeHandle = {
   Context: React.FunctionComponent<{ children: ReactNode }>;
 };
 
-const NULL_NODE = {} as CreatedNavigationNode;
+const NULL_NODE = {} as CreatedNavtreeNode;
 
 export function useNavigationNode(options: NodeOptions): NodeHandle {
   const { tree, parentNode } = useNavigationContext();

@@ -1,12 +1,16 @@
 import { type NodeId, convergingPaths, idsToRoot, isParent } from "./id.js";
-import type { CreatedNavigationNode, NavigationNode } from "./node.js";
-import { type ListenerTree, type TreeEvent, callListeners } from "./events.js";
+import type { CreatedNavtreeNode, NavtreeNode } from "./node.js";
+import {
+  type ListenerTree,
+  type NavtreeEvent,
+  callListeners,
+} from "./events.js";
 import { type NavigationDirection, runHandler } from "./navigation.js";
 import { focusHandler } from "./handlers/focus.js";
 import { binarySearch } from "./array.js";
 
 export type NavigationTree = {
-  nodes: Map<NodeId, NavigationNode>;
+  nodes: Map<NodeId, NavtreeNode>;
   focusedId: NodeId;
   orphans: Map<NodeId, NodeId[]>;
   listeners: ListenerTree;
@@ -33,7 +37,7 @@ export function createNavigationTree(): NavigationTree {
   return tree;
 }
 
-export function insertNode(tree: NavigationTree, node: CreatedNavigationNode) {
+export function insertNode(tree: NavigationTree, node: CreatedNavtreeNode) {
   if (node.parent === null) {
     throw new Error("trying to insert root (or node without parent)");
   }
@@ -43,11 +47,11 @@ export function insertNode(tree: NavigationTree, node: CreatedNavigationNode) {
   }
 
   node.tree = tree;
-  tree.nodes.set(node.id, node as NavigationNode);
+  tree.nodes.set(node.id, node as NavtreeNode);
 
   const parentNode = tree.nodes.get(node.parent);
   if (parentNode != null && parentNode.connected) {
-    connectNode(tree, parentNode, node as NavigationNode);
+    connectNode(tree, parentNode, node as NavtreeNode);
   } else {
     markOrphan(tree, node.parent, node.id);
   }
@@ -57,13 +61,13 @@ export function insertNode(tree: NavigationTree, node: CreatedNavigationNode) {
 
 function connectNode(
   tree: NavigationTree,
-  parentNode: NavigationNode,
-  node: NavigationNode,
+  parentNode: NavtreeNode,
+  node: NavtreeNode,
 ) {
   insertChildInOrder(parentNode, node);
   node.connected = true;
 
-  const event: TreeEvent = {
+  const event: NavtreeEvent = {
     type: "structurechange",
     operation: "insert",
     id: node.id,
@@ -134,7 +138,7 @@ function disconnectNode(tree: NavigationTree, nodeId: NodeId) {
 
   node.connected = false;
 
-  const event: TreeEvent = {
+  const event: NavtreeEvent = {
     type: "structurechange",
     operation: "removal",
     id: node.id,
@@ -187,7 +191,7 @@ export function focusNode(
   const lastFocused = tree.focusedId;
   tree.focusedId = resolvedId;
 
-  const event: TreeEvent = {
+  const event: NavtreeEvent = {
     type: "focuschange",
     focused: tree.focusedId,
     previous: lastFocused,
@@ -236,10 +240,7 @@ export function traverseNodes(
   }
 }
 
-function insertChildInOrder(
-  parentNode: NavigationNode,
-  childNode: NavigationNode,
-) {
+function insertChildInOrder(parentNode: NavtreeNode, childNode: NavtreeNode) {
   const oldIndex = parentNode.children.findIndex(
     (child) => child.id === childNode.id,
   );
@@ -268,8 +269,8 @@ function insertChildInOrder(
 }
 
 function removeChildFromParent(
-  parentNode: NavigationNode,
-  childNode: NavigationNode,
+  parentNode: NavtreeNode,
+  childNode: NavtreeNode,
 ) {
   // tombstone id of removed node in parent
   const parentChildIndex = parentNode.children.findIndex(

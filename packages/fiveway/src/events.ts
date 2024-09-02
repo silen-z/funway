@@ -18,14 +18,14 @@ export type StructureChangeEvent = {
   id: NodeId;
 };
 
-export type TreeEvent = StructureChangeEvent | FocusChangeEvent;
+export type NavtreeEvent = StructureChangeEvent | FocusChangeEvent;
 
-export type Listener = {
-  type: TreeEvent["type"];
-  fn: (event: TreeEvent) => void;
+export type NavtreeListener = {
+  type: NavtreeEvent["type"];
+  fn: (event: NavtreeEvent) => void;
 };
 
-export type ListenerTree = Map<NodeId, Listener[]>;
+export type ListenerTree = Map<NodeId, NavtreeListener[]>;
 
 export function registerListener<T extends keyof EventMap>(
   tree: NavigationTree,
@@ -33,7 +33,7 @@ export function registerListener<T extends keyof EventMap>(
   type: T,
   fn: <E extends EventMap[T]>(event: E) => void,
 ) {
-  const listener = { type, fn } as Listener;
+  const listener = { type, fn } as NavtreeListener;
 
   if (!tree.listeners.has(id)) {
     tree.listeners.set(id, []);
@@ -64,7 +64,7 @@ export function registerListener<T extends keyof EventMap>(
 export function callListeners(
   tree: NavigationTree,
   nodeId: NodeId,
-  event: TreeEvent,
+  event: NavtreeEvent,
 ) {
   const listeners = tree.listeners.get(nodeId);
   if (listeners == null) {
