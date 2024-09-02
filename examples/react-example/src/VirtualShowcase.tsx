@@ -141,7 +141,7 @@ export function VirtualGrid() {
 
   const nav = useNavigationNode({
     id: "virtual-grid",
-    handler: gridHandler.prepend((node, action, next) => {
+    handler: gridHandler().prepend((node, action, next) => {
       const rowStart = listPosition - (listPosition % cols);
       if (action.kind === "focus" && items[rowStart] != null) {
         try {
