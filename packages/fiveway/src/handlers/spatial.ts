@@ -33,10 +33,6 @@ export const spatialMovement: NavigationHandler = (node, action, next) => {
   let shortestDistance: number | null = null;
 
   traverseNodes(node.tree, node.id, 1, (id) => {
-    if (next(id, { kind: "focus", direction: null }) === null) {
-      return;
-    }
-
     const pos = NodePosition.query(node.tree, id);
     if (pos === null) {
       return;
@@ -47,7 +43,10 @@ export const spatialMovement: NavigationHandler = (node, action, next) => {
     }
 
     const distance = distanceSquared(focusedPos, pos);
-    if (shortestDistance === null || distance < shortestDistance) {
+    if (
+      (shortestDistance === null || distance < shortestDistance) &&
+      next(id, { kind: "focus", direction: null }) !== null
+    ) {
       closestId = id;
       shortestDistance = distance;
     }
