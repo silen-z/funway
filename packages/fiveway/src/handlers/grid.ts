@@ -131,16 +131,15 @@ function createGridMovement(config: GridHandlerConfig = {}) {
         return;
       }
 
-      if (next(id, { kind: "focus", direction: null }) === null) {
-        return null;
-      }
-
       const distance = getDistance(focusedPos, pos);
       if (distance === null) {
         return;
       }
 
-      if (shortestDistance === null || distance < shortestDistance) {
+      if (
+        (shortestDistance === null || distance < shortestDistance) &&
+        next(id, { kind: "focus", direction: null }) !== null
+      ) {
         closestId = id;
         shortestDistance = distance;
       }
