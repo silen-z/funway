@@ -7,7 +7,7 @@ import {
 
 export type NavigationContext = {
   tree: NavigationTree;
-  parentNode: NodeId;
+  parentNode: () => NodeId;
 };
 
 export const NavigationContext = createContext<NavigationContext | null>(null);
@@ -24,7 +24,7 @@ export function NavigationProvider(props: NavigationProviderProps) {
   const tree = props.tree;
 
   return (
-    <NavigationContext.Provider value={{ tree, parentNode: "#" }}>
+    <NavigationContext.Provider value={{ tree, parentNode: () => "#" }}>
       {props.children}
     </NavigationContext.Provider>
   );
