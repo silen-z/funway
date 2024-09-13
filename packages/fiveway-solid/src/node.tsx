@@ -5,8 +5,9 @@ import {
   type ParentProps,
   children,
   createEffect,
+  createMemo,
+  on,
   onCleanup,
-  splitProps,
   untrack,
 } from "solid-js";
 import {
@@ -23,90 +24,109 @@ import {
 } from "@fiveway/core";
 import { useNavigationContext, NavigationContext } from "./context.jsx";
 
-import { useIsFocused } from "./hooks.jsx";
+import { useIsFocused } from "./hooks.js";
 
 export type NodeOptions = {
-  id: NodeId;
-  parent?: NodeId;
-  order?: number;
+  id: NodeId | Accessor<NodeId>;
+  parent?: NodeId | Accessor<NodeId>;
+  order?: number | Accessor<number>;
   handler?: NavigationHandler;
 };
 
 export type NodeHandle = {
-  id: NodeId;
-  isFocused: Accessor<boolean>;
+  (): NodeId;
   focus: (nodeId?: NodeId) => void;
   select: () => void;
+  isFocused: Accessor<boolean>;
   Context: Component<ParentProps>;
 };
 
 export function createNavigationNode(options: NodeOptions): NodeHandle {
   const { tree, parentNode } = useNavigationContext();
 
-  const node = createNode({
-    id: options.id,
-    parent: options.parent ?? parentNode,
-    order: options.order,
+  const parent = createMemo(() => {
+    return typeof options.parent === "function"
+      ? options.parent()
+      : (options.parent ?? parentNode());
+  });
+
+  const order = createMemo(() => {
+    return typeof options.order === "function"
+      ? options.order()
+      : options.order;
+  });
+
+  const node = createMemo(() => {
+    return createNode({
+      parent: parent(),
+      id: typeof options.id === "function" ? options.id() : options.id,
+      handler: options.handler,
+      order: untrack(order),
+    });
+  });
+
+  const updatable = () => ({
     handler: options.handler,
+    order: order(),
   });
 
   createEffect(() => {
-    insertNode(tree, node);
+    const n = node();
+    insertNode(tree, n);
 
-    createEffect(() => {
-      updateNode(node, options);
-    });
+    // prettier-ignore
+    createEffect(on(updatable, (options) => {
+      updateNode(n, options);
+    }, { defer: true }));
 
     onCleanup(() => {
-      removeNode(tree, node.id);
+      removeNode(tree, n.id);
     });
   });
 
-  return {
-    id: node.id,
-    isFocused: useIsFocused(node.id),
-    focus: (nodeId?: NodeId, options?: FocusOptions) => {
-      return focusNode(
-        tree,
-        nodeId != null ? scopedId(parentNode, nodeId) : node.id,
-        options,
-      );
-    },
-    select: (nodeId?: NodeId) => {
-      selectNode(tree, nodeId != null ? scopedId(parentNode, nodeId) : node.id);
-    },
-    Context: (props: ParentProps) => (
-      <NodeContext node={node.id}>{props.children}</NodeContext>
-    ),
+  const focus = (nodeId?: NodeId, options?: FocusOptions) => {
+    const id = nodeId != null ? scopedId(parentNode(), nodeId) : node().id;
+    return focusNode(tree, id, options);
   };
+
+  const select = (nodeId?: NodeId) => {
+    const id = nodeId != null ? scopedId(parentNode(), nodeId) : node().id;
+    selectNode(tree, id);
+  };
+
+  const handle = () => node().id;
+  handle.focus = focus;
+  handle.select = select;
+  handle.isFocused = useIsFocused(() => node().id);
+  handle.Context = (props: ParentProps) => {
+    const context = useNavigationContext();
+    return (
+      <NavigationContext.Provider
+        value={{ tree: context.tree, parentNode: () => node().id }}
+      >
+        {props.children}
+      </NavigationContext.Provider>
+    );
+  };
+
+  return handle;
 }
 
 export type NodeProps = NodeOptions & {
-  children?: ((node: Omit<NodeHandle, "Context">) => JSX.Element) | JSX.Element;
+  children?: ((node: NodeHandle) => JSX.Element) | JSX.Element;
 };
 
 export function NavigationNode(props: NodeProps) {
-  const [, options] = splitProps(props, ["children"]);
-  const { Context, ...node } = createNavigationNode(options);
+  const context = useNavigationContext();
+  const node = createNavigationNode(props);
 
   return (
-    <Context>
+    <NavigationContext.Provider value={{ ...context, parentNode: node }}>
       {children(() => {
         const child = props.children;
 
         return typeof child === "function" ? child(node) : child;
       })()}
-    </Context>
-  );
-}
-
-function NodeContext(props: { node: NodeId; children: JSX.Element }) {
-  const context = useNavigationContext();
-  const parentNode = untrack(() => props.node);
-
-  return (
-    <NavigationContext.Provider value={{ ...context, parentNode }}>
-      {props.children}
     </NavigationContext.Provider>
   );
 }

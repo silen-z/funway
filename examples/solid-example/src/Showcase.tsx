@@ -1,4 +1,4 @@
-import { createSignal, untrack, type JSX } from "solid-js";
+import { createSignal, type JSX } from "solid-js";
 import {
   gridHandler,
   horizontalHandler,
@@ -23,9 +23,22 @@ export function Showcase() {
     handler: gridHandler().prepend(initialHandler("horizontalList")),
   });
 
+  const [navId, setNavId] = createSignal(0);
+
+  const dynamicNav = createNavigationNode({
+    parent: nav,
+    id: () => `dynamic-${navId()}`,
+    handler: itemHandler().prepend(gridItemHandler({ row: 0, col: 0 })),
+  });
+
   return (
     <div class={css.page}>
-      <h1>fiveway: Solid example</h1>
+      <h1 onClick={() => setNavId((c) => c + 1)}>fiveway: Solid example</h1>
+
+      <dynamicNav.Context>
+        {dynamicNav()}
+        <NavigationNode id="nested">{(node) => <>{node()}</>}</NavigationNode>
+      </dynamicNav.Context>
 
       <div class={css.layout}>
         <nav.Context>
@@ -64,9 +77,9 @@ export function Showcase() {
 function ListShowcase(props: { type: "vertical" | "horizontal" }) {
   const nav = createNavigationNode({
     id: "list",
-    handler: untrack(() =>
-      props.type === "vertical" ? verticalHandler : horizontalHandler,
-    ),
+    get handler() {
+      return props.type === "vertical" ? verticalHandler : horizontalHandler;
+    },
   });
 
   return (
@@ -174,7 +187,7 @@ function SpatialItem(props: {
 }) {
   const elementHandler = createElementHandler();
   const nav = createNavigationNode({
-    id: untrack(() => props.navId),
+    id: () => props.navId,
     handler: defaultHandler
       .prepend(elementHandler)
       .prepend((n, a, next) => (props.focusable ? next() : null)),
