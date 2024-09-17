@@ -10,5 +10,5 @@
     "includeCategories": true
   },
 
-  "out": "docs"
+  "out": "docs/public/typedoc"
 }
