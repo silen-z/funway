@@ -3,7 +3,7 @@ import { defineConfig } from 'vitepress'
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
   title: "fiveway",
-  description: "A VitePress Site",
+  description: "TypeScript library for rich web applications that want to support keyboard navigation and have precise control over what is focused", 
   themeConfig: {
     logo: { src: '/logo-small.png', width: 24, height: 24 },
 
