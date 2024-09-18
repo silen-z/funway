@@ -1,7 +1,7 @@
 # What is fiveway?
 
 **fiveway** is a TypeScript library for rich web applications that want to
-support keyboard navigation and have absolute control over what is focused.
+support keyboard navigation and have precise control over what is focused.
 It comes with a set of default behaviors and allows for extensive customization.
 
 fiveway is designed to be used with component-based UI frameworks such as React, SolidJS, Vue, Svelte and others.
