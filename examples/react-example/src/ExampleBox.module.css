@@ -1,0 +1,32 @@
+.box {
+  border: 1px solid #eee;
+  box-shadow: var(--basic-shadow);
+  border-radius: 12px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.box[data-is-focused="true"] {
+  border-color: rgb(244, 63, 94);
+}
+
+.description {
+  border-top: 1px solid #eee;
+  padding: 16px;
+}
+
+.label {
+  font-weight: bold;
+  padding: 4px 16px;
+}
+
+.box[data-is-focused="true"] .label {
+  color: white;
+  background: rgb(244, 63, 94);
+}
+
+.content {
+  border-top: 1px solid #eee;
+  flex-grow: 1;
+}

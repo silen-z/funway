@@ -4,6 +4,7 @@ import { createNavigationTree } from "@fiveway/core";
 import { NavigationProvider, useActionHandler } from "@fiveway/react";
 import { enableDevtools } from "@fiveway/devtools";
 import { Showcase } from "./Showcase.tsx";
+import "./styles.css";
 // import { Items } from "./Benchmark.tsx";
 
 const navigationTree = createNavigationTree();

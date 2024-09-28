@@ -1,4 +1,4 @@
-import { type CSSProperties, type WheelEvent, useState } from "react";
+import { type CSSProperties, useState } from "react";
 import {
   verticalHandler,
   directChildId,
@@ -7,8 +7,9 @@ import {
   itemHandler,
   isRefocus,
 } from "@fiveway/core";
-import { useNavigationNode, useOnFocus, NavigationNode } from "@fiveway/react";
+import { useNavigationNode, useOnFocus } from "@fiveway/react";
 import css from "./Showcase.module.css";
+import { NavItem } from "./NavItem";
 
 const items = [...new Array(42)].map((_, i) => {
   return { id: `item-${i + 1}`, order: i, label: `Item ${i + 1}` };
@@ -94,40 +95,26 @@ export function VirtualList() {
     }
   });
 
-  const handleListScroll = (e: WheelEvent) => {
-    const step = e.deltaY > 0 ? 1 : -1;
-
-    const nextPosition = Math.min(
-      Math.max(0, listPosition + step),
-      items.length - 1,
-    );
-
-    setListPosition(nextPosition);
-    if (nav.isFocused() && items[nextPosition] != null) {
-      nav.focus(items[nextPosition].id);
-    }
-  };
-
   return (
-    <div
-      onWheel={handleListScroll}
-      className={css.section}
-      data-is-focused={nav.isFocused()}
+    <ul
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        gap: "8px",
+        padding: "16px",
+      }}
     >
-      <ul className={css.list}>
-        <nav.Context>
-          {mapRange(items, windowRange, (item) => (
-            <NavigationNode key={item.id} id={item.id} order={item.order}>
-              {(node) => (
-                <li className={css.item} data-is-focused={node.isFocused()}>
-                  {item.label}
-                </li>
-              )}
-            </NavigationNode>
-          ))}
-        </nav.Context>
-      </ul>
-    </div>
+      <nav.Context>
+        {mapRange(items, windowRange, (item) => (
+          <NavItem
+            key={item.id}
+            navId={item.id}
+            label={item.label}
+            order={item.order}
+          />
+        ))}
+      </nav.Context>
+    </ul>
   );
 }
 
@@ -181,53 +168,26 @@ export function VirtualGrid() {
     }
   });
 
-  const handleGridScroll = (e: WheelEvent) => {
-    const step = e.deltaY > 0 ? cols : -cols;
-    const nextPosition = listPosition + step;
-
-    if (nextPosition < 0 || nextPosition > items.length - 1) {
-      return;
-    }
-
-    setListPosition(nextPosition);
-    if (nav.isFocused() && items[nextPosition] != null) {
-      nav.focus(items[nextPosition].id);
-    }
-  };
-
   return (
-    <div
-      onWheel={handleGridScroll}
-      className={css.section}
-      data-is-focused={nav.isFocused()}
-    >
-      <div className={css.grid} style={{ "--cols": cols } as CSSProperties}>
-        <nav.Context>
-          {mapRange(items, gridRange, (item) => {
-            const gridPosition = {
-              row: Math.floor(item.order / cols),
-              col: item.order % cols,
-            };
+    <div className={css.grid} style={{ "--cols": cols } as CSSProperties}>
+      <nav.Context>
+        {mapRange(items, gridRange, (item) => {
+          const gridPosition = {
+            row: Math.floor(item.order / cols),
+            col: item.order % cols,
+          };
 
-            return (
-              <NavigationNode
-                key={item.id}
-                id={item.id}
-                order={item.order}
-                handler={itemHandler(() => {
-                  nav.focus("#");
-                }).prepend(gridItemHandler(gridPosition))}
-              >
-                {(node) => (
-                  <div className={css.item} data-is-focused={node.isFocused()}>
-                    {item.label}
-                  </div>
-                )}
-              </NavigationNode>
-            );
-          })}
-        </nav.Context>
-      </div>
+          return (
+            <NavItem
+              key={item.id}
+              navId={item.id}
+              label={item.label}
+              order={item.order}
+              handler={itemHandler().prepend(gridItemHandler(gridPosition))}
+            />
+          );
+        })}
+      </nav.Context>
     </div>
   );
 }
