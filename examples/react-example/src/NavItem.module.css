@@ -1,0 +1,12 @@
+.item {
+  font-weight: bold;
+  background: #eee;
+  padding: 2px 8px;
+  border: 1px solid #ccc;
+}
+
+.item[data-is-focused="true"] {
+  color: white;
+  background: rgb(244, 63, 94);
+  border-color: rgb(244, 63, 94);
+}

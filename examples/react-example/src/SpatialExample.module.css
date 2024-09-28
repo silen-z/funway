@@ -1,0 +1,26 @@
+.container {
+  position: relative;
+  min-height: 250px;
+}
+
+@keyframes move {
+  from {
+    transform: translateX(0);
+  }
+
+  50% {
+    transform: translateX(700px);
+  }
+
+  to {
+    transform: translateX(0);
+  }
+}
+
+.item {
+  position: absolute;
+}
+
+.item[data-moving="true"] {
+  animation: move 5s linear infinite reverse;
+}
