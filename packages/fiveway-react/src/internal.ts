@@ -1,4 +1,4 @@
-import { useCallback, useSyncExternalStore, useRef } from "react";
+import { useState, useCallback, useSyncExternalStore } from "react";
 import {
   type NavigationTree,
   type NodeId,
@@ -14,22 +14,23 @@ function noopSubscribe() {
  * @internal
  */
 export function useLazyIsFocused(tree: NavigationTree, nodeId: NodeId) {
+  const [subscribed, setSubscribed] = useState(false);
+
   const subscribe = useCallback(
     (cb: () => void) => registerListener(tree, nodeId, "focuschange", cb),
     [tree, nodeId],
   );
 
-  const subscription = useRef<typeof subscribe>(noopSubscribe);
-
-  const isNodeFocused = useSyncExternalStore(subscription.current, () =>
-    isFocused(tree, nodeId),
+  const subscribedValue = useSyncExternalStore(
+    subscribed ? subscribe : noopSubscribe,
+    () => isFocused(tree, nodeId),
   );
 
   return () => {
-    if (subscription.current !== subscribe) {
-      subscription.current = subscribe;
+    if (!subscribed) {
+      setSubscribed(true);
     }
 
-    return isNodeFocused;
+    return subscribedValue;
   };
 }

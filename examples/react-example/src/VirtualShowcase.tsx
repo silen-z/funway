@@ -5,7 +5,6 @@ import {
   gridHandler,
   gridItemHandler,
   itemHandler,
-  isRefocus,
 } from "@fiveway/core";
 import { useNavigationNode, useOnFocus } from "@fiveway/react";
 import css from "./Showcase.module.css";
@@ -62,7 +61,7 @@ export function VirtualList() {
   const nav = useNavigationNode({
     id: "virtual-list",
     handler: verticalHandler.prepend((node, action, next) => {
-      if (action.kind === "focus" && !isRefocus(node, action)) {
+      if (action.kind === "focus") {
         const item = items[listPosition];
         if (item == null) {
           return next();
@@ -135,7 +134,7 @@ export function VirtualGrid() {
   const nav = useNavigationNode({
     id: "virtual-grid",
     handler: gridHandler().prepend((node, action, next) => {
-      if (action.kind === "focus" && !isRefocus(node, action)) {
+      if (action.kind === "focus") {
         const item = items[listPosition - (listPosition % cols)];
         if (item == null) {
           return next();

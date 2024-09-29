@@ -5,15 +5,16 @@ import {
   focusNode,
   insertNode,
   isFocused,
+  resolveFocus,
 } from "./tree.ts";
 import { createNode } from "./node.ts";
 
-test("listeners", () => {
+test("listeners", async () => {
   const tree = createNavigationTree();
   insertNode(tree, createNode({ id: "one", parent: "#" }));
   insertNode(tree, createNode({ id: "two", parent: "#" }));
 
-  expect(isFocused(tree, "#/one")).toBe(true);
+  expect(await resolveFocus(tree)).toBe("#/one");
 
   const listener1 = vi.fn();
   const cleanupListener1 = registerListener(

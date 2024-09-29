@@ -5,6 +5,7 @@ import {
   insertNode,
   isFocused,
   removeNode,
+  resolveFocus,
 } from "../tree.ts";
 import { createNode } from "../node.ts";
 import { containerHandler, defaultHandler } from "./default.ts";
@@ -12,7 +13,7 @@ import { captureHandler, initialHandler } from "./focus.ts";
 import { verticalHandler } from "./directional.ts";
 import { handleAction } from "../navigation.ts";
 
-test("focusHandler: items are focusable focus", () => {
+test("focusHandler: items themselves are focusable", async () => {
   const tree = createNavigationTree();
 
   const item = insertNode(
@@ -23,7 +24,7 @@ test("focusHandler: items are focusable focus", () => {
     }),
   );
 
-  expect(isFocused(tree, item.id)).toBe(true);
+  expect(await resolveFocus(tree)).toBe(item.id);
 });
 
 test("focusHandler: skip empty containers", () => {
@@ -41,7 +42,7 @@ test("focusHandler: skip empty containers", () => {
   expect(isFocused(tree, container.id)).toBe(false);
 });
 
-test("focusHandler: keep focus", () => {
+test("focusHandler: keep focus", async () => {
   const tree = createNavigationTree();
 
   const container = insertNode(
@@ -63,6 +64,8 @@ test("focusHandler: keep focus", () => {
     }),
   );
 
+  await resolveFocus(tree);
+
   insertNode(
     tree,
     createNode({
@@ -73,10 +76,10 @@ test("focusHandler: keep focus", () => {
     }),
   );
 
-  expect(tree.focusedId).toBe(item1.id);
+  expect(await resolveFocus(tree)).toBe(item1.id);
 });
 
-test("initialHandler: skip empty containers", () => {
+test("initialHandler", async () => {
   const tree = createNavigationTree();
 
   const container = insertNode(
@@ -97,8 +100,6 @@ test("initialHandler: skip empty containers", () => {
     }),
   );
 
-  expect(tree.focusedId).toBe(item1.id);
-
   const item2 = insertNode(
     tree,
     createNode({
@@ -108,7 +109,7 @@ test("initialHandler: skip empty containers", () => {
     }),
   );
 
-  expect(tree.focusedId).toBe(item2.id);
+  expect(await resolveFocus(tree)).toBe(item2.id);
 
   const item3 = insertNode(
     tree,
@@ -119,23 +120,23 @@ test("initialHandler: skip empty containers", () => {
     }),
   );
 
-  expect(tree.focusedId).toBe(item2.id);
+  expect(await resolveFocus(tree)).toBe(item2.id);
 
   removeNode(tree, item2.id);
 
-  expect(tree.focusedId).toBe(item1.id);
+  expect(await resolveFocus(tree)).toBe(item1.id);
 
   handleAction(tree, { kind: "move", direction: "down" });
 
-  expect(tree.focusedId).toBe(item3.id);
+  expect(await resolveFocus(tree)).toBe(item3.id);
 
   insertNode(tree, item2);
 
   // initialHandler resets focus back to initial node on insert
-  expect(tree.focusedId).toBe(item2.id);
+  expect(await resolveFocus(tree)).toBe(item3.id);
 });
 
-test("captureHandler", () => {
+test("captureHandler", async () => {
   const tree = createNavigationTree();
 
   const topContainer = insertNode(
@@ -165,17 +166,17 @@ test("captureHandler", () => {
     createNode({ id: "outside", order: 2, parent: topContainer.id }),
   );
 
-  expect(tree.focusedId).toBe(item1.id);
+  expect(await resolveFocus(tree)).toBe(item1.id);
 
   handleAction(tree, { kind: "move", direction: "down" });
 
-  expect(tree.focusedId).toBe(item2.id);
+  expect(await resolveFocus(tree)).toBe(item2.id);
 
   handleAction(tree, { kind: "move", direction: "down" });
 
-  expect(tree.focusedId).toBe(item2.id);
+  expect(await resolveFocus(tree)).toBe(item2.id);
 
   focusNode(tree, outside.id);
 
-  expect(tree.focusedId).toBe(outside.id);
+  expect(await resolveFocus(tree)).toBe(outside.id);
 });

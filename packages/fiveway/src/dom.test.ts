@@ -5,9 +5,9 @@ import { handleAction } from "./navigation.ts";
 import { defaultHandler } from "./handlers/default.ts";
 import { verticalHandler } from "./handlers/directional.ts";
 import { createNode } from "./node.ts";
-import { createNavigationTree, insertNode } from "./tree.ts";
+import { createNavigationTree, insertNode, resolveFocus } from "./tree.ts";
 
-test("defaultKeyMapping", () => {
+test("defaultKeyMapping", async () => {
   expect(defaultEventMapping(new MouseEvent("mouseover"))).toBeNull();
 
   const tree = createNavigationTree();
@@ -39,12 +39,12 @@ test("defaultKeyMapping", () => {
     }),
   );
 
-  expect(tree.focusedId).toBe(item1.id);
+  expect(await resolveFocus(tree)).toBe(item1.id);
 
   const action = defaultEventMapping(
     new KeyboardEvent("keydown", { key: "ArrowDown" }),
   );
   expect(action).not.toBeNull();
   handleAction(tree, action!);
-  expect(tree.focusedId).toBe(item2.id);
+  expect(await resolveFocus(tree)).toBe(item2.id);
 });
