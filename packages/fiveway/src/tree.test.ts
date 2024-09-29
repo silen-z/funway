@@ -4,6 +4,7 @@ import {
   focusNode,
   insertNode,
   removeNode,
+  resolveFocus,
   traverseNodes,
 } from "./tree.ts";
 import { createNode } from "./node.ts";
@@ -164,7 +165,7 @@ test("removeNode: remembered children", () => {
   ]);
 });
 
-test("focusNode", () => {
+test("focusNode", async () => {
   const tree = createNavigationTree();
 
   const node1 = createNode({
@@ -180,18 +181,18 @@ test("focusNode", () => {
   insertNode(tree, node1);
   insertNode(tree, node2);
 
-  expect(tree.focusedId).toBe(node1.id);
+  expect(await resolveFocus(tree)).toBe(node1.id);
 
   focusNode(tree, node2.id);
 
-  expect(tree.focusedId).toBe(node2.id);
+  expect(await resolveFocus(tree)).toBe(node2.id);
 
   const success = focusNode(tree, "#/non-existent");
   expect(success).toBe(false);
-  expect(tree.focusedId).toBe(node2.id);
+  expect(await resolveFocus(tree)).toBe(node2.id);
 });
 
-test("selectNode", () => {
+test("selectNode", async () => {
   const tree = createNavigationTree();
 
   const parkingNode = createNode({
@@ -210,12 +211,12 @@ test("selectNode", () => {
   insertNode(tree, parkingNode);
   insertNode(tree, targetNode);
 
-  expect(tree.focusedId).toBe(parkingNode.id);
+  expect(await resolveFocus(tree)).toBe(parkingNode.id);
 
   selectNode(tree, targetNode.id);
 
   expect(onSelect).toBeCalledTimes(1);
-  expect(tree.focusedId).toBe(targetNode.id);
+  expect(await resolveFocus(tree)).toBe(targetNode.id);
 });
 
 test("traverseNodes", () => {

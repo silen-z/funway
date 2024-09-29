@@ -14,14 +14,16 @@ export type NavigationTree = {
   focusedId: NodeId;
   orphans: Map<NodeId, NodeId[]>;
   listeners: ListenerTree;
+  pendingFocusUpdate: Promise<NodeId> | null;
 };
 
 export function createNavigationTree(): NavigationTree {
-  const tree = {
+  const tree: NavigationTree = {
     focusedId: "#",
     nodes: new Map(),
     orphans: new Map(),
     listeners: new Map(),
+    pendingFocusUpdate: null,
   };
 
   tree.nodes.set("#", {
@@ -76,8 +78,8 @@ function connectNode(
     callListeners(tree, id, event);
   });
 
-  if (tree.focusedId === "#" || isFocused(tree, parentNode.id)) {
-    focusNode(tree, parentNode.id, { direction: "initial" });
+  if (isParent(tree.focusedId, node.id)) {
+    scheduleFocusUpdate(tree);
   }
 
   const orphans = tree.orphans.get(node.id);
@@ -108,6 +110,11 @@ export function removeNode(tree: NavigationTree, nodeId: NodeId) {
 
   tree.nodes.delete(nodeId);
   clearOrphan(tree, node.parent!, nodeId);
+
+  if (isFocused(tree, node.id)) {
+    tree.focusedId = node.parent ?? "#";
+    scheduleFocusUpdate(tree);
+  }
 }
 
 function disconnectNode(tree: NavigationTree, nodeId: NodeId) {
@@ -146,19 +153,42 @@ function disconnectNode(tree: NavigationTree, nodeId: NodeId) {
   idsToRoot(node.parent, (id) => {
     callListeners(tree, id, event);
   });
+}
 
-  if (isFocused(tree, node.id)) {
-    tree.focusedId = node.parent;
-
-    idsToRoot(node.parent, (id) => {
-      const focused = focusNode(tree, id, { direction: "initial" });
-
+function updateFocus(tree: NavigationTree) {
+  const focusedNode = tree.nodes.get(tree.focusedId);
+  if (focusedNode == null || !focusedNode.connected) {
+    idsToRoot(tree.focusedId, (id) => {
       // if we managed to focus a node we can stop searching
-      if (focused) {
+      if (focusNode(tree, id, { direction: "initial" })) {
         return false;
       }
     });
+  } else {
+    focusNode(tree, focusedNode.id, { direction: "initial" });
   }
+
+  return tree.focusedId;
+}
+
+function scheduleFocusUpdate(tree: NavigationTree) {
+  if (tree.pendingFocusUpdate === null) {
+    tree.pendingFocusUpdate = Promise.resolve().then(() => {
+      const id = updateFocus(tree);
+      tree.pendingFocusUpdate = null;
+      return id;
+    });
+  }
+
+  return tree.pendingFocusUpdate;
+}
+
+export function resolveFocus(tree: NavigationTree) {
+  if (tree.pendingFocusUpdate === null) {
+    return tree.focusedId;
+  }
+
+  return tree.pendingFocusUpdate;
 }
 
 export type FocusOptions = {

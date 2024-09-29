@@ -43,17 +43,21 @@
 
 .infoBox {
   border: 1px solid #eee;
-  max-width: 90ch;
   box-shadow: var(--basic-shadow);
   border-radius: 12px;
   padding: 16px;
   display: flex;
   flex-direction: column;
+  align-items: start;
   gap: 16px;
 }
 
 .infoBox strong {
   color: var(--primary-color);
+}
+
+.infoBox p {
+  max-width: 80ch;
 }
 
 .list[data-type="horizontal"] {

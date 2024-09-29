@@ -1,11 +1,6 @@
-import type {
-  NavigationAction,
-  NavigationDirection,
-  NavigationHandler,
-} from "../navigation.js";
+import type { NavigationDirection, NavigationHandler } from "../navigation.js";
 import { isParent } from "../id.js";
 import { describeHandler } from "../introspection.js";
-import type { NavtreeNode } from "../node.js";
 
 export type FocusDirection = "front" | "back";
 
@@ -35,10 +30,6 @@ function createFocusHandler(config: FocusHandlerConfig = {}) {
 
     if (action.kind !== "focus") {
       return next();
-    }
-
-    if (isRefocus(node, action)) {
-      return null;
     }
 
     if (!node.children.some((c) => c.active)) {
@@ -113,7 +104,7 @@ function createInitialHandler(id: string) {
       }
     }
 
-    return next(node.id);
+    return next();
   };
 
   return initialHandler;
@@ -131,14 +122,6 @@ export const captureHandler: NavigationHandler = (node, action, next) => {
 
   return id;
 };
-
-export function isRefocus(node: NavtreeNode, action: NavigationAction) {
-  return (
-    action.kind === "focus" &&
-    action.direction === "initial" &&
-    isParent(node.id, node.tree.focusedId)
-  );
-}
 
 export {
   createFocusHandler as focusHandler,

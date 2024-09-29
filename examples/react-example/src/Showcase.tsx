@@ -7,9 +7,9 @@ import {
   itemHandler,
 } from "@fiveway/core";
 import {
-  useFocusedId,
   useNavigationContext,
   useNavigationNode,
+  useOnFocus,
 } from "@fiveway/react";
 import css from "./Showcase.module.css";
 import { VirtualList, VirtualGrid } from "./VirtualShowcase.tsx";
@@ -26,17 +26,15 @@ export function Showcase() {
     handler: gridHandler().prepend(initialHandler("start")),
   });
 
-  const focusedId = useFocusedId(nav.id);
-  useEffect(() => {
-    if (focusedId == null) {
+  useOnFocus(nav.id, (id) => {
+    if (id === null) {
       return;
     }
-
-    const el = NodeElement.query(tree, focusedId);
+    const el = NodeElement.query(tree, id);
     if (el != null) {
       el.scrollIntoView({ block: "center", behavior: "smooth" });
     }
-  }, [focusedId]);
+  });
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -90,7 +88,6 @@ export function Showcase() {
           <NavItem
             navId="start"
             label="Start"
-            order={-1}
             handler={itemHandler(() => {
               nav.focus("vertical-list");
             }).prepend(gridItemHandler({ row: 0, col: 0 }))}
