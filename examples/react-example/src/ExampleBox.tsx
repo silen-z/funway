@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import {
   GridItem,
   containerHandler,
@@ -5,7 +6,6 @@ import {
   type NodeId,
 } from "@fiveway/core";
 import { useNavigationNode } from "@fiveway/react";
-import type { ReactNode } from "react";
 import css from "./ExampleBox.module.css";
 
 type ExampleBoxProps = {
@@ -23,12 +23,12 @@ export function ExampleBox(props: ExampleBoxProps) {
   });
 
   return (
-    <div className={css.box} data-is-focused={nav.isFocused()}>
-      <div className={css.label}>{props.label}</div>
-      <div className={css.description}>{props.description}</div>
-      <div className={css.content}>
-        <nav.Context>{props.children}</nav.Context>
+    <nav.Context>
+      <div className={css.box}>
+        <div className={css.label}>{props.label}</div>
+        <div className={css.description}>{props.description}</div>
+        <div className={css.content}>{props.children}</div>
       </div>
-    </div>
+    </nav.Context>
   );
 }

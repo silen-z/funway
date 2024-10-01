@@ -1,13 +1,8 @@
-import {
-  spatialHandler,
-  captureHandler,
-  itemHandler,
-  type NavigationHandler,
-} from "@fiveway/core";
-import { useElementHandler, useNavigationNode } from "@fiveway/react";
-import css from "./SpatialExample.module.css";
-import itemCss from "./NavItem.module.css";
 import type { CSSProperties } from "react";
+import { spatialHandler, captureHandler } from "@fiveway/core";
+import { useNavigationNode } from "@fiveway/react";
+import { NavItem } from "./NavItem.tsx";
+import css from "./SpatialExample.module.css";
 
 export function SpatialExample() {
   const nav = useNavigationNode({
@@ -30,33 +25,14 @@ export function SpatialExample() {
   );
 }
 
-const goBackHandler: NavigationHandler = (_, action, next) => {
-  if (action.kind === "move" && action.direction === "back") {
-    return "#";
-  }
-  return next();
-};
-
 function SpatialItem(props: {
   navId: string;
   style: CSSProperties;
   isMoving?: boolean;
 }) {
-  const elementHandler = useElementHandler();
-  const nav = useNavigationNode({
-    id: props.navId,
-    handler: itemHandler().prepend(goBackHandler).prepend(elementHandler),
-  });
-
   return (
-    <div
-      ref={elementHandler.register}
-      className={itemCss.item + " " + css.item}
-      data-is-focused={nav.isFocused()}
-      data-moving={props.isMoving}
-      style={props.style}
-    >
-      {props.navId}
+    <div className={css.item} data-moving={props.isMoving} style={props.style}>
+      <NavItem navId={props.navId} label={props.navId} />
     </div>
   );
 }

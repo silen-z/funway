@@ -6,18 +6,19 @@ import {
   initialHandler,
   itemHandler,
 } from "@fiveway/core";
+import { NodeElement } from "@fiveway/core/dom";
 import {
   useNavigationContext,
   useNavigationNode,
   useOnFocus,
 } from "@fiveway/react";
-import css from "./Showcase.module.css";
-import { VirtualList, VirtualGrid } from "./VirtualShowcase.tsx";
-import { SpatialExample } from "./SpatialExample.tsx";
+import { NavItem } from "./NavItem.tsx";
 import { ExampleBox } from "./ExampleBox.tsx";
 import { ListExample } from "./ListExample.tsx";
-import { NavItem } from "./NavItem.tsx";
-import { NodeElement } from "@fiveway/core/dom";
+import { VirtualGridExample } from "./virtual/VirtualGridExample.tsx";
+import { VirtualListExample } from "./virtual/VirtualListExample.tsx";
+import { SpatialExample } from "./SpatialExample.tsx";
+import css from "./Showcase.module.css";
 
 export function Showcase() {
   const { tree } = useNavigationContext();
@@ -151,7 +152,7 @@ export function Showcase() {
             description="This is an example of navigation node with advanced handler setup. While virtual lists are not part of fiveway they can be easily implemented by extending vertical hander with custom one."
             gridPos={{ row: 3, col: 1 }}
           >
-            <VirtualList />
+            <VirtualListExample />
           </ExampleBox>
 
           <ExampleBox
@@ -160,7 +161,7 @@ export function Showcase() {
             description="This is an example of navigation node with advanced handler setup. While virtual grid are not part of fiveway they can be easily implemented by extending grid handler with custom one."
             gridPos={{ row: 3, col: 2 }}
           >
-            <VirtualGrid />
+            <VirtualGridExample />
           </ExampleBox>
 
           <ExampleBox
