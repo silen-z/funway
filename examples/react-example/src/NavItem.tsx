@@ -35,9 +35,10 @@ export function NavItem(props: NavItemProps) {
 
   return (
     <div
+      tabIndex={0}
+      onFocus={() => nav.focus()}
       ref={elementHandler.register}
       className={css.item}
-      data-is-focused={nav.isFocused()}
     >
       {props.label}
     </div>

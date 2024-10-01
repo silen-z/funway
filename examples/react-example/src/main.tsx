@@ -1,7 +1,11 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { createNavigationTree } from "@fiveway/core";
-import { NavigationProvider, useActionHandler } from "@fiveway/react";
+import {
+  NavigationProvider,
+  useActionHandler,
+  useSyncFocus,
+} from "@fiveway/react";
 import { enableDevtools } from "@fiveway/devtools";
 import { Showcase } from "./Showcase.tsx";
 import "./styles.css";
@@ -17,6 +21,7 @@ Object.defineProperties(window, {
 
 function App() {
   useActionHandler(navigationTree);
+  useSyncFocus(navigationTree);
   return (
     <NavigationProvider tree={navigationTree}>
       <Showcase />

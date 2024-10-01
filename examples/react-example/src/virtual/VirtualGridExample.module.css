@@ -1,0 +1,11 @@
+.grid {
+  min-height: 100%;
+  display: grid;
+  grid-template-columns: repeat(var(--cols), 1fr);
+}
+
+.grid > * {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
