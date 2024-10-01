@@ -46,12 +46,13 @@ export function verticalMovementHandler(
 }
 
 function verticalFocusDirection(dir: NavigationDirection | "initial" | null) {
-  if (dir === "up") {
-    return "back";
-  }
-
-  if (dir === "down") {
-    return "front";
+  switch (dir) {
+    case "up":
+      return "back";
+    case "down":
+      return "front";
+    default:
+      return null;
   }
 }
 
@@ -100,12 +101,13 @@ export function horizontalMovementHandler(
 }
 
 function horizontalFocusDirection(dir: NavigationDirection | "initial" | null) {
-  if (dir === "left") {
-    return "back";
-  }
-
-  if (dir === "right") {
-    return "front";
+  switch (dir) {
+    case "left":
+      return "back";
+    case "right":
+      return "front";
+    default:
+      return null;
   }
 }
 
