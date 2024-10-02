@@ -1,11 +1,18 @@
 /** @vitest-environment jsdom */
 import { test, expect } from "vitest";
-import { defaultEventMapping } from "./dom.ts";
-import { handleAction } from "./navigation.ts";
-import { defaultHandler } from "./handlers/default.ts";
-import { verticalHandler } from "./handlers/directional.ts";
-import { createNode } from "./node.ts";
-import { createNavigationTree, insertNode, resolveFocus } from "./tree.ts";
+
+// imported from index files otherwise vitest errors on:
+// TypeError: defineMetadata is not a function
+import {
+  createNavigationTree,
+  createNode,
+  insertNode,
+  defaultHandler,
+  verticalHandler,
+  resolveFocus,
+  handleAction,
+} from "@fiveway/core";
+import { defaultEventMapping } from "@fiveway/core/dom";
 
 test("defaultKeyMapping", async () => {
   expect(defaultEventMapping(new MouseEvent("mouseover"))).toBeNull();
