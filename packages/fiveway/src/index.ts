@@ -1,5 +1,3 @@
-/* v8 ignore start */
-
 declare global {
   interface ImportMeta {
     env: { DEV?: boolean };
