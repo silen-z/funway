@@ -2,7 +2,6 @@ import type { NavigationDirection, NavigationHandler } from "../navigation.js";
 import { type NodeId, isParent } from "../id.js";
 import { describeHandler } from "../introspection.js";
 import { defineMetadata } from "../metadata.js";
-import type { NavtreeNode } from "../node.js";
 
 export type FocusDirection = "front" | "back";
 
@@ -42,13 +41,26 @@ function createFocusHandler(config: FocusHandlerConfig = {}) {
     }
 
     const focusDirection = config.direction?.(action.direction) ?? null;
-    if (focusDirection === null) {
-      const initialChild = findInitialChild(node);
-      if (initialChild !== null) {
-        const childId = next(initialChild);
-        if (childId !== null) {
-          return childId;
-        }
+
+    initialFocus: {
+      if (focusDirection !== null) {
+        break initialFocus;
+      }
+
+      const localId = InitialFocus.query(node.tree, node.id);
+      if (localId === null) {
+        break initialFocus;
+      }
+
+      const initialId = `${node.id}/${localId}`;
+      const child = node.children.find((c) => c.active && c.id === initialId);
+      if (child == null) {
+        break initialFocus;
+      }
+
+      const childId = next(child.id);
+      if (childId !== null) {
+        return childId;
       }
     }
 
@@ -84,21 +96,6 @@ function createFocusHandler(config: FocusHandlerConfig = {}) {
   };
 
   return focusHandler;
-}
-
-function findInitialChild(node: NavtreeNode): NodeId | null {
-  const initialItem = InitialFocus.query(node.tree, node.id);
-  if (initialItem === null) {
-    return null;
-  }
-
-  const initialId = `${node.id}/${initialItem}`;
-  const child = node.children.find((c) => c.active && c.id === initialId);
-  if (child == null) {
-    return null;
-  }
-
-  return child.id;
 }
 
 export const captureHandler: NavigationHandler = (node, action, next) => {
