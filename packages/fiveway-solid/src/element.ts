@@ -31,12 +31,19 @@ export function createElementHandler() {
   return handler;
 }
 
-export function useActionHandler(
+export type ActionHandlerOptions = {
+  target?: EventTarget;
+  eventToAction?: (e: Event) => NavigationAction | null;
+};
+
+export function createActionHandler(
   tree: NavigationTree,
-  target: EventTarget = window,
-  eventToAction: (e: Event) => NavigationAction | null = defaultEventMapping,
+  options: ActionHandlerOptions = {},
 ) {
   createEffect(() => {
+    const eventToAction = options.eventToAction ?? defaultEventMapping;
+    const target = options.target ?? window;
+
     const handler = (e: Event) => {
       const action = eventToAction(e);
       if (action === null) {
