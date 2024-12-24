@@ -4,7 +4,8 @@
   "version": "1.0.0-beta.0",
   "repository": "github:silen-z/fiveway",
   "scripts": {
-    "build": "tsc -b",
+    "build": "rm -rf ./dist/* && tsc --build --force",
+    "build:watch": "tsc --build --watch",
     "test": "vitest"
   },
   "main": "./dist/index.js",

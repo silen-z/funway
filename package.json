@@ -5,7 +5,7 @@
     "example:react": "pnpm --filter \"@fiveway/react-example\" run dev",
     "example:solid": "pnpm --filter \"@fiveway/solid-example\" run dev",
     "build": "pnpm --filter \"@fiveway/core\" --filter \"@fiveway/react\" --filter \"@fiveway/solid\" --filter \"@fiveway/devtools\" run build",
-    "build:watch": "pnpm --filter \"@fiveway/core\" --filter \"@fiveway/react\" --filter \"@fiveway/solid\" --filter \"@fiveway/devtools\" --parallel run build --watch",
+    "build:watch": "pnpm --filter \"@fiveway/core\" --filter \"@fiveway/react\" --filter \"@fiveway/solid\" --filter \"@fiveway/devtools\" --parallel run build:watch",
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
     "check": "eslint",
