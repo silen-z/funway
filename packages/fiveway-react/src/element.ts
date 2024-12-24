@@ -34,11 +34,19 @@ export function useElementHandler() {
   }, []);
 }
 
+
+export type ActionHandlerOptions = {
+  target?: EventTarget;
+  eventToAction?: (e: Event) => NavigationAction | null;
+};
+
 export function useActionHandler(
   tree: NavigationTree,
-  target: EventTarget = window,
-  eventToAction: (e: Event) => NavigationAction | null = defaultEventMapping,
+  options: ActionHandlerOptions = {},
 ) {
+  const eventToAction = options.eventToAction ?? defaultEventMapping;
+  const target = options.target ?? window;
+
   useEffect(() => {
     const handler = (e: Event) => {
       const action = eventToAction(e);
