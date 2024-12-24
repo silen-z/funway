@@ -3,7 +3,8 @@
   "type": "module",
   "version": "0.1.0",
   "scripts": {
-    "build": "vite build"
+    "build": "vite build",
+    "build:watch": "vite build --watch"
   },
   "main": "./dist/devtools.js",
   "types": "./dist/devtools.d.ts",
