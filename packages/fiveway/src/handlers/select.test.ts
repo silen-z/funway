@@ -1,5 +1,5 @@
 import { test, expect, vi } from "vitest";
-import { createNavigationTree, insertNode, resolveFocus } from "../tree.ts";
+import { createNavigationTree, insertNode } from "../tree.ts";
 import { createNode } from "../node.ts";
 import { defaultHandler } from "./default.ts";
 import { selectHandler } from "./select.ts";
@@ -18,7 +18,7 @@ test("selectHandler", async () => {
     }),
   );
 
-  expect(await resolveFocus(tree)).toBe(node.id);
+  expect(tree.focusedId).toBe(node.id);
 
   handleAction(tree, { kind: "select" });
 

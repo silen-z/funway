@@ -1,5 +1,5 @@
 import { expect, test, vi } from "vitest";
-import { insertNode, createNavigationTree, resolveFocus } from "./tree.ts";
+import { insertNode, createNavigationTree } from "./tree.ts";
 import { createNode } from "./node.ts";
 import { type NavigationHandler } from "./navigation.ts";
 
@@ -8,8 +8,6 @@ test("runHandler", async () => {
 
   const handler = vi.fn(() => null);
   insertNode(tree, createNode({ id: "one", parent: "#", handler }));
-
-  await resolveFocus(tree);
 
   expect(handler).toHaveBeenCalledWith(
     expect.objectContaining({ id: "#/one" }),

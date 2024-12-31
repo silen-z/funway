@@ -15,6 +15,7 @@ export type NavigationTree = {
   orphans: Map<NodeId, NodeId[]>;
   listeners: ListenerTree;
   pendingFocusUpdate: Promise<NodeId> | null;
+  locked: boolean;
 };
 
 export function createNavigationTree(): NavigationTree {
@@ -24,6 +25,7 @@ export function createNavigationTree(): NavigationTree {
     orphans: new Map(),
     listeners: new Map(),
     pendingFocusUpdate: null,
+    locked: false,
   };
 
   tree.nodes.set("#", {
@@ -79,7 +81,7 @@ function connectNode(
   });
 
   if (isParent(tree.focusedId, node.id)) {
-    scheduleFocusUpdate(tree);
+    updateFocus(tree);
   }
 
   const orphans = tree.orphans.get(node.id);
@@ -113,7 +115,7 @@ export function removeNode(tree: NavigationTree, nodeId: NodeId) {
 
   if (isFocused(tree, node.id)) {
     tree.focusedId = node.parent ?? "#";
-    scheduleFocusUpdate(tree);
+    updateFocus(tree);
   }
 }
 
@@ -156,6 +158,10 @@ function disconnectNode(tree: NavigationTree, nodeId: NodeId) {
 }
 
 function updateFocus(tree: NavigationTree) {
+  if (tree.locked) {
+    return tree.focusedId;
+  }
+
   const focusedNode = tree.nodes.get(tree.focusedId);
   if (focusedNode == null || !focusedNode.connected) {
     idsToRoot(tree.focusedId, (id) => {
@@ -171,24 +177,22 @@ function updateFocus(tree: NavigationTree) {
   return tree.focusedId;
 }
 
-function scheduleFocusUpdate(tree: NavigationTree) {
-  if (tree.pendingFocusUpdate === null) {
-    tree.pendingFocusUpdate = Promise.resolve().then(() => {
-      const id = updateFocus(tree);
-      tree.pendingFocusUpdate = null;
-      return id;
-    });
+export function holdFocus(tree: NavigationTree) {
+  if (tree.locked) {
+    return null;
   }
 
-  return tree.pendingFocusUpdate;
+  tree.locked = true;
+  return () => {
+    tree.locked = false;
+    updateFocus(tree);
+  };
 }
 
-export function resolveFocus(tree: NavigationTree) {
-  if (tree.pendingFocusUpdate === null) {
-    return tree.focusedId;
-  }
-
-  return tree.pendingFocusUpdate;
+export function withHeldFocus(tree: NavigationTree, update: () => void) {
+  const releaseLock = holdFocus(tree);
+  update();
+  releaseLock?.();
 }
 
 export type FocusOptions = {

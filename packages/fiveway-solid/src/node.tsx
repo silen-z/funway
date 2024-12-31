@@ -21,6 +21,7 @@ import {
   scopedId,
   selectNode,
   updateNode,
+  holdFocus,
 } from "@fiveway/core";
 import { useNavigationContext, NavigationContext } from "./context.jsx";
 
@@ -71,6 +72,14 @@ export function createNavigationNode(options: NodeOptions): NodeHandle {
   });
 
   createEffect(() => {
+    // to resolve initial focus correctly focus need to be held while child nodes get inserted via effects
+    // child effects should run synchronously after this one
+    // and Promise.resolve() should release the focus when they are done
+    const releaseFocus = holdFocus(tree);
+    if (releaseFocus) {
+      Promise.resolve().then(releaseFocus);
+    }
+
     const n = node();
     insertNode(tree, n);
 
@@ -85,12 +94,12 @@ export function createNavigationNode(options: NodeOptions): NodeHandle {
   });
 
   const focus = (nodeId?: NodeId, options?: FocusOptions) => {
-    const id = nodeId != null ? scopedId(parentNode(), nodeId) : node().id;
+    const id = nodeId != null ? scopedId(node().id, nodeId) : node().id;
     return focusNode(tree, id, options);
   };
 
   const select = (nodeId?: NodeId) => {
-    const id = nodeId != null ? scopedId(parentNode(), nodeId) : node().id;
+    const id = nodeId != null ? scopedId(node().id, nodeId) : node().id;
     selectNode(tree, id);
   };
 
@@ -99,11 +108,10 @@ export function createNavigationNode(options: NodeOptions): NodeHandle {
   handle.select = select;
   handle.isFocused = useIsFocused(() => node().id);
   handle.Context = (props: ParentProps) => {
-    const context = useNavigationContext();
+    const value = { tree, parentNode: () => node().id };
+
     return (
-      <NavigationContext.Provider
-        value={{ tree: context.tree, parentNode: () => node().id }}
-      >
+      <NavigationContext.Provider value={value}>
         {props.children}
       </NavigationContext.Provider>
     );
@@ -121,7 +129,9 @@ export function NavigationNode(props: NodeProps) {
   const node = createNavigationNode(props);
 
   return (
-    <NavigationContext.Provider value={{ ...context, parentNode: node }}>
+    <NavigationContext.Provider
+      value={{ ...context, parentNode: () => node() }}
+    >
       {children(() => {
         const child = props.children;
 

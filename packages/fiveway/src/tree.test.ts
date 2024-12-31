@@ -4,7 +4,6 @@ import {
   focusNode,
   insertNode,
   removeNode,
-  resolveFocus,
   traverseNodes,
 } from "./tree.ts";
 import { createNode } from "./node.ts";
@@ -181,15 +180,15 @@ test("focusNode", async () => {
   insertNode(tree, node1);
   insertNode(tree, node2);
 
-  expect(await resolveFocus(tree)).toBe(node1.id);
+  expect(tree.focusedId).toBe(node1.id);
 
   focusNode(tree, node2.id);
 
-  expect(await resolveFocus(tree)).toBe(node2.id);
+  expect(tree.focusedId).toBe(node2.id);
 
   const success = focusNode(tree, "#/non-existent");
   expect(success).toBe(false);
-  expect(await resolveFocus(tree)).toBe(node2.id);
+  expect(tree.focusedId).toBe(node2.id);
 });
 
 test("selectNode", async () => {
@@ -211,12 +210,12 @@ test("selectNode", async () => {
   insertNode(tree, parkingNode);
   insertNode(tree, targetNode);
 
-  expect(await resolveFocus(tree)).toBe(parkingNode.id);
+  expect(tree.focusedId).toBe(parkingNode.id);
 
   selectNode(tree, targetNode.id);
 
   expect(onSelect).toBeCalledTimes(1);
-  expect(await resolveFocus(tree)).toBe(targetNode.id);
+  expect(tree.focusedId).toBe(targetNode.id);
 });
 
 test("traverseNodes", () => {

@@ -2,12 +2,7 @@ import { test, expect } from "vitest";
 import { handleAction } from "../navigation.ts";
 import { horizontalHandler, verticalHandler } from "./directional.ts";
 import { createNode } from "../node.ts";
-import {
-  createNavigationTree,
-  insertNode,
-  removeNode,
-  resolveFocus,
-} from "../tree.ts";
+import { createNavigationTree, insertNode, removeNode } from "../tree.ts";
 
 test("verticalHandler", async () => {
   const tree = createNavigationTree();
@@ -37,15 +32,15 @@ test("verticalHandler", async () => {
     }),
   );
 
-  expect(await resolveFocus(tree)).toBe(item1.id);
+  expect(tree.focusedId).toBe(item1.id);
 
   handleAction(tree, { kind: "move", direction: "down" });
 
-  expect(await resolveFocus(tree)).toBe(item2.id);
+  expect(tree.focusedId).toBe(item2.id);
 
   handleAction(tree, { kind: "move", direction: "up" });
 
-  expect(await resolveFocus(tree)).toBe(item1.id);
+  expect(tree.focusedId).toBe(item1.id);
 });
 
 test("verticalHandler: wrong direction", async () => {
@@ -67,19 +62,19 @@ test("verticalHandler: wrong direction", async () => {
 
   insertNode(tree, createNode({ id: "item2", parent: container.id }));
 
-  expect(await resolveFocus(tree)).toBe(item1.id);
+  expect(tree.focusedId).toBe(item1.id);
 
   handleAction(tree, { kind: "move", direction: "up" });
 
-  expect(await resolveFocus(tree)).toBe(item1.id);
+  expect(tree.focusedId).toBe(item1.id);
 
   handleAction(tree, { kind: "move", direction: "left" });
 
-  expect(await resolveFocus(tree)).toBe(item1.id);
+  expect(tree.focusedId).toBe(item1.id);
 
   handleAction(tree, { kind: "move", direction: "right" });
 
-  expect(await resolveFocus(tree)).toBe(item1.id);
+  expect(tree.focusedId).toBe(item1.id);
 });
 
 test("verticalHandler: skip removed", async () => {
@@ -120,15 +115,15 @@ test("verticalHandler: skip removed", async () => {
 
   removeNode(tree, item2.id);
 
-  expect(await resolveFocus(tree)).toBe(item1.id);
+  expect(tree.focusedId).toBe(item1.id);
 
   handleAction(tree, { kind: "move", direction: "down" });
 
-  expect(await resolveFocus(tree)).toBe(item3.id);
+  expect(tree.focusedId).toBe(item3.id);
 
   handleAction(tree, { kind: "move", direction: "up" });
 
-  expect(await resolveFocus(tree)).toBe(item1.id);
+  expect(tree.focusedId).toBe(item1.id);
 });
 
 test("verticalHandler: focus direction", async () => {
@@ -176,16 +171,16 @@ test("verticalHandler: focus direction", async () => {
     }),
   );
 
-  expect(await resolveFocus(tree)).toBe(item1.id);
+  expect(tree.focusedId).toBe(item1.id);
 
   handleAction(tree, { kind: "move", direction: "down" });
   handleAction(tree, { kind: "move", direction: "down" });
 
-  expect(await resolveFocus(tree)).toBe(outside.id);
+  expect(tree.focusedId).toBe(outside.id);
 
   handleAction(tree, { kind: "move", direction: "up" });
 
-  expect(await resolveFocus(tree)).toBe(item2.id);
+  expect(tree.focusedId).toBe(item2.id);
 });
 
 test("horizontalHandler", async () => {
@@ -216,15 +211,15 @@ test("horizontalHandler", async () => {
     }),
   );
 
-  expect(await resolveFocus(tree)).toBe(item1.id);
+  expect(tree.focusedId).toBe(item1.id);
 
   handleAction(tree, { kind: "move", direction: "right" });
 
-  expect(await resolveFocus(tree)).toBe(item2.id);
+  expect(tree.focusedId).toBe(item2.id);
 
   handleAction(tree, { kind: "move", direction: "left" });
 
-  expect(await resolveFocus(tree)).toBe(item1.id);
+  expect(tree.focusedId).toBe(item1.id);
 });
 
 test("horizontalHandler: wrong direction", async () => {
@@ -246,19 +241,19 @@ test("horizontalHandler: wrong direction", async () => {
 
   insertNode(tree, createNode({ id: "item2", parent: container.id }));
 
-  expect(await resolveFocus(tree)).toBe(item1.id);
+  expect(tree.focusedId).toBe(item1.id);
 
   handleAction(tree, { kind: "move", direction: "left" });
 
-  expect(await resolveFocus(tree)).toBe(item1.id);
+  expect(tree.focusedId).toBe(item1.id);
 
   handleAction(tree, { kind: "move", direction: "down" });
 
-  expect(await resolveFocus(tree)).toBe(item1.id);
+  expect(tree.focusedId).toBe(item1.id);
 
   handleAction(tree, { kind: "move", direction: "up" });
 
-  expect(await resolveFocus(tree)).toBe(item1.id);
+  expect(tree.focusedId).toBe(item1.id);
 });
 
 test("horizontalHandler: focus direction", async () => {
@@ -306,16 +301,16 @@ test("horizontalHandler: focus direction", async () => {
     }),
   );
 
-  expect(await resolveFocus(tree)).toBe(item1.id);
+  expect(tree.focusedId).toBe(item1.id);
 
   handleAction(tree, { kind: "move", direction: "right" });
   handleAction(tree, { kind: "move", direction: "right" });
 
-  expect(await resolveFocus(tree)).toBe(outside.id);
+  expect(tree.focusedId).toBe(outside.id);
 
   handleAction(tree, { kind: "move", direction: "left" });
 
-  expect(await resolveFocus(tree)).toBe(item2.id);
+  expect(tree.focusedId).toBe(item2.id);
 });
 
 test("horizontal: skip removed", async () => {
@@ -356,13 +351,13 @@ test("horizontal: skip removed", async () => {
 
   removeNode(tree, item2.id);
 
-  expect(await resolveFocus(tree)).toBe(item1.id);
+  expect(tree.focusedId).toBe(item1.id);
 
   handleAction(tree, { kind: "move", direction: "right" });
 
-  expect(await resolveFocus(tree)).toBe(item3.id);
+  expect(tree.focusedId).toBe(item3.id);
 
   handleAction(tree, { kind: "move", direction: "left" });
 
-  expect(await resolveFocus(tree)).toBe(item1.id);
+  expect(tree.focusedId).toBe(item1.id);
 });

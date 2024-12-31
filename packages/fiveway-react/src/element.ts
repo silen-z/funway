@@ -34,7 +34,6 @@ export function useElementHandler() {
   }, []);
 }
 
-
 export type ActionHandlerOptions = {
   target?: EventTarget;
   eventToAction?: (e: Event) => NavigationAction | null;

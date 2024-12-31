@@ -2,12 +2,7 @@ import { expect, test } from "vitest";
 import { spatialHandler, NodePosition } from "./spatial.ts";
 import { handleAction } from "../navigation.ts";
 import { createNode } from "../node.ts";
-import {
-  createNavigationTree,
-  insertNode,
-  removeNode,
-  resolveFocus,
-} from "../tree.ts";
+import { createNavigationTree, insertNode, removeNode } from "../tree.ts";
 import { defaultHandler } from "./default.ts";
 
 test("spatialHandler", async () => {
@@ -53,25 +48,25 @@ test("spatialHandler", async () => {
 
   removeNode(tree, "#/spatial/item-2-2");
 
-  expect(await resolveFocus(tree)).toBe("#/spatial/item-1-1");
+  expect(tree.focusedId).toBe("#/spatial/item-1-1");
 
   handleAction(tree, { kind: "move", direction: "right" });
 
-  expect(await resolveFocus(tree)).toBe("#/spatial/item-1-2");
+  expect(tree.focusedId).toBe("#/spatial/item-1-2");
 
   handleAction(tree, { kind: "move", direction: "down" });
 
-  expect(await resolveFocus(tree)).toBe("#/spatial/item-2-1");
+  expect(tree.focusedId).toBe("#/spatial/item-2-1");
 
   handleAction(tree, { kind: "move", direction: "up" });
 
-  expect(await resolveFocus(tree)).toBe("#/spatial/item-1-1");
+  expect(tree.focusedId).toBe("#/spatial/item-1-1");
 
   handleAction(tree, { kind: "move", direction: "right" });
 
-  expect(await resolveFocus(tree)).toBe("#/spatial/item-1-2");
+  expect(tree.focusedId).toBe("#/spatial/item-1-2");
 
   handleAction(tree, { kind: "move", direction: "left" });
 
-  expect(await resolveFocus(tree)).toBe("#/spatial/item-1-1");
+  expect(tree.focusedId).toBe("#/spatial/item-1-1");
 });

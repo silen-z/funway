@@ -13,11 +13,10 @@
     "solid": "./dist/index.jsx"
   },
   "dependencies": {
-    "@fiveway/core": "workspace:*",
-    "@solid-primitives/memo": "^1.3.9"
+    "@fiveway/core": "workspace:*"
   },
   "peerDependencies": {
-    "solid-js": "^1.8.11"
+    "solid-js": "^1.9.3"
   },
   "devDependencies": {
     "typescript": "^5.4.3"

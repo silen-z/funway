@@ -1,7 +1,7 @@
 /* @refresh reload */
 import { render } from "solid-js/web";
 import { createNavigationTree } from "@fiveway/core";
-import { NavigationProvider, useActionHandler } from "@fiveway/solid";
+import { createActionHandler, NavigationProvider } from "@fiveway/solid";
 import { enableDevtools } from "@fiveway/devtools";
 import { Showcase } from "./Showcase.tsx";
 
@@ -20,7 +20,7 @@ Object.defineProperties(window, {
 enableDevtools(fiveway);
 
 function App() {
-  useActionHandler(fiveway);
+  createActionHandler(fiveway);
   return (
     <NavigationProvider tree={fiveway}>
       <Showcase />
