@@ -9,7 +9,6 @@ import {
   insertNode,
   defaultHandler,
   verticalHandler,
-  resolveFocus,
   handleAction,
 } from "@fiveway/core";
 import { defaultEventMapping } from "@fiveway/core/dom";
@@ -46,12 +45,12 @@ test("defaultKeyMapping", async () => {
     }),
   );
 
-  expect(await resolveFocus(tree)).toBe(item1.id);
+  expect(tree.focusedId).toBe(item1.id);
 
   const action = defaultEventMapping(
     new KeyboardEvent("keydown", { key: "ArrowDown" }),
   );
   expect(action).not.toBeNull();
   handleAction(tree, action!);
-  expect(await resolveFocus(tree)).toBe(item2.id);
+  expect(tree.focusedId).toBe(item2.id);
 });
